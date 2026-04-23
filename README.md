@@ -51,6 +51,13 @@
 > [\!IMPORTANT]
 > 實測建議選用 **Dense (稠密)** 架構模型（如 27B），在處理 Agent 格式化輸出（JSON/Code）任務時通常比 MoE 架構更穩健。
 
+### 💡 持續追蹤與更新 (Upstream & Community)
+
+開源模型與量化技術迭代極快，建議追蹤以下來源以獲取最新的模型優化成果：
+
+  * **[Unsloth AI](https://huggingface.co/unsloth)**：提供極速且優化的量化版本，通常在模型發佈數小時內即會跟進。
+  * **[HauhauCS](https://huggingface.co/HauhauCS)**：專注於高品質的「無審查（Uncensored）」版本與經過 I-Matrix 優化的 GGUF 權重。
+
 -----
 
 ## 🚀 4. 一鍵啟動伺服器

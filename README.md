@@ -83,13 +83,15 @@ llama-server.exe ^
   --host 127.0.0.1 ^
   --port 18080 ^
   --parallel 1 ^
+  --batch-size 2048 ^
+  --ubatch-size 512 ^
   --cache-type-k turbo3 ^
   --cache-type-v turbo3 ^
   --flash-attn on ^
-  --batch-size 2048 ^
-  --ubatch-size 512 ^
+  --no-mmap ^
   --mlock ^
-  --jinja
+  --jinja ^
+  --timeout 600
 pause
 ```
 

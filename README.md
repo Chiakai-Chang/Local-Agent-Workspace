@@ -62,16 +62,61 @@
 
 ## 🚀 4. 一鍵啟動伺服器
 
-將本 Repo 提供的 `.bat` 檔放入引擎資料夾中，依據下載的版本雙擊執行：
+請依據您下載的引擎版本，將以下代碼存成對應的 `.bat` 檔並放進引擎目錄中執行：
 
-  * **執行 `start_27B_turbo.bat`：** 開啟 `turbo3` 快取壓縮，最大化利用 GPU 空間。
-  * **執行 `start_27B_vanilla.bat`：** 開啟專家層 CPU Offload 分流與碎片整理，確保 128K 運作穩定。
+### 選項 A：使用 TurboQuant 引擎 (`start_27B_turbo.bat`)
+
+```batch
+@echo off
+chcp 65001 > nul
+title Llama.cpp - Qwen3.6 27B (TurboQuant 極速版)
+
+echo 啟動 27B IQ3_M 純文字極限模式 (128K Context)...
+llama-server.exe ^
+  -m "Qwen3.6-27B-Uncensored-HauhauCS-Aggressive-IQ3_M.gguf" ^
+  -c 131072 ^
+  -ngl 99 ^
+  --host 127.0.0.1 ^
+  --port 18080 ^
+  --parallel 1 ^
+  --cache-type-k turbo3 ^
+  --cache-type-v turbo3 ^
+  --flash-attn on ^
+  --batch-size 4096 ^
+  --ubatch-size 4096
+pause
+```
+
+### 選項 B：使用 Llama.cpp 官方引擎 (`start_27B_vanilla.bat`)
+
+```batch
+@echo off
+chcp 65001 > nul
+title Llama.cpp - Qwen3.6 27B (官方標準版)
+
+echo 啟動 27B IQ3_M 標準模式 (128K Context, 專家層分流)...
+llama-server.exe ^
+  -m "Qwen3.6-27B-Uncensored-HauhauCS-Aggressive-IQ3_M.gguf" ^
+  -c 131072 ^
+  -ngl 99 ^
+  -ot exps=CPU ^
+  --defrag-thold 0.1 ^
+  --host 127.0.0.1 ^
+  --port 18080 ^
+  --parallel 1 ^
+  --cache-type-k q4_0 ^
+  --cache-type-v q4_0 ^
+  --flash-attn on ^
+  --batch-size 2048 ^
+  --ubatch-size 2048
+pause
+```
 
 -----
 
 ## 🤖 5. 橋接自動化代理 (Claude Code)
 
-在目標專案目錄中執行本專案提供的 **`claude-local.bat`**。該腳本會將 API 請求重新導向至本地伺服器。
+請在您的**專案工作目錄**中建立 `claude-local.bat`。
 
 > [\!CAUTION]
 >
@@ -82,10 +127,25 @@
 >   * **僅在受信任且已建立版本控制（Git）的專案目錄執行。**
 >   * 若您在不熟悉的環境開發，建議移除此參數以手動審核 Agent 的每一項操作。
 
-```powershell
-# 設定環境變數並啟動
+```batch
+@echo off
+chcp 65001 > nul
+title Claude Code - 本地橋接模式
+
+echo ========================================================
+echo ⚠️  警告：目前正在以「全自動授權」模式執行
+echo 此模式下 Agent 執行任何指令都「不會」徵求您的同意。
+echo 請確保您位於受信任的專案目錄中！
+echo ========================================================
+
+:: 將代理工具的通訊端點指向本地伺服器
 set ANTHROPIC_BASE_URL=http://127.0.0.1:18080
+set ANTHROPIC_AUTH_TOKEN=local-qwen-token
+
+:: 啟動助理
 call claude --dangerously-skip-permissions
+
+pause
 ```
 
 > [\!NOTE]

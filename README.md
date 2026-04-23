@@ -72,6 +72,7 @@ chcp 65001 > nul
 title Llama.cpp - Qwen3.6 27B (TurboQuant 極速版)
 
 echo 啟動 27B IQ3_M 純文字極限模式 (128K Context)...
+:: 優化批次大小以防止 VRAM 溢出，並加入 mlock 穩定記憶體
 llama-server.exe ^
   -m "Qwen3.6-27B-Uncensored-HauhauCS-Aggressive-IQ3_M.gguf" ^
   -c 131072 ^
@@ -82,8 +83,10 @@ llama-server.exe ^
   --cache-type-k turbo3 ^
   --cache-type-v turbo3 ^
   --flash-attn on ^
-  --batch-size 4096 ^
-  --ubatch-size 4096
+  --batch-size 2048 ^
+  --ubatch-size 512 ^
+  --mlock ^
+  --jinja
 pause
 ```
 
@@ -108,7 +111,9 @@ llama-server.exe ^
   --cache-type-v q4_0 ^
   --flash-attn on ^
   --batch-size 2048 ^
-  --ubatch-size 2048
+  --ubatch-size 512 ^
+  --no-mmap ^
+  --jinja
 pause
 ```
 

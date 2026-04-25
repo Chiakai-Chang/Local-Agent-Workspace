@@ -28,12 +28,20 @@
 
 我們提供兩種引擎選擇，請依據您的需求與熟悉度選擇其一：
 
-| 引擎選擇 | 特色說明 | 推薦下載檔名 / 來源 |
+| 引擎選擇 | 特色說明 | 推薦來源 |
 | :--- | :--- | :--- |
-| **🛡️ Llama.cpp (官方)**<br>*(強烈推薦)* | 更新最快，功能涵蓋最完整，穩定性最高。搭配最新 CUDA DLLs 已足以應付絕大多數開發場景。 | [Llama.cpp Releases](https://github.com/ggml-org/llama.cpp/releases)<br>(下載 `cudart-llama-bin-win-cu12.4-x64.zip`) |
-| **🔥 TurboQuant**<br>*(極限壓榨備選)* | 針對 VRAM 佔用進行深度非官方優化，適合想要在極低 VRAM 下硬開超長上下文的極客玩家。 | [TurboQuant Releases](https://github.com/TheTom/llama-cpp-turboquant/releases)<br>(下載 `turboquant-plus...zip`) |
+| **🛡️ Llama.cpp (官方)**<br>*(強烈推薦)* | 更新最快，功能涵蓋最完整，穩定性最高。搭配最新 CUDA DLLs 已足以應付絕大多數開發場景。 | [Llama.cpp Releases](https://github.com/ggml-org/llama.cpp/releases) |
+| **🔥 TurboQuant**<br>*(極限壓榨備選)* | 針對 VRAM 佔用進行深度非官方優化，適合想要在極低 VRAM 下硬開超長上下文的極客玩家。 | [TurboQuant Releases](https://github.com/TheTom/llama-cpp-turboquant/releases) |
 
-> **部署步驟：** 建立專屬資料夾（請自訂路徑，例如：`C:\llama.cpp`），並將解壓縮後的檔案放入其中。
+> [!IMPORTANT]
+> **Llama.cpp 官方版安裝必看：雙檔案合併解壓縮**
+> 由於官方更新極為頻繁，為了減少檔案大小，他們將「主程式」與「CUDA 依賴庫」分開打包。您必須同時下載兩個檔案：
+> 1. **主程式：** `llama-b...-bin-win-cuda-cu12.4-x64.zip` (尋找標註 win-cuda-cu12.4 的版本)
+> 2. **CUDA 依賴包：** `cudart-llama-bin-win-cu12.4-x64.zip`
+> 
+> 💡 **穩定性強烈建議 (避開 cu13)：** 目前社群實測發現 CUDA 13 (`cu13`) 版本在部分環境下偶有不穩定的狀況，因此**強烈建議統一選擇 `cu12.4` 版本**。請放心，NVIDIA 顯卡驅動具備完美的向下相容性，即使您的驅動程式已更新至最新版，執行 `cu12.4` 依然能發揮完整效能且絕對穩定。
+> 
+> **安裝步驟：** 建立專屬資料夾（例如：`C:\llama.cpp`），接著**將這兩個壓縮檔解壓縮到該同一個資料夾內**。確保 `llama-server.exe` 旁邊有 `cudart64_12.dll` 等檔案，伺服器才能順利驅動您的 GPU。
 
 -----
 

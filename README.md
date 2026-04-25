@@ -118,11 +118,9 @@ echo ========================================================
 llama-server.exe ^
   -m "<您的模型存放路徑>\Qwen3.6-27B-NEO-CODE-2T-OT-IQ4_XS.gguf" ^
   -ngl 99 ^
-  -c 65536 ^
+  -c 131072 ^
   --port 18080 ^
   --parallel 1 ^
-  -b 2048 ^
-  -ub 512 ^
   --cache-type-k q8_0 ^
   --cache-type-v q8_0 ^
   --flash-attn on ^
@@ -149,12 +147,10 @@ echo ========================================================
 
 llama-server.exe ^
   -m "<您的模型存放路徑>\Qwen3.6-27B-NEO-CODE-2T-OT-IQ4_XS.gguf" ^
-  -c 65536 ^
+  -c 131072 ^
   -ngl 99 ^
   --port 18080 ^
   --parallel 1 ^
-  --batch-size 2048 ^
-  --ubatch-size 512 ^
   --cache-type-k turbo3 ^
   --cache-type-v turbo3 ^
   --flash-attn on ^

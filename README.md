@@ -109,19 +109,20 @@ echo 目標硬體: NVIDIA RTX A4500 (20GB VRAM) / 64GB RAM
 echo ========================================================
 
 :: 參數解析：
-:: -c 131072        : 設定 128K 上下文，適合 Agent 讀取專案
-:: --cache-type-k/v : 啟用 8-bit KV 快取，節省近半 VRAM，防止 OOM 溢位降速
+:: -c 147456        : 設定略大於 128K 上下文，適合 Agent 讀取專案(但要善用 /compact 或 /claer， Harness Engineering 的部分，我正在嘗試請 Agent 記得一些準則，穩定後再跟大家分享)
+:: --cache-type-k/v : 啟用 4-bit KV 快取，節省 VRAM，防止 OOM 溢位降速
 :: --no-mmap        : 確保模型完整載入記憶體，避免 Windows I/O 卡頓
 
 :: 2. 請將 -m 後方的路徑與檔名修改為您實際下載的模型位置
 llama-server.exe ^
   -m "<您的模型存放路徑>\Qwen3.6-27B-NEO-CODE-2T-OT-IQ4_XS.gguf" ^
   -ngl 99 ^
-  -c 131072 ^
+  -c 147456 ^
   --port 18080 ^
   --parallel 1 ^
-  --cache-type-k q8_0 ^
-  --cache-type-v q8_0 ^
+  --cache-type-k q4_0 ^
+  --cache-type-v q4_0 ^
+  -b 4096 ^
   --flash-attn on ^
   --no-mmap ^
   --jinja 

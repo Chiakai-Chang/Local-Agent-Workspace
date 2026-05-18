@@ -49,15 +49,20 @@
 
 選擇模型時，除了看參數量（B），更要評估硬體 VRAM 的極限。以下推薦基於不同開發場景的模型選擇：
 
-### 🌟 穩定首選 (程式碼開發與常規 Agent 自動化)
+### 🌟 穩定首選 (Claude Code 代理橋接與複雜自動化)
+🔥 **[GRM-2.6-Opus.i1-IQ4_XS](https://huggingface.co/mradermacher/GRM-2.6-Opus-i1-GGUF/blob/main/GRM-2.6-Opus.i1-IQ4_XS.gguf)** (約 15.2 GB)
+> **強烈推薦：** 此版本融合了頂尖的 GRM 邏輯與 Claude Opus 的推理風格。當您使用 Claude Code 等 Agent 工具時，它能輸出極度穩定的結構化思維，大幅降低代理工具解析指令的錯誤率與迴圈機率。IQ4_XS 量化完美適配 20GB VRAM，並能留下約 4.8 GB 的餘裕空間給長文本（Context）運算。**注意：此版本具備標準安全審查。**
+
+### 💻 程式開發特化 (純代碼生成與 JSON 結構化)
 🔥 **[Qwen3.6-27B-NEO-CODE-2T-OT-IQ4_XS](https://huggingface.co/DavidAU/Qwen3.6-27B-NEO-CODE-Di-IMatrix-MAX-GGUF/blob/main/Qwen3.6-27B-NEO-CODE-2T-OT-IQ4_XS.gguf)** (約 15.4 GB)
-> **強烈推薦：** 此版本（Dense 架構）專為開發與程式碼任務優化，處理 Agent 工具極度要求的 **JSON 格式輸出**具有極高的穩定性。搭配 IQ4_XS 量化，完美適配 20GB VRAM。在保留極高邏輯精度的同時，能留下約 4~5GB 的 VRAM 餘裕給長文本（Context）運算。**注意：此版本具備標準安全審查。**
+> **優質備選：** 此版本專為高難度程式碼任務與除錯優化，在處理極度要求的 **JSON 格式輸出**時具有極高的穩定性。若您的工作流不需要複雜的 Opus 仿生邏輯，或是更偏好原生 Qwen 的思維模式來進行單純的專案重構，這依然是一台非常優秀的純代碼生產機器。**注意：此版本具備標準安全審查。**
 
 ### ⚠️ 實驗性質：頂規無審查版 (封閉環境分析、鑑識與 OSINT 腳本)
 🧪 **[Qwen3.6-35B-A3B-Abliterix-EGA-abliterated.i1-IQ3_M](https://huggingface.co/mradermacher/Qwen3.6-35B-A3B-Abliterix-EGA-abliterated-i1-GGUF/blob/main/Qwen3.6-35B-A3B-Abliterix-EGA-abliterated.i1-IQ3_M.gguf)** (約 15.4 GB)
 > [!WARNING]
 > **未充分測試聲明：** 此為 35B MoE（混合專家）架構，尚未在自動化 Agent 連續呼叫工具的流程中進行長期穩定度測試。
-> **推薦理由：** 使用了最先進的 **Abliteration（特徵消融）** 技術。若您的 Agent 需要頻繁分析具攻擊性的惡意代碼或滲透測試腳本，此模型能完美保留原廠邏輯能力並避免被安全機制中斷。受限於 20GB VRAM，請務必選擇 **`IQ3_M`** 或 **`IQ3_XS`** 版本。
+> 
+> **推薦理由：** 使用了最先進的 **Abliteration（特徵消融）** 技術。若您的 Agent 需要頻繁分析具攻擊性的惡意代碼、數位鑑識日誌或滲透測試腳本，此模型能完美保留原廠邏輯能力並避免被安全機制強制中斷。受限於 20GB VRAM，請務必選擇 **`IQ3_M`** 或 **`IQ3_XS`** 版本。
 
 -----
 

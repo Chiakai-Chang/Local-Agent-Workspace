@@ -17,12 +17,15 @@
 
 ## 🧩 CK 的 AI 開發生態系 (The Ecosystem)
 
-為了達到真正的「工業級本地 AI 開發」，本專案是完整生態系的**第一步（底層動力）**。建議搭配以下專案使用，以獲得最佳開發體驗：
+為了達到真正的「工業級本地 AI 開發」，本專案是完整生態系的**第一步（AI 核心大腦）**。這三個專案構成了一個不斷進化的自動化開發循環：
 
-1. ⚙️ **基礎引擎 (本專案)：** 建立極致優化的 Llama.cpp 本地伺服器與模型選擇。
-2. 🧠 **作業大腦 [CK's Pi Code Agent Harness](https://github.com/Chiakai-Chang/CKs_PI_Code_Agent_Harness)：** 放棄難以控制 Context 大小的 Claude Code，改用更輕量、具備專家紀律與完美 Context 控制的 Pi Coding Agent。
-3. 🩺 **品質守衛 [OmniHeal](https://github.com/Chiakai-Chang/OmniHeal)：**
-   AI 協作久了容易累積技術債？使用這個零安裝的健檢工具箱，一鍵掃描並產出修復行動路線圖。
+<p align="center">
+  <img src="assets/ecosystem.svg" alt="CK's AI Development Ecosystem" width="100%">
+</p>
+
+* 🧠 **[Tier 1: 核心大腦 (Local-Agent-Workspace)](https://github.com/Chiakai-Chang/Local-Agent-Workspace)：** 建立極致優化的 Llama.cpp 本地伺服器。為整個生態系提供純粹的邏輯推理能力與龐大的記憶體 (Context)。（📍 **您目前在這裡**）
+* 🤖 **[Tier 2: 代理工程師 (CK's Pi Code Agent Harness)](https://github.com/Chiakai-Chang/CKs_PI_Code_Agent_Harness)：** 自動化編程的指揮樞紐。將純粹的 AI 算力裝上「工程紀律 (TDD/BDD)」，化身為完美的本地 Coding Agent，處理日常的程式碼撰寫與重構。
+* 👁️ **[Tier 3: 全域修復雷達 (OmniHeal)](https://github.com/Chiakai-Chang/OmniHeal)：** 零安裝的全局專案健檢工具。當開發累積一定程度的技術債時，一鍵掃描整個專案架構 (Omni)，並開立精準的修復處方箋 (Heal) 交還給 Agent 執行。
 
 ---
 

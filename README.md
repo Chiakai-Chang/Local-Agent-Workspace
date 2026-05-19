@@ -3,218 +3,170 @@
 > [!IMPORTANT]
 > **個人立場聲明：** 本專案僅為個人技術研究分享，所有內容與參數調校均基於公開開源數據（Open Source Data）。專案內容不代表任何機關立場，亦不涉及任何公務機敏資料與軟體。
 
-### 開發者本地 AI 部署與 Agent 橋接指南
+### 開發者本地 AI 部署指南：Llama.cpp 極致壓榨與模型推薦
 
-這是一個旨在協助開發者在本地環境快速部署高效能大語言模型（LLM），並銜接自動化 Agent 工具（如 **Claude Code**）的實戰指南。
+這是一個旨在協助開發者在本地環境快速部署高效能大語言模型（LLM）的實戰指南。我們專注於如何透過 **Llama.cpp** 與精準的參數調校，在有限的硬體資源下，榨出最大的 Context 空間與推理速度。
 
-本專案的核心目標在於解決雲端 API 的隱私疑慮、頻繁的審查限制以及長文本處理成本。透過針對特定硬體配置的參數調校，實現流暢的本地輔助開發體驗。
+本專案的核心目標在於解決雲端 API 的隱私疑慮、頻繁的審查限制以及長文本處理成本，為後續銜接自動化 Agent 工具打造最堅實的底層引擎。
 
 > [!TIP]
 > **測試硬體參考：** NVIDIA RTX A4500 (20GB VRAM) / 64GB RAM。
 > **硬體適應性：** 只要具備 NVIDIA GPU 且 VRAM 充足（建議 12GB 以上，20GB 為完美甜蜜點），皆可參考本指南進行部署與參數調整。
 
------
+---
+
+## 🧩 CK 的 AI 開發生態系 (The Ecosystem)
+
+為了達到真正的「工業級本地 AI 開發」，本專案是完整生態系的**第一步（底層動力）**。建議搭配以下專案使用，以獲得最佳開發體驗：
+
+1. ⚙️ **基礎引擎 (本專案)：** 建立極致優化的 Llama.cpp 本地伺服器與模型選擇。
+2. 🧠 **作業大腦 [CK's Pi Code Agent Harness](https://github.com/Chiakai-Chang/CKs_PI_Code_Agent_Harness)：** 放棄難以控制 Context 大小的 Claude Code，改用更輕量、具備專家紀律與完美 Context 控制的 Pi Coding Agent。
+3. 🩺 **品質守衛 [OmniHeal](https://github.com/Chiakai-Chang/OmniHeal)：**
+   AI 協作久了容易累積技術債？使用這個零安裝的健檢工具箱，一鍵掃描並產出修復行動路線圖。
+
+---
 
 ## 💎 部署本地環境的優勢
 
-  * **🔒 物理級資料隔離：** 程式碼、專案架構與日誌數據完全留在本地，無需上傳至任何雲端節點。特別適合處理具備高度機敏性，或需進行數位鑑識、OSINT 封閉分析等不容許資料外流的專案。
-  * **🧠 高上下文容量：** 透過優化的快取壓縮技術，在 20GB VRAM 的環境下依然可支援至 **64K~128K Context**，足以應付大規模 Repo 分析。
-  * **🔓 任務連續性：** 使用特徵消融（Abliterated）或開發特化版模型，可避免 Agent 在執行特定腳本分析或封閉網路掃描時，因安全過濾機制而強行中斷。
-  * **💰 成本效益：** 適合頻繁開發與自動化迭代需求，無需負擔雲端 API 昂貴的長文本 Token 費用。
+* **🔒 物理級資料隔離：** 程式碼、專案架構完全留在本地。特別適合處理具備高度機敏性、數位鑑識或 OSINT 封閉分析等不容許資料外流的專案。
+* **🧠 高上下文容量：** 透過優化的 KV 快取壓縮技術，在 20GB VRAM 下依然可支援至 **128K+ Context**。
+* **🔓 任務連續性：** 選擇特徵消融（Abliterated）模型，可避免 Agent 在執行特定分析腳本時因安全機制而強行中斷。
+* **💰 成本效益：** 適合頻繁開發與自動化迭代，無懼雲端 API 昂貴的 Token 費用。
 
------
+---
 
-## 🛠️ 1. 運算引擎準備
+## 🛠️ 1. 運算引擎準備：Llama.cpp
 
-我們提供兩種引擎選擇，請依據您的需求與熟悉度選擇其一：
-
-| 引擎選擇 | 特色說明 | 推薦來源 |
-| :--- | :--- | :--- |
-| **🛡️ Llama.cpp (官方)**<br>*(強烈推薦)* | 更新最快，功能涵蓋最完整，穩定性最高。搭配最新 CUDA DLLs 已足以應付絕大多數開發場景。 | [Llama.cpp Releases](https://github.com/ggml-org/llama.cpp/releases) |
-| **🔥 TurboQuant**<br>*(極限壓榨備選)* | 針對 VRAM 佔用進行深度非官方優化，適合想要在極低 VRAM 下硬開超長上下文的極客玩家。 | [TurboQuant Releases](https://github.com/TheTom/llama-cpp-turboquant/releases) |
+我們強烈推薦使用官方版的 **Llama.cpp** 作為伺服器引擎，更新最快、功能最完整。
 
 > [!IMPORTANT]
 > **Llama.cpp 官方版安裝必看：雙檔案合併解壓縮**
-> 由於官方更新極為頻繁，為了減少檔案大小，他們將「主程式」與「CUDA 依賴庫」分開打包。您必須同時下載兩個檔案：
+> 請至 [Llama.cpp Releases](https://github.com/ggml-org/llama.cpp/releases) 下載。必須同時下載兩個檔案：
 > 1. **主程式：** `llama-b...-bin-win-cuda-cu12.4-x64.zip` (尋找標註 win-cuda-cu12.4 的版本)
 > 2. **CUDA 依賴包：** `cudart-llama-bin-win-cu12.4-x64.zip`
 > 
-> 💡 **穩定性強烈建議 (避開 cu13)：** 目前社群實測發現 CUDA 13 (`cu13`) 版本在部分環境下偶有不穩定的狀況，因此**強烈建議統一選擇 `cu12.4` 版本**。請放心，NVIDIA 顯卡驅動具備完美的向下相容性，即使您的驅動程式已更新至最新版，執行 `cu12.4` 依然能發揮完整效能且絕對穩定。
-> 
-> **安裝步驟：** 建立專屬資料夾（例如：`C:\llama.cpp`），接著**將這兩個壓縮檔解壓縮到該同一個資料夾內**。確保 `llama-server.exe` 旁邊有 `cudart64_12.dll` 等檔案，伺服器才能順利驅動您的 GPU。
+> 💡 **強烈建議選擇 `cu12.4` 版本**以確保最高穩定性。建立專屬資料夾（例如：`C:\llama.cpp`），**將這兩個壓縮檔解壓縮到同一個資料夾內**，確保 `llama-server.exe` 旁邊有 `.dll` 依賴檔。
 
------
+---
 
-## 📦 2. 模型權重下載 (GGUF)
+## 📦 2. 模型權重推薦 (GGUF)
 
-選擇模型時，除了看參數量（B），更要評估硬體 VRAM 的極限。以下推薦基於不同開發場景的模型選擇：
+在 20GB VRAM 的環境下，以下是我實測後強烈推薦的模型：
 
-### 🌟 穩定首選 (Claude Code 代理橋接與複雜自動化)
+### 🌟 穩定首選 (代理橋接與複雜自動化)
 🔥 **[GRM-2.6-Opus.i1-IQ4_XS](https://huggingface.co/mradermacher/GRM-2.6-Opus-i1-GGUF/blob/main/GRM-2.6-Opus.i1-IQ4_XS.gguf)** (約 15.2 GB)
-> **強烈推薦：** 此版本融合了頂尖的 GRM 邏輯與 Claude Opus 的推理風格。當您使用 Claude Code 等 Agent 工具時，它能輸出極度穩定的結構化思維，大幅降低代理工具解析指令的錯誤率與迴圈機率。IQ4_XS 量化完美適配 20GB VRAM，並能留下約 4.8 GB 的餘裕空間給長文本（Context）運算。**注意：此版本具備標準安全審查。**
+> 融合頂尖的 GRM 邏輯與 Claude Opus 的推理風格。輸出極度穩定的結構化思維，大幅降低 Agent 解析指令的錯誤率。IQ4_XS 量化完美適配 20GB VRAM，留下充足餘裕給長文本運算。
 
 ### 💻 程式開發特化 (純代碼生成與 JSON 結構化)
 🔥 **[Qwen3.6-27B-NEO-CODE-2T-OT-IQ4_XS](https://huggingface.co/DavidAU/Qwen3.6-27B-NEO-CODE-Di-IMatrix-MAX-GGUF/blob/main/Qwen3.6-27B-NEO-CODE-2T-OT-IQ4_XS.gguf)** (約 15.4 GB)
-> **優質備選：** 此版本專為高難度程式碼任務與除錯優化，在處理極度要求的 **JSON 格式輸出**時具有極高的穩定性。若您的工作流不需要複雜的 Opus 仿生邏輯，或是更偏好原生 Qwen 的思維模式來進行單純的專案重構，這依然是一台非常優秀的純代碼生產機器。**注意：此版本具備標準安全審查。**
+> 專為高難度程式碼任務與 JSON 格式輸出優化。若工作流偏好原生 Qwen 思維模式來進行專案重構，這是一台非常優秀的純代碼生產機器。
 
-### ⚠️ 實驗性質：頂規無審查版 (封閉環境分析、鑑識與 OSINT 腳本)
-🧪 **[Qwen3.6-35B-A3B-Abliterix-EGA-abliterated.i1-IQ3_M](https://huggingface.co/mradermacher/Qwen3.6-35B-A3B-Abliterix-EGA-abliterated-i1-GGUF/blob/main/Qwen3.6-35B-A3B-Abliterix-EGA-abliterated.i1-IQ3_M.gguf)** (約 15.4 GB)
-> [!WARNING]
-> **未充分測試聲明：** 此為 35B MoE（混合專家）架構，尚未在自動化 Agent 連續呼叫工具的流程中進行長期穩定度測試。
-> 
-> **推薦理由：** 使用了最先進的 **Abliteration（特徵消融）** 技術。若您的 Agent 需要頻繁分析具攻擊性的惡意代碼、數位鑑識日誌或滲透測試腳本，此模型能完美保留原廠邏輯能力並避免被安全機制強制中斷。受限於 20GB VRAM，請務必選擇 **`IQ3_M`** 或 **`IQ3_XS`** 版本。
+*(新手科普：`IQ` 系列量化搭配 `i1` 矩陣技術，能在相同檔案大小下比傳統 `Q` 系列保留更多模型智商。檔案大小與 VRAM 之間務必保留 4~5GB 以上作為 Context 運算空間。)*
 
------
+---
 
-## 💡 科普：如何看懂模型後綴與量化參數？
+## 🚀 3. 一鍵啟動伺服器 (RTX A4500 極致優化版)
 
-初入本地 AI 部署的開發者，面對落落長的模型檔名（如 `...i1-IQ4_XS.gguf`）常感到困惑。以下是快速看懂這些參數的實戰指南：
+以下是我針對 **20GB VRAM (如 RTX A4500)** 所調校出的最佳化啟動腳本。它能最大化吞吐量、開啟 Flash Attention，並使用 4-bit 壓縮 KV Cache 以換取更大的 Context 空間。
 
-### 1. 什麼是 GGUF？
-GGUF 是一種專為 `llama.cpp` 設計的檔案格式。它的最大優勢在於**「異質運算（CPU+GPU 協同）」**。當您的 GPU VRAM 不夠塞下整個模型時，GGUF 允許將多出來的負擔轉移到系統 RAM 與 CPU 上。
-
-### 2. 量化級別：Q 與 IQ 的差異
-未壓縮的模型極大。為了放進消費級顯卡，我們必須降低精度（量化）。
-* **Q 系列 (如 Q4_K_M)：** 傳統量化方式，數字代表位元數（4-bit）。
-* **IQ 系列 (如 IQ4_XS, IQ3_M)：** 搭配 `i1` (Imatrix 重要性矩陣) 技術的新一代量化。它會去分析神經網路中「哪些參數最重要」，在壓縮時保留重要參數的精度。**結論：同等檔案大小下，IQ 系列通常比傳統 Q 系列更聰明、損失更少。**
-* **尺寸後綴：** `S` (Small), `M` (Medium), `L` (Large), `XS` (Extra Small)。主要反映在檔案大小的微調。
-
-### 3. 解除審查：Uncensored vs. Abliterated
-* **Uncensored (無審查)：** 通常是拿沒有過濾的資料集對模型重新進行微調。缺點是微調過程有時會破壞模型原有的邏輯推理能力（變笨）。
-* **Abliterated (特徵消融)：** 不重新訓練，而是直接在權重矩陣中，利用數學向量運算「抹除」掉掌管「拒絕回答（Refusal）」的特徵方向。**能完美保留原廠模型的高智商，同時解除護欄。**
-
-> [!TIP]
-> **VRAM 精算守則：** 您的 VRAM (如 20GB) = 模型權重大小 (如 15.4GB) + Context / KV Cache 快取空間。千萬不要把模型大小抓得剛剛好等於 VRAM，必須保留至少 4~5GB 給上下文運算，否則速度會面臨斷崖式下跌。
-
------
-
-## 🚀 3. 一鍵啟動伺服器 (A4500 最佳化版)
-
-以下提供兩種引擎的啟動腳本，請依據您安裝的引擎選擇對應的程式碼，存成 `start_server.bat`，並與您的執行檔放在同一目錄下執行。
-
-> [!CAUTION]
-> **執行前請務必修改路徑：**
-> 請將腳本中的 `<您的_引擎資料夾路徑>` 與 `<您的模型存放路徑>` 替換為您電腦中實際的位置與檔名！
-
-### 選項 A：使用 Llama.cpp 官方引擎 (首選推薦)
-
-此腳本已針對 RTX A4500 (20GB VRAM) 進行深度最佳化，無論您選擇上述哪一款模型皆適用。
+請將以下程式碼存成 `start_server.bat`，並確保修改變數路徑：
 
 ```batch
 @echo off
 chcp 65001 > nul
-title Llama.cpp Server - 本地代理引擎
+setlocal
 
-:: 1. 請將此處修改為您存放 llama-server.exe 的實際資料夾路徑
-cd /d <您的_引擎資料夾路徑>
+title GRM-2.6-Opus IQ4_XS 128K - RTX A4500
 
+:: ==========================================
+:: ⚠️ 請修改以下兩個路徑為您電腦中的實際位置
+:: ==========================================
+set LLAMA_EXE=D:\MyProject\llama\llama-server.exe
+set MODEL=D:\MyProject\llama\GRM-2.6-Opus.i1-IQ4_XS.gguf
+set CTX_SIZE=131072
+set PORT=8080
+
+echo Starting Local LLM Server...
 echo ========================================================
-echo 啟動 Llama.cpp 本地伺服器...
-echo 目標硬體: NVIDIA RTX A4500 (20GB VRAM) / 64GB RAM
+echo Model  : %MODEL%
+echo Server : [http://127.0.0.1](http://127.0.0.1):%PORT%
+echo GPU    : RTX A4500 20GB
+echo Context: %CTX_SIZE% (128K)
+echo KV     : q4_0 / q4_0
+echo Batch  : 1024 / 256
 echo ========================================================
 
-:: 參數解析：
-:: -c 147456        : 設定略大於 128K 上下文，適合 Agent 讀取專案(但要善用 /compact 或 /claer， Harness Engineering 的部分，我正在嘗試請 Agent 記得一些準則，穩定後再跟大家分享)
-:: --cache-type-k/v : 啟用 4-bit KV 快取，節省 VRAM，防止 OOM 溢位降速
-:: --no-mmap        : 確保模型完整載入記憶體，避免 Windows I/O 卡頓
-
-:: 2. 請將 -m 後方的路徑與檔名修改為您實際下載的模型位置
-llama-server.exe ^
-  -m "<您的模型存放路徑>\Qwen3.6-27B-NEO-CODE-2T-OT-IQ4_XS.gguf" ^
-  -ngl 99 ^
-  -c 147456 ^
-  --port 18080 ^
+"%LLAMA_EXE%" ^
+  -m "%MODEL%" ^
+  -ngl 999 ^
+  -c %CTX_SIZE% ^
+  --host 127.0.0.1 ^
+  --port %PORT% ^
   --parallel 1 ^
+  -b 4096 ^
+  -ub 1024 ^
   --cache-type-k q4_0 ^
   --cache-type-v q4_0 ^
-  -b 4096 ^
   --flash-attn on ^
-  --no-mmap ^
-  --jinja 
-
-pause
-```
-
-### 選項 B：使用 TurboQuant 引擎 (備選極限版)
-
-若您選擇使用 TurboQuant，可利用其特有的 `turbo3` 快取進一步壓縮 VRAM。
-
-```batch
-@echo off
-chcp 65001 > nul
-title TurboQuant Server - 本地代理引擎
-
-cd /d <您的_引擎資料夾路徑>
-
-echo ========================================================
-echo 啟動 TurboQuant 本地伺服器 (極限 VRAM 壓榨模式)...
-echo ========================================================
-
-llama-server.exe ^
-  -m "<您的模型存放路徑>\Qwen3.6-27B-NEO-CODE-2T-OT-IQ4_XS.gguf" ^
-  -c 131072 ^
-  -ngl 99 ^
-  --port 18080 ^
-  --parallel 1 ^
-  --cache-type-k turbo3 ^
-  --cache-type-v turbo3 ^
-  --flash-attn on ^
+  --context-shift ^
   --no-mmap ^
   --mlock ^
-  --jinja 
+  --no-warmup ^
+  --jinja ^
+  --cache-prompt ^
+  --cache-reuse 512 ^
+  --threads 8 ^
+  --threads-batch 12 ^
+  --prio 2 ^
+  --timeout 900
+
 pause
+
 ```
 
------
+---
 
-## 🤖 4. 橋接自動化代理 (Claude Code)
+## 🤖 4. 銜接自動化 Agent
 
-請在您的**專案工作目錄**中建立 `claude-local.bat`。
+伺服器啟動完成後（預設運行於 `http://127.0.0.1:8080`），您就可以將其接入各類 Coding Agent。
 
-> [!CAUTION]
-> ### 🚨 安全警告：關於權限跳過模式
-> 預設腳本包含 `--dangerously-skip-permissions` 參數，這將允許 Agent 在**不經詢問**的情況下直接執行終端機指令（如修改檔案、執行刪除指令）。
->
->   * **僅在受信任且已建立版本控制（Git）的專案目錄執行。**
->   * 若您在進行安全性未知的腳本分析，強烈建議移除此參數，以手動審核 Agent 的每一項操作。
+### 🌟 首選推薦：Pi Coding Agent + Harness 套件
+
+雖然本指南過去以 Claude Code 為主，但實戰中我們發現 Claude Code 難以自訂 Auto-compact 的大小，容易在本地模型中造成 Context 溢位或效能衰退。
+
+因此，**我們強烈建議改用 Pi Coding Agent**，並搭配我們的專屬套件：
+👉 前往 [**CK's Pi Code Agent Harness**](https://github.com/Chiakai-Chang/CKs_PI_Code_Agent_Harness)
+
+該套件解決了上述痛點，不僅更輕量，還注入了全球頂尖專家的開發直覺（TDD、BDD）與紀律，是目前本地環境最完美的搭檔。
+
+*(若您仍需使用 Claude Code，只需在專案目錄下設定環境變數 `set ANTHROPIC_BASE_URL=http://127.0.0.1:8080` 與假 Token 即可啟動。)*
+> 以下作法參考自: [How to Run Local LLMs with Claude Code](https://unsloth.ai/docs/basics/claude-code)
+
+請將以下程式碼存成 `start_local_claude.bat`，並複製到想要啟動的資料夾內啟動即可 (注意 "ANTHROPIC_BASE_URL=http://127.0.0.1:8080" 要修改成你 llama.cpp 指定的 URL 與 port)：
 
 ```batch
 @echo off
-chcp 65001 > nul
-title Claude Code - 本地橋接模式
+setlocal
 
-echo ========================================================
-echo ⚠️  警告：目前正在以「全自動授權」模式執行
-echo 此模式下 Agent 執行任何指令都「不會」徵求您的同意。
-echo 請確保您位於受信任的專案目錄中！
-echo ========================================================
+title Claude Local
+color 0A
 
-:: 將代理工具的通訊端點指向本地伺服器
-set ANTHROPIC_BASE_URL=[http://127.0.0.1:18080](http://127.0.0.1:18080)
-set ANTHROPIC_AUTH_TOKEN=local-qwen-token
+set ANTHROPIC_BASE_URL=http://127.0.0.1:8080
 
-:: 啟動助理
-call claude --dangerously-skip-permissions
+set CLAUDE_CODE_ATTRIBUTION_HEADER=0
+set CLAUDE_CODE_ENABLE_TELEMETRY=0
+set CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 
-pause
+claude --dangerously-skip-permissions
+
+endlocal
+
 ```
 
-> [!NOTE]
-> 首次分析專案時，模型需要進行資料預讀（Prompt Prefill），此時得益於我們的批次參數優化，GPU 負載會瞬間拉滿以快速處理龐大上下文，此屬正常高效運算現象。完成後互動將恢復即時。
-
------
+---
 
 ## 📮 聯繫與交流
 
 如果您在部署過程中有任何技術問題或參數優化的建議，歡迎透過以下管道聯繫：
-
-<p align="left">
-  <a href="mailto:lotifv@gmail.com">
-    <img src="https://img.shields.io/badge/Email-lotifv@gmail.com-D14836?style=flat-square&logo=gmail&logoColor=white" alt="Email">
-  </a>
-  <a href="https://www.linkedin.com/in/chiakai-chang-htciu/">
-    <img src="https://img.shields.io/badge/LinkedIn-Chang,%20Chia--Kai-0077B5?style=flat-square&logo=linkedin&logoColor=white" alt="LinkedIn">
-  </a>
-</p>
 
 **May the Local AI be with you.**

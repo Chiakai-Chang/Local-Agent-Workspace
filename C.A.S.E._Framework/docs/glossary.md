@@ -28,7 +28,7 @@
 | 名詞（中文） | 英文術語 | 人類理解 | AI 執行定義 |
 |------------|---------|---------|-----------|
 | **制憲者** | Architect / Constitution Author | 專案的總指揮，決定最高目標與禁止事項 | 人類使用者；唯一可修改 `00_Constitution/` 的對象 |
-| **宏觀層 / 指揮所** | Macro Layer / Strategic Planning Layer | 智囊團，負責看全局、出計畫、訂結案標準，但不碰具體案件資料 | Layer 2；雲端前沿 AI（Claude、Gemini、GPT-4 等）；生成 Roadmap 與 Task Packages |
+| **宏觀層 / 指揮所** | Macro Layer / Strategic Planning Layer | 智囊團，負責看全局、出計畫、訂結案標準，但不碰具體案件資料 | Layer 2；雲端前沿 AI（Claude、Gemini、各大廠旗艦模型等，以當下最強者為準）；生成 Roadmap 與 Task Packages |
 | **微觀層 / 基層執行** | Micro Layer / Tactical Execution Layer | 基層調查員，領到任務卷宗，照指引辦事，資料絕不外流 | Layer 3；本地端開源 AI（Llama 等）；操作範圍限於當前 Task 資料夾 |
 | **執行者** | Worker Agent | 負責執行工作、寫成果報告的基層人員 | 讀取 recipe.md → 處理 inputs/ → 寫入 output.md → 呼叫 submit_for_review |
 | **驗收者** | Checker Agent | 負責審查成果是否符合驗收標準的品管人員 | 讀取 recipe.md 的 Local DoD → 核對 output.md → 核准或退件 |

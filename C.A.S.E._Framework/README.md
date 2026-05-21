@@ -12,7 +12,7 @@
 ```mermaid
 graph TD
     H["👤 人類 / 制憲者<br/>定義最終目標與最高原則"]
-    C["☁️ 雲端強力 AI<br/>Claude / Gemini / GPT-4"]
+    C["☁️ 雲端前沿 AI<br/>（Claude · Gemini · OpenAI 等旗艦模型）"]
     TQ[("📁 工作區 / Task Queue")]
     T1["📂 卷宗 Task_01"]
     T2["📂 卷宗 Task_02"]
@@ -66,7 +66,7 @@ C.A.S.E. 框架是「為什麼要這樣建構本地 AI」的**哲學基礎**，�
 ```
 [ 您的目標 (憲法) ]
         ↓
-[ Claude / Gemini 雲端規劃 (宏觀層) ]
+[ 雲端前沿 AI 規劃 (宏觀層) ]
         ↓
 [ Local-Agent-Workspace → Pi Agent → OmniHeal (微觀執行層) ]
 ```

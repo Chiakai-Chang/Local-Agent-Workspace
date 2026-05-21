@@ -69,7 +69,7 @@ Required sections (in order):
 
 ### `inputs/`
 - All source material the agent is authorized to read.
-- Agents MUST NOT read files outside `inputs/`, `role.md`, `recipe.md`, and `00_Constitution/core.md`.
+- Agents MUST NOT read files outside `inputs/`, `role.md`, `recipe.md`, `00_Constitution/core.md`, and `01_Roadmap/*.md` (only when explicitly listed in `recipe.md > Input Sources`).
 
 ---
 
@@ -83,12 +83,13 @@ Required sections (in order):
 | `IN_PROGRESS` | Worker agent actively executing | Worker agent (upon starting) |
 | `REVIEW` | Worker complete; awaiting Checker | Worker agent (upon submitting) |
 | `DONE` | Checker approved; task closed | Checker agent |
-| `ESCALATED` | Retry limit exceeded; human/Layer 2 required | Checker agent |
+| `ESCALATED` | Task halted; human or Layer 2 intervention required. Triggered by: (a) Checker retry limit exceeded, or (b) Worker discovered a prerequisite gap and created a subtask via `create_subtask` (see Section 10a). | Checker agent (scenario a) or Worker agent (scenario b) |
 
 **Transition rules:**
 ```
 PENDING      → IN_PROGRESS  (Worker starts)
 IN_PROGRESS  → REVIEW       (Worker submits via submit_for_review)
+IN_PROGRESS  → ESCALATED    (Worker finds prerequisite gap; creates subtask then escalates — see Section 10a)
 REVIEW       → DONE         (Checker approves)
 REVIEW       → PENDING      (Checker rejects; retry count < 3)
 REVIEW       → ESCALATED    (Checker rejects; retry count >= 3)
@@ -130,7 +131,8 @@ Upon receiving a task (status = `PENDING`):
 7. **Submit**: Call `submit_for_review(<one-sentence summary of what was produced>)`.
 
 **On error or uncertainty:**
-- Insufficient inputs → `escalate_issue("Insufficient input: <specific gap>")`
+- Insufficient inputs where a prerequisite task can be defined → call `create_subtask(...)` first, then `escalate_issue(...)` (see Section 10a). Do NOT skip directly to `escalate_issue`.
+- Insufficient inputs due to a recipe specification error (e.g., referenced file does not exist and cannot be produced by a subtask) → `escalate_issue("Insufficient input: <specific gap>")`
 - Contradictory instructions → `escalate_issue("Contradictory instructions in recipe.md: <detail>")`
 - NEVER hallucinate data or invent file contents to fill gaps.
 

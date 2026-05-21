@@ -108,6 +108,7 @@ Layer 3 agents MUST only use the following tools. No direct shell access or arbi
 | `change_status(task_id, status)` | `task_id: str`, `status: enum` | `status` MUST be one of the five allowed tokens. |
 | `submit_for_review(summary)` | `summary: str` | Sets status to `REVIEW`; notifies Checker role. |
 | `escalate_issue(reason)` | `reason: str` | Halts task; writes to `action_log.jsonl`; sets status to `ESCALATED`. |
+| `create_subtask(slug, recipe_content, role_content)` | `slug: str`, `recipe_content: str`, `role_content: str` | Orchestrator creates `02_Task_Queue/Task_<next_NNN>_<slug>/` with provided content and `status.txt = PENDING`. Agent MUST NOT write outside its own folder directly — this tool is the only sanctioned path for micro-level Task Queue injection. |
 
 **MUST NOT use:**
 - Native shell commands (`rm`, `cp`, `mv`, `mkdir`) directly.
@@ -190,10 +191,9 @@ When `escalate_issue` is called:
 A Worker agent that discovers a prerequisite gap during execution MUST use this path **before** resorting to `escalate_issue`:
 
 1. Worker detects a missing precondition (e.g., required input does not exist yet).
-2. Worker calls `write_artifact("02_Task_Queue/Task_<NNN>_<slug>/recipe.md", <content>)` to create a new Atomic Task Package at the correct path.
-3. Worker calls `write_artifact("02_Task_Queue/Task_<NNN>_<slug>/status.txt", "PENDING")` to register it in the queue.
-4. Worker logs the action in its own `action_log.jsonl`.
-5. Worker calls `escalate_issue("Prerequisite gap found; sub-task Task_<NNN>_<slug> created in queue.")` to pause itself and signal that the new task must be completed first.
+2. Worker calls `create_subtask(slug="<descriptive-slug>", recipe_content="<full recipe.md text>", role_content="<full role.md text>")`. The orchestrator creates the new task folder in `02_Task_Queue/` with `status.txt = PENDING`. Worker MUST NOT use `write_artifact` to write outside its own task folder.
+3. Worker logs the `create_subtask` call in its own `action_log.jsonl`.
+4. Worker calls `escalate_issue("Prerequisite gap found; sub-task <slug> created in queue.")` to pause itself and signal that the new task must be completed first.
 
 **Key principle:** Micro-level feedback bypasses Global Aggregation entirely. The gap is patched in real time, preventing technical debt accumulation that would otherwise only surface after all tasks complete.
 

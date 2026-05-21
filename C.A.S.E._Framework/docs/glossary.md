@@ -58,7 +58,7 @@
 | **重試熔斷** | Retry Decay / Escalation Threshold | 同一件事做錯三次，就停工求援，不再無謂重試；若是執行中發現缺口，則建立子任務後才升級 | Checker 追蹤 retry count；≥ 3 → escalate_issue → `ESCALATED`；Worker 發現先決缺口可先建立子任務再 escalate |
 | **時光機還原** | Git Rollback | 每次 AI 修改檔案都自動備份，壞了可以一鍵恢復 | 每次 `write_artifact` 觸發自動 `git commit`；`revert_task(task_id)` 還原整個 Task 資料夾 |
 | **全局聚合** | Global Aggregation | 所有小任務都結案後，指揮所統一審視是否達到全案標準 | 所有 Task 狀態 = `DONE` 後觸發；Layer 2 核對 `global_dod.md` |
-| **微觀回饋** | Micro-Level Feedback (⑤) | 基層人員辦案中發現缺了一份前置資料，馬上補開一個新卷宗繼續辦——不用等總指揮開會 | Worker 在執行中發現先決缺口 → 直接在 `02_Task_Queue/` 建立新 Task Package → 自身 escalate 暫停等待子任務完成 |
+| **微觀回饋** | Micro-Level Feedback (⑤) | 基層人員辦案中發現缺了一份前置資料，馬上補開一個新卷宗繼續辦——不用等總指揮開會 | Worker 在執行中發現先決缺口 → 呼叫 `create_subtask` 工具（由協調系統在 `02_Task_Queue/` 建立新卷宗）→ 自身 escalate 暫停等待子任務完成 |
 | **宏觀回饋** | Macro-Level Feedback (⑥) | 所有任務全部結案後，總指揮發現全案標準仍有缺漏，重新規劃下一階段 | Global Aggregation 核對 `global_dod.md` 未達標 → Layer 2 重規劃 → 新 Task Packages 進入 `02_Task_Queue/` |
 | **幻覺** | Hallucination | AI 一本正經地捏造了不存在的資料或方法 | LLM 輸出與現實不符的虛假內容；C.A.S.E. 透過 File as State 與 Dual-track Verification 降低此風險 |
 | **上下文遺忘** | Context Forgetting / Attention Decay | AI 對話太長，忘記了前面說過的重要指示 | 超出 Context Window 後的資訊衰減；C.A.S.E. 透過把狀態寫入實體檔案來規避此問題 |

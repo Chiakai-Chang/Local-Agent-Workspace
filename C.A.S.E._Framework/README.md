@@ -12,7 +12,7 @@
 ```mermaid
 graph TD
     H["👤 人類 / 制憲者<br/>定義最終目標與最高原則"]
-    C["☁️ 雲端前沿 AI<br/>（Claude · Gemini · OpenAI 等旗艦模型）"]
+    C["☁️ 雲端前沿 AI<br/>（Claude · Gemini · GPT 等旗艦模型）"]
     TQ[("📁 工作區 / Task Queue")]
     T1["📂 卷宗 Task_01"]
     T2["📂 卷宗 Task_02"]

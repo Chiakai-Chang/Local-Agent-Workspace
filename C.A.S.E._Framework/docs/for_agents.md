@@ -182,8 +182,25 @@ When `escalate_issue` is called:
 2. A human or Layer 2 agent MUST review `feedback.md` and `action_log.jsonl`.
 3. Resolution options:
    - **Re-specify**: Layer 2 rewrites `recipe.md`, resets status to `PENDING`.
-   - **Split task**: Layer 2 replaces this task with two smaller sub-tasks.
+   - **Split task**: Layer 2 replaces this task with two smaller sub-tasks. The new sub-task folders MUST be created directly inside `02_Task_Queue/` immediately — do NOT wait for Global Aggregation.
    - **Human intervention**: Human directly resolves the constraint or provides missing input.
+
+## 10a. Micro-Level Feedback — Direct Task Queue Injection
+
+A Worker agent that discovers a prerequisite gap during execution MUST use this path **before** resorting to `escalate_issue`:
+
+1. Worker detects a missing precondition (e.g., required input does not exist yet).
+2. Worker calls `write_artifact("02_Task_Queue/Task_<NNN>_<slug>/recipe.md", <content>)` to create a new Atomic Task Package at the correct path.
+3. Worker calls `write_artifact("02_Task_Queue/Task_<NNN>_<slug>/status.txt", "PENDING")` to register it in the queue.
+4. Worker logs the action in its own `action_log.jsonl`.
+5. Worker calls `escalate_issue("Prerequisite gap found; sub-task Task_<NNN>_<slug> created in queue.")` to pause itself and signal that the new task must be completed first.
+
+**Key principle:** Micro-level feedback bypasses Global Aggregation entirely. The gap is patched in real time, preventing technical debt accumulation that would otherwise only surface after all tasks complete.
+
+| Feedback Path | Trigger | Route | Timing |
+|--------------|---------|-------|--------|
+| **Micro (⑤)** | Worker finds gap during execution | Worker → `02_Task_Queue/` directly | Immediate |
+| **Macro (⑥)** | Global Aggregation finds Global DoD unmet | AGG → Layer 2 → new task packages | After all tasks complete |
 
 ---
 

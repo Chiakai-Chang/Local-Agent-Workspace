@@ -156,11 +156,12 @@ CK 提出原始理念：
 |---------|------|
 | 框架名稱 | C.A.S.E.（Constitutional Agent State Engine） |
 | 存放位置 | `Local-Agent-Workspace` repo 的 `C.A.S.E._Framework/` |
-| 三大公理 | 智力分層、萬物皆卷宗、雙軌核實 |
+| 四大公理 | 智力分層、萬物皆卷宗、雙軌核實、**雙層回饋** |
 | 核心目錄結構 | `00_Constitution/` → `01_Roadmap/` → `02_Task_Queue/Task_<NNN>/` |
 | Task 必備檔 | `role.md`、`recipe.md`、`status.txt`、`inputs/`、`output.md` |
 | 安全機制 | Controlled Tool API ＋ 路徑鎖定 ＋ Git 版控 ＋ 重試熔斷（上限 3 次） |
 | 文件受眾分離 | `for_humans.md` ＋ `for_agents.md` ＋ `glossary.md` |
+| 回饋機制 | **微觀（⑤）**：Worker 執行中發現缺口 → 直接在 Task Queue 建立子任務；**宏觀（⑥）**：全局聚合未達標 → Layer 2 重規劃新 Stage |
 
 ---
 

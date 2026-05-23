@@ -71,15 +71,19 @@
 
 ---
 
-## 📦 2. 模型權重推薦 (GGUF)
+## 📦 2. 模型權重推薦 (GGUF & MTP 自我推測)
 
-在 20GB VRAM 的環境下，以下是我實測後強烈推薦的模型：
+在 20GB VRAM (如 RTX A4500) 或 32GB 記憶體 (如 Claw 8) 的環境下，以下是我實測後強烈推薦的模型：
 
-### 🌟 穩定首選 (代理橋接與複雜自動化)
+### 🌟 A. 穩定首選 (代理橋接與複雜自動化)
 🔥 **[GRM-2.6-Opus.i1-IQ4_XS](https://huggingface.co/mradermacher/GRM-2.6-Opus-i1-GGUF/blob/main/GRM-2.6-Opus.i1-IQ4_XS.gguf)** (約 15.2 GB)
 > 融合頂尖的 GRM 邏輯與 Claude Opus 的推理風格。輸出極度穩定的結構化思維，大幅降低 Agent 解析指令的錯誤率。IQ4_XS 量化完美適配 20GB VRAM，留下充足餘裕給長文本運算。
 
-### 💻 程式開發特化 (純代碼生成與 JSON 結構化)
+### ⚡ B. 速度與效能黑科技 (MTP 自我推測解碼)
+🔥 **[Qwen3.6-35B-A3B-Claude-4.7-Opus-Reasoning-Distilled-APEX-MTP-GGUF](https://huggingface.co/mudler/Qwen3.6-35B-A3B-Claude-4.7-Opus-Reasoning-Distilled-APEX-MTP-GGUF)** (Mini 版約 13.7 GB / Balanced 版約 18.5 GB)
+> **黑科技推薦：** 該版本將 Model 的 **MTP (Multi-Token Prediction) 頭**與 Trunk 主體打包在同一個 GGUF 檔中。搭配近期版本的 llama.cpp，只需在啟動參數加入 `--draft-mtp`，即可在**不掛載額外 draft 模型**的情況下啟動「自我推測解碼（Self-Speculative Decoding）」，推理速度大幅飆升，極度適合 RTX A4500 等 20GB VRAM GPU 壓榨效能！
+
+### 💻 C. 程式開發特化 (純代碼生成與 JSON 結構化)
 🔥 **[Qwen3.6-27B-NEO-CODE-2T-OT-IQ4_XS](https://huggingface.co/DavidAU/Qwen3.6-27B-NEO-CODE-Di-IMatrix-MAX-GGUF/blob/main/Qwen3.6-27B-NEO-CODE-2T-OT-IQ4_XS.gguf)** (約 15.4 GB)
 > 專為高難度程式碼任務與 JSON 格式輸出優化。若工作流偏好原生 Qwen 思維模式來進行專案重構，這是一台非常優秀的純代碼生產機器。
 
@@ -87,35 +91,42 @@
 
 ---
 
-## 🚀 3. 一鍵啟動伺服器 (RTX A4500 極致優化版)
+## 🚀 3. 一鍵啟動伺服器 (多硬體極致優化版)
 
-以下是我針對 **20GB VRAM (如 RTX A4500)** 所調校出的最佳化啟動腳本。它能最大化吞吐量、開啟 Flash Attention，並使用 4-bit 壓縮 KV Cache 以換取更大的 Context 空間。
+> [!WARNING]
+> **💡 為什麼舊版的啟動腳本會出錯？**
+> 隨著 Llama.cpp 的快速迭代，許多舊參數已被廢棄或整合。若您遇到啟動閃退或錯誤，通常是因為：
+> 1. **已移除的參數：** `--cache-reuse`、`--cache-prompt`、`--context-shift` 在新版中已被廢棄（快取管理已自動化）。
+> 2. **更名的參數：** `--parallel 1` 已更名為 `-np 1` 或 `--slots 1`（代表並行 Slot 數量）。
+> 3. **記憶體映射：** `--no-mmap` 會大幅拖慢模型載入速度，新版建議改用預設的 `--mmap`。
+> 4. **Batch 大小：** `-b 4096` 與 `-ub 1024` 在長 Context 時可能導致 OOM，已調整為穩健的 `512` 與 `128`。
 
-請將以下程式碼存成 `start_server.bat`，並確保修改變數路徑：
+本專案已將優化後的啟動腳本直接存於專案根目錄，您可以直接複製或修改使用：
 
+### 🟢 A. NVIDIA GPU 專用啟動檔 ([`start_server_nvidia.bat`](file:///D:/Myproject/Local-Agent-Workspace/start_server_nvidia.bat))
+適合 RTX A4500 (20GB VRAM) 或其他 NVIDIA 顯示卡，使用穩健的 Llama.cpp CUDA 引擎：
 ```batch
 @echo off
 chcp 65001 > nul
 setlocal
-
 title GRM-2.6-Opus IQ4_XS 128K - RTX A4500
 
-:: ==========================================
+:: ====================================================================
 :: ⚠️ 請修改以下兩個路徑為您電腦中的實際位置
-:: ==========================================
+:: ====================================================================
 set LLAMA_EXE=D:\MyProject\llama\llama-server.exe
 set MODEL=D:\MyProject\llama\GRM-2.6-Opus.i1-IQ4_XS.gguf
 set CTX_SIZE=131072
 set PORT=8080
 
-echo Starting Local LLM Server...
+echo Starting Local LLM Server (NVIDIA CUDA)...
 echo ========================================================
 echo Model  : %MODEL%
-echo Server : [http://127.0.0.1](http://127.0.0.1):%PORT%
-echo GPU    : RTX A4500 20GB
+echo Server : http://127.0.0.1:%PORT%
+echo GPU    : RTX A4500 20GB (Or other NVIDIA GPUs)
 echo Context: %CTX_SIZE% (128K)
-echo KV     : q4_0 / q4_0
-echo Batch  : 1024 / 256
+echo KV     : q4_0 / q4_0 (KV Cache quantized to save VRAM)
+echo Batch  : 512 / 128 (Logical / Physical Batch)
 echo ========================================================
 
 "%LLAMA_EXE%" ^
@@ -124,66 +135,146 @@ echo ========================================================
   -c %CTX_SIZE% ^
   --host 127.0.0.1 ^
   --port %PORT% ^
-  --parallel 1 ^
-  -b 4096 ^
-  -ub 1024 ^
+  -np 1 ^
+  -b 512 ^
+  -ub 128 ^
   --cache-type-k q4_0 ^
   --cache-type-v q4_0 ^
   --flash-attn on ^
-  --context-shift ^
-  --no-mmap ^
-  --mlock ^
+  --mmap ^
   --no-warmup ^
   --jinja ^
-  --cache-prompt ^
-  --cache-reuse 512 ^
   --threads 8 ^
-  --threads-batch 12 ^
   --prio 2 ^
-  --timeout 900
+  --timeout 1200
 
 pause
+```
 
+### ⚡ B. NVIDIA GPU + MTP 自我推測解碼 ([`start_server_nvidia_mtp.bat`](file:///D:/Myproject/Local-Agent-Workspace/start_server_nvidia_mtp.bat))
+適合搭配 `APEX-MTP` 權重檔案，一鍵解鎖高達 2 倍的推理生成速度：
+```batch
+@echo off
+chcp 65001 > nul
+setlocal
+title Qwen3.6 APEX-MTP - RTX A4500
+
+:: ====================================================================
+:: ⚠️ 請修改以下兩個路徑為您電腦中的實際位置
+:: ====================================================================
+set LLAMA_EXE=D:\MyProject\llama\llama-server.exe
+set MODEL=D:\MyProject\llama\Qwen3.6-35B-A3B-Claude-4.7-Opus-Reasoning-Distilled-APEX-MTP-I-Balanced.gguf
+set CTX_SIZE=98304
+set PORT=8080
+
+echo Starting Local LLM Server with Self-Speculative MTP Decoding...
+echo ========================================================
+echo Model  : %MODEL%
+echo Server : http://127.0.0.1:%PORT%
+echo GPU    : RTX A4500 20GB (Or other NVIDIA GPUs)
+echo Context: %CTX_SIZE% (96K)
+echo KV     : q4_0 / q4_0 (KV Cache quantized to save VRAM)
+echo MTP    : Enabled (--draft-mtp)
+echo ========================================================
+
+"%LLAMA_EXE%" ^
+  -m "%MODEL%" ^
+  -ngl 999 ^
+  -c %CTX_SIZE% ^
+  --host 127.0.0.1 ^
+  --port %PORT% ^
+  -np 1 ^
+  -b 512 ^
+  -ub 128 ^
+  --cache-type-k q4_0 ^
+  --cache-type-v q4_0 ^
+  --flash-attn on ^
+  --draft-mtp ^
+  --mmap ^
+  --no-warmup ^
+  --jinja ^
+  --threads 8 ^
+  --prio 2 ^
+  --timeout 1200
+
+pause
+```
+
+### 🔵 C. Intel Arc / SYCL 平台專用啟動檔 ([`start_server_sycl.bat`](file:///D:/Myproject/Local-Agent-Workspace/start_server_sycl.bat))
+適合 MSI Claw 8 AI+、Intel 內顯、Arc 獨立顯卡或 Intel CPU，透過 level_zero 驅動加速：
+```batch
+@echo off
+chcp 65001 >nul
+title Llama Server (Intel SYCL - Claw 8 AI+)
+
+:: 載入 Intel oneAPI 環境變數
+call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
+
+:: SYCL 執行優化環境變數
+set SYCL_PI_LEVEL_ZERO_USE_IMMEDIATE_COMMANDLISTS=1
+set SYCL_CACHE_PERSISTENT=1
+set SYCL_DEVICE_FILTER=level_zero:gpu:0
+set ZES_ENABLE_SYSMAN=1
+
+:: ====================================================================
+:: ⚠️ 請修改以下變數以配合您的實際檔案與路徑
+:: ====================================================================
+set LLAMA_DIR=D:\Myproject\llama-win-sycl-x64
+set MODEL=C:\models\GRM-2.6-Opus.i1-IQ3_M.gguf
+set CTX_SIZE=98304
+set PORT=8080
+
+cd /d "%LLAMA_DIR%"
+
+echo Starting Local LLM Server (Intel SYCL)...
+echo ========================================================
+echo Model  : %MODEL%
+echo Server : http://127.0.0.1:%PORT%
+echo GPU    : Intel Arc Graphics (Level Zero GPU 0)
+echo Context: %CTX_SIZE% (96K)
+echo KV     : q4_0 / q4_0
+echo Batch  : 512 / 128
+echo ========================================================
+
+llama-server.exe ^
+  -m "%MODEL%" ^
+  --host 127.0.0.1 ^
+  --port %PORT% ^
+  -ngl 99 ^
+  -c %CTX_SIZE% ^
+  -np 1 ^
+  -b 512 ^
+  -ub 128 ^
+  --cache-type-k q4_0 ^
+  --cache-type-v q4_0 ^
+  --flash-attn on ^
+  --mmap ^
+  --no-warmup ^
+  --jinja ^
+  --cache-ram 0 ^
+  --threads 12 ^
+  --prio 2 ^
+  --timeout 1200
+
+pause
 ```
 
 ---
 
 ## 🤖 4. 銜接自動化 Agent
 
-伺服器啟動完成後（預設運行於 `http://127.0.0.1:8080`），您就可以將其接入各類 Coding Agent。
+本地伺服器啟動完成後（預設運行於 `http://127.0.0.1:8080`），您就可以將其接入各類 Coding Agent 或自動化工具。
 
-### 🌟 首選推薦：Pi Coding Agent + Harness 套件
-
-雖然本指南過去以 Claude Code 為主，但實戰中我們發現 Claude Code 難以自訂 Auto-compact 的大小，容易在本地模型中造成 Context 溢位或效能衰退。
-
-因此，**我們強烈建議改用 Pi Coding Agent**，並搭配我們的專屬套件：
+### 🌟 生態系核心推薦：Pi Coding Agent + Harness 套件
+雖然本指南過去以 Claude Code 為主，但在本地實戰中，我們強烈建議改用更輕量、更具擴充性的 **Pi Coding Agent**，並搭配我們的專屬套件：
 👉 前往 [**CK's Pi Code Agent Harness**](https://github.com/Chiakai-Chang/CKs_PI_Code_Agent_Harness)
 
-該套件解決了上述痛點，不僅更輕量，還注入了全球頂尖專家的開發直覺（TDD、BDD）與紀律，是目前實測下在本地環境效果很好的搭配選擇。
+**為什麼推薦這個組合？**
+1. **解決 Context 溢位：** 雲端 CLI 工具（如 Claude Code）無法精準控制本地端 auto-compact 觸發時機，容易造成本地 LLM 的 Context 溢出。Pi Agent 可以完美依照本地模型的限制設定。
+2. **極致輕量：** 本地 GGUF 模型對於冗餘 Token 極度敏感。Harness 精選了核心 plugins 與 skills，能以最精簡的 prompt 格式發揮本地模型的最大智商。
+3. **無縫整合健康診斷：** 與 **OmniHeal** 工具完美串接，一鍵檢查專案技術債，再交由本地算力精準修復。
 
-*(若您仍需使用 Claude Code，只需在專案目錄下設定環境變數 `set ANTHROPIC_BASE_URL=http://127.0.0.1:8080` 與假 Token 即可啟動。)*
-> 以下作法參考自: [How to Run Local LLMs with Claude Code](https://unsloth.ai/docs/basics/claude-code)
-
-請將以下程式碼存成 `start_local_claude.bat`，並複製到想要啟動的資料夾內啟動即可 (注意 "ANTHROPIC_BASE_URL=http://127.0.0.1:8080" 要修改成你 llama.cpp 指定的 URL 與 port)：
-
-```batch
-@echo off
-setlocal
-
-title Claude Local
-color 0A
-
-set ANTHROPIC_BASE_URL=http://127.0.0.1:8080
-
-set CLAUDE_CODE_ATTRIBUTION_HEADER=0
-set CLAUDE_CODE_ENABLE_TELEMETRY=0
-set CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
-
-claude --dangerously-skip-permissions
-
-endlocal
-
-```
+*(若您仍需使用 Claude Code，只需在專案目錄下設定環境變數 `set ANTHROPIC_BASE_URL=http://127.0.0.1:8080`，請參考根目錄的 `start_local_claude.bat` 啟動。)*
 
 ---
 

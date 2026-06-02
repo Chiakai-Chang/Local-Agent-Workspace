@@ -383,8 +383,7 @@ pause
 
 *(若您仍需使用 Claude Code，只需在專案目錄下設定環境變數 `set ANTHROPIC_BASE_URL=http://127.0.0.1:8080`，並參考根目錄的 `start_local_claude.bat` 啟動。)*
 
-<details>
-<summary><b>🔍 展開檢視開發生態系三大核心 Tier 及延伸工具</b></summary>
+### 🔍 開發生態系三大核心 Tier 及延伸工具
 
 * 🧠 **[Tier 1: 核心大腦 (Local-Agent-Workspace)](https://github.com/Chiakai-Chang/Local-Agent-Workspace)：** 建立極致優化的 Llama.cpp 本地伺服器。作為承接雲端架構師規劃後，能無情消耗 Token 進行打底運算的強大本地算力引擎。（📍 **您目前在這裡**）
 * 🤖 **[Tier 2: 代理工程師 (CK's Pi Code Agent Harness)](https://github.com/Chiakai-Chang/CKs_PI_Code_Agent_Harness)：** 混合開發的指揮樞紐。負責接收雲端模型開出的「任務菜譜與 SOP」，在本地端化身為懂工程紀律的虛擬同事，按部就班地切換目標檔案、撰寫程式碼並嚴格執行 TDD 測試。
@@ -392,16 +391,15 @@ pause
 
 #### 🏅 延伸工具：知識資產提煉
 📝 **[InfoGold - 經歷提煉與知識資產增值](https://github.com/Chiakai-Chang/InfoGold)**：扮演「煉金助理」的角色，將會議逐字稿、工作手稿、閱讀筆記等原始文字資產，透過四部曲系統化增值：**洗礦→精煉金磚→圓桌思辨→鑄造策略貨幣**，讓「曾經發生過的事」持續產生知識複利。
-</details>
 
-<details>
-<summary><b>💎 展開檢視本地部署的四大優勢 (隱私、高上下文、免安全中斷、零Token成本)</b></summary>
+---
+
+### 💎 本地部署的四大核心優勢
 
 * **🔒 物理性資料隔離：** 程式碼與專案架構保留在本地，特別適合高度重視資料邊界、數位鑑識與 OSINT 封閉分析等專案。
 * **🧠 高上下文容量：** 透過優化的 KV 快取壓縮技術，在 20GB VRAM 下依然可支援至 **128K+ Context**。
 * **🔓 任務連續性：** 選擇特徵消融（Abliterated）模型，可避免 Agent 在執行特定分析腳本時因安全機制而強行中斷。
 * **💰 成本效益：** 適合頻繁開發與自動化迭代，無懼雲端 API 昂貴的 Token 費用。
-</details>
 
 ---
 

@@ -22,11 +22,11 @@ graph TD
 為防範不同硬體平台的使用者因 VRAM 限制遭遇崩潰，我們提供以下最佳化的啟動腳本範本。您可以直接複製對應的配置，建立您的本機 `.bat` 啟動檔：
 
 ### 📊 本地算力平台快速選取看板
-| 硬體環境 (Hardware Platform) | 核心推薦模型 (Recommended Model) | 檔案大小 (Size) | 推理效能 (Inference Performance) | 啟動設定說明 (BAT Setup) |
+| 硬體環境 (Hardware Platform) | 核心推薦模型 (Recommended Model) | 檔案大小 (Size) | 推理效能 (Inference Performance) | 啟動設定說明 (Setup Link) |
 | :--- | :--- | :--- | :--- | :--- |
-| **高階顯卡 (20GB+ VRAM)** | GRM-2.6-Opus-Heretic 27B | 15.3 GB | MTP 投機解碼 (~49 T/s) | [▶️ 檢視配置](#-高階顯卡-mtp-極速版-rtx-a4500-20gb-vram-甜蜜點) |
-| **中階顯卡 (16GB VRAM)** | Qwopus3.6-27B-v2 | 15.4 GB | MTP 投機解碼 (~44 T/s) | [▶️ 檢視配置](#-中階顯卡-mtp-性能版-16gb-vram-消費級環境) |
-| **純 CPU / 大 RAM (32GB+)** | Qwen3.6-35B-A3B-Cerebellum | **12 GB** | MoE+SSM 混合線性推理 | [▶️ 檢視配置](#-純-cpu-與大記憶體優化版-無-gpu--大-ram-主機) |
+| **高階顯卡 (20GB+ VRAM)** | GRM-2.6-Opus 27B / Qwopus 27B | 15.3G / 15.4G | MTP 投機解碼 (~49 T/s) | [▶️ 檢視配置](#1-grm-opus--qwopus-mtp-20gb-vram-) |
+| **中階顯卡 (16GB VRAM)** | Qwen3.6-35B-A3B-Cerebellum | **12 GB** | **GPU 全卸載** MoE 線性推理 | [▶️ 檢視配置](#2-qwen36-cerebellum-gpu--16gb-vram-) |
+| **純 CPU / 大 RAM (32GB+)** | Qwen3.6-35B-A3B-Cerebellum | **12 GB** | MoE+SSM **純 CPU** 線性推理 | [▶️ 檢視配置](#3-cpu-moessm--32gb-ram-) |
 
 > [!IMPORTANT]
 > **⚠️ 必做步驟：建立本機啟動檔時請務必修改路徑！**
@@ -35,9 +35,9 @@ graph TD
 
 ---
 
-### 1. 🟢 高階顯卡 MTP 極速版 (RTX A4500 20GB VRAM 甜蜜點)
-* **核心優勢**：透過 `llama.cpp` 內建預測頭（MTP）實現 **5 倍推理速度提升**，配合 4-bit KV Cache 壓縮技術，實現 **128K** 超大 Context 且完全不溢位（OOM）。
-* **適合模型**：`GRM-2.6-Opus-Heretic-Abliterated-MTP-IQ4_XS` (15.3 GB)
+### 1. 🟢 高階顯卡 MTP 極速版 (20GB+ VRAM 專屬)
+* **核心優勢**：適合 RTX A4500 等 20GB+ 高階顯卡。透過 `llama.cpp` 內建預測頭（MTP）實現 **5 倍推理速度提升**，配合 4-bit KV Cache 壓縮技術，實現 **128K** 超大 Context 且完全不溢位（OOM）。
+* **適合模型**：首選 `GRM-2.6-Opus-Heretic-Abliterated-MTP-IQ4_XS` (15.3 GB) 或 `Qwopus3.6-27B-v2-MTP-IQ4_XS` (15.4 GB)。
 
 ##### ⚡ NVIDIA MTP 效能調校精華 (Tuning Essence)：
 * **MTP 自我投機解碼 (`--spec-type draft-mtp`)**：免掛載外部小模型，推理速度狂飆 4x-5x（達 49 T/s）。
@@ -45,12 +45,12 @@ graph TD
 * **P-cores 綁定 (`--threads 8`)**：鎖定 8 顆實體 Performance Cores 以獲取最低延遲。
 
 <details>
-<summary><b>📂 點此複製 BAT 啟動腳本 (GRM-Opus MTP)</b></summary>
+<summary><b>📂 點此複製 BAT 啟動腳本 (NVIDIA MTP 旗艦版)</b></summary>
 
 ```batch
 @echo off
 setlocal
-title GRM-2.6-Opus-Heretic-Abliterated-MTP [RTX A4500 128K Max Performance]
+title NVIDIA MTP Server [RTX A4500 20GB+ Max Performance]
 
 :: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 :: !!! CRITICAL: YOU MUST UPDATE THE PATHS BELOW TO REFLECT YOUR     !!!
@@ -60,9 +60,17 @@ title GRM-2.6-Opus-Heretic-Abliterated-MTP [RTX A4500 128K Max Performance]
 :: [Configuration Paths] Please modify the paths below to match your system.
 :: ====================================================================
 set LLAMA_EXE=D:\MyProject\llama\llama-server.exe
-set MODEL=D:\MyProject\llama\GRM-2.6-Opus-Heretic-Abliterated-MTP-IQ4_XS.gguf
-set CTX_SIZE=131072
 set PORT=8080
+set CTX_SIZE=131072
+
+:: --------------------------------------------------------------------
+:: [Model Selection] Uncomment the one you want to run.
+:: --------------------------------------------------------------------
+:: Option A: GRM-2.6-Opus-Heretic-Abliterated-MTP-IQ4_XS (15.3 GB) - DEFAULT
+set MODEL=D:\MyProject\llama\GRM-2.6-Opus-Heretic-Abliterated-MTP-IQ4_XS.gguf
+
+:: Option B: Qwopus3.6-27B-v2-MTP-IQ4_XS (15.4 GB)
+:: set MODEL=D:\MyProject\llama\Qwopus3.6-27B-v2-MTP-GGUF.gguf
 
 :: Verify paths exist before executing to prevent silent crashes
 if not exist "%LLAMA_EXE%" (
@@ -129,23 +137,28 @@ pause
 * **`-ctk q4_0 -ctv q4_0` 與 `-ctkd q4_0 -ctvd q4_0`**：將 KV Cache 進行 4-bit 量化壓縮，節省 72% VRAM！在 128K Context 時 KV 快取僅佔 ~200MB，徹底防範 VRAM 溢出。
 * **`--kv-unified`**：令主模型與預測頭共享 KV Buffer 快取以節省記憶體。
 * **`--cache-ram 12288`**：劃分 12GB 實體 RAM 快取對話上下文。多輪對話時，歷史脈絡直接載入，**跳過 prompt re-eval 進程，解鎖 sub-second 首字輸出速度**。
-* **`--threads 8`**：將計算線程強制鎖定在 Intel i7 的 **8 顆 P-cores 實體效能核心**上，防範系統將線程派發給 E-cores 或超線程而拉高延遲。
+* **`--threads 8`**：將計算線程強制鎖定在 Intel i7 的 **8 顆 P-cores 實體效能核心**上，防範系統將線程派發給 E-cores 或超線程中而拉高延遲。
 * **`--reasoning-format deepseek`**：自動提取模型推理時產生的 `<think>` 思考流，完美對接 Open WebUI 等折疊式思維泡泡 UI。
 </details>
 
 ---
 
-### 2. 🟡 中階顯卡 MTP 性能版 (16GB VRAM 消費級環境)
-* **核心優勢**：專為 16GB VRAM 顯示卡量身打造，在極小顯示記憶體開銷下，依然提供自我投機解碼加速（~44 tokens/sec），預留空間供 Context 與多輪對話使用。
-* **適合模型**：`Qwopus3.6-27B-v2-MTP-IQ4_XS` (15.4 GB)
+### 2. 🟡 中階顯卡 GPU 極速版 (16GB VRAM 專屬)
+* **核心優勢**：**16GB VRAM 扣除 Windows 系統與顯卡 WDDM 佔用後實際僅剩約 14GB VRAM**。在此物理限制下，若強行載入 15.4GB 的 27B 模型，會導致大批層數溢出至系統 RAM，因 PCIe 頻寬瓶頸而速度暴跌！
+* **極佳解法**：強烈推薦選用僅 **12 GB** 大小、採用敏感度引導混合壓縮的 `Qwen3.6-35B-A3B-Cerebellum`。這能將模型**全數載入 16GB VRAM**，並保留充足的 **2.5GB 運算空間**，完美在顯卡內執行 Flash-Attention、量化 KV Cache 與多模態視覺投影，享受流暢無PCIe 交換的極致運算！
+
+##### ⚡ NVIDIA GPU 卸載效能調校精華 (Tuning Essence)：
+* **GPU 完全卸載 (`-ngl 999`)**：確保 100% 的模型張量全數塞在 VRAM 中運行。
+* **4-bit KV 快取壓縮 (`-ctk q4_0 -ctv q4_0`)**：壓縮 KV 快取，預留大上下文空間。
+* **物理線程綁定 (`--threads 8`)**：由實體效能核心協同高頻調度。
 
 <details>
-<summary><b>📂 點此複製 BAT 啟動腳本 (Qwopus MTP)</b></summary>
+<summary><b>📂 點此複製 BAT 啟動腳本 (Cerebellum GPU 全卸載版)</b></summary>
 
 ```batch
 @echo off
 setlocal
-title Qwopus3.6-27B-v2-MTP [RTX A4500 128K Max Performance]
+title Qwen3.6-35B-A3B-Cerebellum [NVIDIA GPU Offload - 16GB VRAM]
 
 :: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 :: !!! CRITICAL: YOU MUST UPDATE THE PATHS BELOW TO REFLECT YOUR     !!!
@@ -155,8 +168,8 @@ title Qwopus3.6-27B-v2-MTP [RTX A4500 128K Max Performance]
 :: [Configuration Paths] Please modify the paths below to match your system.
 :: ====================================================================
 set LLAMA_EXE=D:\MyProject\llama\llama-server.exe
-set MODEL=D:\MyProject\llama\Qwopus3.6-27B-v2-MTP-GGUF.gguf
-set CTX_SIZE=131072
+set MODEL=D:\MyProject\llama\Qwen3.6-35B-A3B-Cerebellum.gguf
+set CTX_SIZE=32768
 set PORT=8080
 
 :: Verify paths exist before executing to prevent silent crashes
@@ -193,16 +206,8 @@ if not exist "%MODEL%" (
   -np 1 ^
   -b 512 ^
   -ub 128 ^
-  --spec-type draft-mtp ^
-  --spec-draft-n-max 3 ^
-  --spec-draft-ngl all ^
   --cache-type-k q4_0 ^
   --cache-type-v q4_0 ^
-  --cache-type-kd q4_0 ^
-  --cache-type-vd q4_0 ^
-  --kv-unified ^
-  --cache-ram 12288 ^
-  --cache-idle-slots ^
   --flash-attn on ^
   --mmap ^
   --no-warmup ^
@@ -210,7 +215,6 @@ if not exist "%MODEL%" (
   --threads 8 ^
   --threads-batch 12 ^
   --prio 2 ^
-  --reasoning-format deepseek ^
   --timeout 1200
 
 pause
@@ -220,11 +224,11 @@ pause
 ---
 
 ### 3. 🔵 純 CPU 與大記憶體優化版 (無 GPU / 大 RAM 主機)
-* **核心優勢**：**主記憶體 (RAM) 容量充足為最大優勢**（16GB RAM 可開 32K，32GB 可開滿 128K！）。**此平台必須關閉 MTP（投機解碼在 CPU 上會拖慢速度）**，且 prefill（提示詞預評估）速度會較為緩慢，但對話解碼速率穩定。
-* **適合模型**：首選 `Qwen3.6-35B-A3B-Cerebellum` (12 GB MoE 混合模型，活化參數僅 3B)，備用單體 `Qwopus3.6-7B-IQ4_XS`。
+* **核心優勢**：**系統記憶體 (RAM) 容量充足為最大優勢**（16GB RAM 可開 32K，32GB 可開滿 128K！）。**此平台必須關閉 MTP（投機解碼在 CPU 上會拖慢速度）**，且 prefill（提示詞預評估）速度會較為緩慢，但對話解碼速率穩定。
+* **適合模型**：首選 `Qwen3.6-35B-A3B-Cerebellum` (12 GB MoE 混合模型，推理時活化參數僅約 3B)，備用單體 `Qwopus3.6-7B-IQ4_XS`。
 
 ##### 🛠️ CPU 效能調校精華 (Tuning Essence)：
-* **關閉 GPU (`-ngl 0`)**：強制算力全部保留在實體 CPU與系統記憶體中。
+* **關閉 GPU (`-ngl 0`)**：強制算力全部保留在實體 CPU 與系統記憶體中。
 * **鎖定 P-cores 實體效能核心 (`--threads 8`)**：避免背景任務被分發至 E-cores，大幅降低解碼延遲。
 * **記憶體 vs Prefill 速度權衡**：32GB RAM 開 128K context 不會 OOM，但 CPU 頻寬低，Prefill 首字延遲 (TTFT) 會很長。
 
@@ -352,8 +356,8 @@ pause
 
 #### 2. 推薦模型權重下載連結：
 * **🔥 NVIDIA 首選：[GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF (15.3 GB)](https://huggingface.co/mradermacher/GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF)**
-* **⚡ NVIDIA 中階選：[Qwopus3.6-27B-v2-MTP-GGUF (15.4 GB)](https://huggingface.co/Jackrong/Qwopus3.6-27B-v2-MTP-GGUF/)**
-* **🧠 CPU 首選：[Qwen3.6-35B-A3B-Cerebellum-GGUF (12 GB MoE)](https://huggingface.co/deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF)**
+* **⚡ NVIDIA 次選：[Qwopus3.6-27B-v2-MTP-GGUF (15.4 GB)](https://huggingface.co/Jackrong/Qwopus3.6-27B-v2-MTP-GGUF/)**
+* **🧠 CPU & 16GB GPU 最適：[Qwen3.6-35B-A3B-Cerebellum-GGUF (12 GB MoE)](https://huggingface.co/deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF)**
 </details>
 
 ---

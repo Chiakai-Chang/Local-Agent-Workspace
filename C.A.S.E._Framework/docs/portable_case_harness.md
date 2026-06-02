@@ -1,17 +1,16 @@
-# 📦 Portable C.A.S.E. Harness — "CASE-in-a-Box"
+# 📦 Portable C.A.S.E. Harness — "CASE.md" Ruleset
 
-> **Concept**: Transform C.A.S.E. from a documentation framework into a **plug-and-play developer utility** that can be instantly cloned or initialized inside *any* repository. 
-> Once dropped in, it automatically scans the codebase, sets up reference folders, configures external AI tools (Cursor, Claude Code, Copilot) to obey C.A.S.E. rules, and generates structured roadmaps for the current project context.
+> **Concept**: Transform C.A.S.E. from a documentation framework into a **plug-and-play declarative ruleset (`CASE.md`)** that can be dropped inside *any* repository.
+> When an IDE AI agent (Cursor, Claude Code, Windsurf) opens the repository, it natively reads `CASE.md` and immediately adapts to the C.A.S.E. structured workflow, directory boundaries, and trace logging protocols—without executing any host-level code.
 
 ---
 
-## 1. The Core Vision: Portable Orchestration
+## 1. The Core Vision: Portable Declarative Ruleset
 
-For general users, implementing an AI agent system from scratch is complex. They want an out-of-the-box system that:
-1. **Requires Zero Configuration**: Just drop a folder/script into their project.
-2. **Auto-Configures AI Agents**: Automatically programs their IDE agents (like Cursor, Windsurf, or Claude Code) to respect structured workflows (Worker/Checker, trace verification, context limits) without requiring custom agent development.
-3. **Is Codebase-Agile**: Scans the project (languages, files, frameworks) and instantly decomposes their current task into discrete milestones.
-4. **Enforces Memory Integrity**: Keeps a chronological, Git-tracked record of the project state that persists across different AI models and chat sessions.
+For general users, executing setup scripts on host machines creates security friction. By mimicking the standard `CLAUDE.md` and `.cursorrules` developer experience, C.A.S.E. provides a **single, secure markdown ruleset (`CASE.md`)** that:
+1. **Requires Zero Code Execution**: No script execution, no RCE hazards. Just download a static Markdown file.
+2. **Auto-Configures AI Agents**: Natively programs Cursor, Claude Code, or Windsurf to respect C.A.S.E. boundaries (Worker role, Task Queue folders, action trace logging) out-of-the-box.
+3. **Maintains System Integrity**: Separates the codebase's main files from active task queues, keeping development tracked and clean.
 
 ---
 

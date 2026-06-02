@@ -66,24 +66,20 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 
 ## 🚀 3 分鐘快速上手（讓您的 AI 專案秒變專業 Repo！）
 
-您可以將本專案的「攜帶式套件 (CASE-in-a-Box)」直接放入您**任何的 AI 開發專案**中，操作極其簡單：
+您可以將本專案的專案規則檔 **[CASE.md](../CASE.md)** 直接放入您**任何的 AI 開發專案**中，操作極其簡單：
 
-### 1️⃣ 第一步：複製 `.case/` 工具夾
-直接將本專案根目錄下的 `.case/` 資料夾（內含 `init.py` 與 `agent_skills.md` 規則手冊）複製到您想開發的任意 Repository 根目錄。
+### 1️⃣ 第一步：獲取 `CASE.md` 規則手冊
+直接在您的專案根目錄下，下載或建立一個 **`CASE.md`** 檔案。您可以直接複製本專案的 [**CASE.md 樣板**](../CASE.md)。
+* 💡 **提示**：您也可以直接將 [CASE.md](../CASE.md) 的內容直接追加至您現有的 `.cursorrules` 或 `CLAUDE.md` 檔案的尾端。
 
-### 2️⃣ 第二步：一鍵啟動掃描 (專案初始化)
-在您的專案根目錄，打開終端機執行：
-```bash
-python .case/init.py
-```
-* 💡 **它會做什麼？**
-  1. **專案健檢**：自動偵測您的語言（Python/JavaScript 等）。
-  2. **詢問目標**：問您：「這次想讓 AI 幫您完成什麼任務？」
-  3. **自動防護**：自動在專案中建立 `.cursorrules`，任何 IDE 智能體（Cursor, Windsurf）讀取到後，會**自動進入 C.A.S.E. 嚴格模式**。
-  4. **Git 清潔**：詢問是否啟用 `case-state` 孤立分支（推薦），將 AI 執行期的龐大 log 檔排除在您的 production Git 提交之外，保持代碼庫乾淨！
+### 2️⃣ 第二步：建立 C.A.S.E 標準目錄
+在您的專案根目錄中，建立三個空資料夾：
+* 📁 `00_Constitution/`：建立 `core.md` 寫入您的專案最高指導原則。
+* 📁 `01_Roadmap/`：建立 `roadmap.md` 規劃開發里程碑。
+* 📁 `02_Task_Queue/`：建立 `Task_001_Scan/` 資料夾，並在此建立 `recipe.md` (做事步驟)、`role.md` (角色) 以及寫入 `PENDING` 字串的 `status.txt` (任務狀態)。
 
 ### 3️⃣ 第三步：讓 AI 照表操課
-打開您的 Cursor、Claude Code 或任何 AI 輔助軟體，您會發現 AI 會乖乖打開 `.case/` 指引，前往 `02_Task_Queue/Task_001_InitialScan/` 領取第一個任務，自動分析、自動寫入、自動記錄！
+打開您的 Cursor、Claude Code 或任何 AI 輔助軟體，AI 智能體載入專案時會自動讀取到 `CASE.md`，並主動前往 `02_Task_Queue/` 領取第一個任務，自動分析、編寫，並在背景記錄 `action_log.jsonl`！
 
 ---
 

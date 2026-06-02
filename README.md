@@ -22,10 +22,10 @@
 >   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
 >   ```
 >
-> 2️⃣ **第二步：啟動您的 AI Agent (如 Cursor / Claude Code / Windsurf) 並貼上下列 Prompt**：
+> 2️⃣ **第二步：啟動您的 AI Agent (如 Claude Code / Codex / Antigravity CLI / Pi) 並貼上下列 Prompt**：
 > > 「請閱讀我專案中的 [CASE_framework_for_agents.md](CASE_framework_for_agents.md) 文件。閱讀後，請分析我目前的專案結構，規劃如何以最合適的方式為本專案建立 C.A.S.E 物理目錄結構（包含 Constitution、Roadmap、Task_Queue 任務資料夾），並將此執行期規則妥善整合寫入您的長效記憶配置中（例如 `CLAUDE.md`、`.cursorrules`、`gemini.md` 或 `memory.md` 等對應位置）。在建立目錄與寫入配置前，請先向我報告您的規劃並取得我的同意。」
 >
-> 🌟 **結果**：AI Agent 將會**自己動手**幫您做好專案分析、創立所有目錄、並配置好 IDE 的原生規則設定！完全不需要您手動搬移任何檔案，安全、乾淨且優雅！
+> 🌟 **結果**：AI Agent 將會**自己動手**幫您做好專案分析、創立所有目錄、並配置好原生規則設定（如 `CLAUDE.md` 或 `memory.md`）！完全不需要您手動搬移任何檔案，安全、乾淨且優雅！
 > 👉 **[進入詳細 C.A.S.E. 框架設計說明](C.A.S.E._Framework/README.md)**
 
 > [!TIP]

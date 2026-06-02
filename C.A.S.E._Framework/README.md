@@ -66,20 +66,25 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 
 ## 🚀 3 分鐘快速上手（讓您的 AI 專案秒變專業 Repo！）
 
-您可以將本專案的專案規則檔 **[CASE.md](../CASE.md)** 直接放入您**任何的 AI 開發專案**中，操作極其簡單：
+本專案已經為 AI 智能體編寫好了完整的 **`for_agents.md`** 規則文件。您**不需要**手動複製或建立任何資料夾！只需在您要開發的任何專案根目錄下，開啟終端機並複製貼上以下其中一行指令即可：
 
-### 1️⃣ 第一步：獲取 `CASE.md` 規則手冊
-直接在您的專案根目錄下，下載或建立一個 **`CASE.md`** 檔案。您可以直接複製本專案的 [**CASE.md 樣板**](../CASE.md)。
-* 💡 **提示**：您也可以直接將 [CASE.md](../CASE.md) 的內容直接追加至您現有的 `.cursorrules` 或 `CLAUDE.md` 檔案的尾端。
+### 1️⃣ 第一步：一鍵下載規則文件
+* **💻 Linux / macOS / Git Bash (cURL)**:
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md -o CASE_framework_for_agents.md
+  ```
+* **💻 Windows (PowerShell)**:
+  ```powershell
+  Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
+  ```
+> 💡 *說明：本指令僅會下載一個唯讀的 `.md` 文件，完全無任何代碼執行，絕無安全疑慮，且不會覆蓋您專案中的任何既有檔案。*
 
-### 2️⃣ 第二步：建立 C.A.S.E 標準目錄
-在您的專案根目錄中，建立三個空資料夾：
-* 📁 `00_Constitution/`：建立 `core.md` 寫入您的專案最高指導原則。
-* 📁 `01_Roadmap/`：建立 `roadmap.md` 規劃開發里程碑。
-* 📁 `02_Task_Queue/`：建立 `Task_001_Scan/` 資料夾，並在此建立 `recipe.md` (做事步驟)、`role.md` (角色) 以及寫入 `PENDING` 字串的 `status.txt` (任務狀態)。
+### 2️⃣ 第二步：給您的 AI 智能體貼上引導 Prompt
+啟動您的 IDE AI 輔助軟體（Cursor、Claude Code、Windsurf 等），將下載好的 `CASE_framework_for_agents.md` 文件作為參考（例如在 Cursor 中使用 `@`），並輸入以下 Prompt：
+> 「請閱讀我專案中的 [CASE_framework_for_agents.md](CASE_framework_for_agents.md) 文件。閱讀後，請分析我目前的專案結構，規劃如何以最合適的方式為本專案建立 C.A.S.E 物理目錄結構（包含 Constitution、Roadmap、Task_Queue 任務資料夾），並將此執行期規則妥善整合寫入您的長效記憶配置中（例如 `CLAUDE.md`、`.cursorrules`、`gemini.md` 或 `memory.md` 等對應位置）。在建立目錄與寫入配置前，請先向我報告您的規劃並取得我的同意。」
 
-### 3️⃣ 第三步：讓 AI 照表操課
-打開您的 Cursor、Claude Code 或任何 AI 輔助軟體，AI 智能體載入專案時會自動讀取到 `CASE.md`，並主動前往 `02_Task_Queue/` 領取第一個任務，自動分析、編寫，並在背景記錄 `action_log.jsonl`！
+### 3️⃣ 第三步：檢閱並同意 AI 的自動配置
+AI 智能體在讀取 Prompt 後，會自動分析您的專案、自動規劃並為您創立所有物理目錄、並妥善配置好 IDE 的原生規則。您只需輸入 `Yes` 或確認同意，AI 就會自己幫您全部設定妥當！
 
 ---
 

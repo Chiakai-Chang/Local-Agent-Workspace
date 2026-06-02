@@ -9,13 +9,24 @@
 
 本專案的核心目標在於解決雲端 API 的隱私疑慮、頻繁的審查限制以及長文本處理成本，為後續銜接自動化 Agent 工具打造最堅實的底層引擎。
 
-> [!NOTE]
-> **為什麼要這樣建本地 AI？背後有一套完整的哲學框架。**
-> 本專案的設計理念源自 **C.A.S.E. 框架（Constitutional Agent State Engine）**——一套將 AI 協作對應到「憲法→法律→執行細則」三層分工的多智能體標準作業架構。
+> [!IMPORTANT]
+> **⚡ 3秒一鍵下載 & AI 自適應配置 C.A.S.E 規範 (極簡低摩擦力設計)**
 >
-> ⚡ **C.A.S.E. 專案規則引導 (安全、零代碼執行的 AI 注入設計)**
-> 您**不需要**克隆本專案，也**不需要**執行任何終端機安裝指令！只需在您要開發的任何專案根目錄下放置一個 Markdown 規則檔 **[CASE.md](CASE.md)**，任何商用 AI 智能體（如 Cursor、Claude Code、Windsurf 等）在載入專案時讀到此說明，就會自動遵從 C.A.S.E 物理管理環境與任務分派約束。
-> 👉 **[獲取 CASE.md 樣板](CASE.md)** | **[進入詳細 C.A.S.E. 框架設計說明](C.A.S.E._Framework/README.md)**
+> 1️⃣ **第一步：在您想開發的任何專案根目錄下，開啟終端機執行指令下載規則檔**：
+> * **💻 Linux / macOS / Git Bash (cURL)**:
+>   ```bash
+>   curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md -o CASE_framework_for_agents.md
+>   ```
+> * **💻 Windows (PowerShell)**:
+>   ```powershell
+>   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
+>   ```
+>
+> 2️⃣ **第二步：啟動您的 AI 智能體 (如 Cursor / Claude Code / Windsurf) 並貼上下列 Prompt**：
+> > 「請閱讀我專案中的 [CASE_framework_for_agents.md](CASE_framework_for_agents.md) 文件。閱讀後，請分析我目前的專案結構，規劃如何以最合適的方式為本專案建立 C.A.S.E 物理目錄結構（包含 Constitution、Roadmap、Task_Queue 任務資料夾），並將此執行期規則妥善整合寫入您的長效記憶配置中（例如 `CLAUDE.md`、`.cursorrules`、`gemini.md` 或 `memory.md` 等對應位置）。在建立目錄與寫入配置前，請先向我報告您的規劃並取得我的同意。」
+>
+> 🌟 **結果**：AI 智能體將會**自己動手**幫您做好專案分析、創立所有目錄、並配置好 IDE 的原生規則設定！完全不需要您手動搬移任何檔案，安全、乾淨且優雅！
+> 👉 **[進入詳細 C.A.S.E. 框架設計說明](C.A.S.E._Framework/README.md)**
 
 > [!TIP]
 > **測試硬體參考：** NVIDIA RTX A4500 (20GB VRAM) / 64GB RAM。

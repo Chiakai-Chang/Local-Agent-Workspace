@@ -304,13 +304,38 @@ pause
 
 ### 🔵 C. 純 CPU 平台專用啟動檔 ([`start_server_cpu.bat`](start_server_cpu.bat))
 由於 `llama.cpp` 官方自 `b9455+` 起已正式停用 Windows/Linux 的 SYCL (Intel Arc GPU) binary 自動打包，為防範無 NVIDIA 顯示卡的使用者無法啟動，我們提供了一套專門針對**純 CPU 環境優化**的極速效能啟動檔。
-適合任何標準筆記型電腦、辦公桌上型電腦或無 GPU 的伺服器環境：
+適合任何標準筆記型電腦、辦公桌上型電腦或無 GPU 的伺服器環境。
+
+#### 🧠 推薦 CPU 首選模型：超強混合精度壓縮 MoE 模型 — Cerebellum
+在 CPU 推理情境下，我們強烈推薦您優先選擇這款採用特殊張量敏感度引導壓縮的 MoE 頂級模型：
+👉 [**deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF (Hugging Face)**](https://huggingface.co/deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF)
+
+* **🧠 前沿的 SSM + Attention + MoE 混合黑科技 (qwen35moe)**：根據 GGUF 元數據分析，此模型極度契合 CPU 環境運作：
+  * **超省運算開銷**：總參數 35B（256 個專家），但每個 Token 僅活化 8 個專家。這使得**推論時活化參數僅為 3B (3B active parameters per token)**，在 CPU 上運作極為輕量流暢！
+  * **SSM 線性複雜度優勢**：除了每 4 層一個 Full Attention 外，其餘 30 層均採用線性注意力與 **SSM (狀態空間模型)** 區塊。SSM 對上下文長度的計算複雜度呈線性增長（而非傳統 Transformer 的二次方），能大幅減輕 CPU 負擔。
+  * **原生支援 262K 原生超長 Context**：元數據配置原生支援高達 **262,144 (262K)** 的上下文長度！這使得在 CPU 大容量系統 RAM 支援下，您可以無痛開啟 128K 超長對話！
+* **極致瘦身 (12 GB GGUF)**：透過張量敏感度引導壓縮，套用了 400 個張量層級 Override，將 35B 巨獸壓至僅 **12 GB (2.73 BPW)**。智商表現與原版 Q3_K_M (16 GB) 完全一致，甚至因正規化效果部分跑分更佳（ARC-Challenge 94.8%, HumanEval 75.0%）。
+* **備用基準選項**：若您需要更小巧的標準單體模型，亦可選用 **`Qwopus3.6-7B-IQ4_XS.gguf`**。
+
+---
+
+適合純 CPU 的啟動批次檔已存於根目錄，且預設已配置 Cerebellum 模型作為預設選項：
+
+<details>
+<summary><b>點此展開查看批次檔代碼與優化參數說明</b></summary>
 
 ```batch
 @echo off
 setlocal
 title Llama.cpp CPU Server [Unified CPU Performance Tuning]
 
+:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+:: !!! CRITICAL: YOU MUST UPDATE THE PATHS BELOW TO REFLECT YOUR     !!!
+:: !!! LOCAL ENVIRONMENT BEFORE RUNNING THIS SCRIPT.                 !!!
+:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+:: ====================================================================
+:: [Configuration Paths] Please modify the paths below to match your system.
+:: ====================================================================
 set LLAMA_EXE=D:\MyProject\llama\llama-server.exe
 set PORT=8080
 set CTX_SIZE=16384
@@ -318,11 +343,60 @@ set CTX_SIZE=16384
 :: --------------------------------------------------------------------
 :: [Model Selection] Uncomment the one you want to run.
 :: --------------------------------------------------------------------
-:: Option A: High-Precision 7B CPU Baseline (Recommended IQ4_XS for balanced speed/quality)
-set MODEL=D:\MyProject\llama\Qwopus3.6-7B-IQ4_XS.gguf
+:: Option A: Extreme MoE Player Choice (Qwen3.6-35B-A3B-Cerebellum 12GB GGUF) - RECOMMENDED
+set MODEL=D:\MyProject\llama\Qwen3.6-35B-A3B-Cerebellum.gguf
 
-:: Option B: Extreme MoE Player Choice (Qwen3.6-35B-A3B-Cerebellum 12GB GGUF)
-:: set MODEL=D:\MyProject\llama\Qwen3.6-35B-A3B-Cerebellum.gguf
+:: Option B: High-Precision 7B CPU Baseline (Recommended IQ4_XS for balanced speed/quality)
+:: set MODEL=D:\MyProject\llama\Qwopus3.6-7B-IQ4_XS.gguf
+
+echo ========================================================
+echo Starting Pure CPU LLM Server...
+echo Model  : %MODEL%
+echo Host   : http://127.0.0.1:%PORT%
+echo Context: %CTX_SIZE% (16K optimized for CPU)
+echo GPU    : Disabled (ngl 0)
+echo Threads: P-core direct binding [8 Physical Cores]
+echo ========================================================
+
+:: Parameters Explained:
+:: 1. ngl 0: Disables GPU offloading completely, forcing running on host CPU.
+:: 2. c 16384: Default context size is 16K (optimized for general CPU speed).
+::    Note: Huge physical RAM capacity is the core advantage of running on CPU.
+::    - 16GB RAM: Easily scale context size (-c) up to 32K.
+::    - 32GB RAM: Run high-precision quant (like IQ4_XS) and scale context size (-c) to 128K (131072) without OOM.
+::    - 64GB+ RAM: Run larger models (27B/72B) with 128K+ context sizes fully unhindered.
+::    However, since CPU memory bandwidth is lower than GPU, prefill speed (TTFT) scales slowly.
+::    If you accept slower prefill times, feel free to adjust CTX_SIZE above to 131072 to unlock maximum capacity.
+:: 3. threads 8: Binds thread pool directly to P-cores to prevent scheduling onto E-cores or hyperthreads.
+:: 4. prio 2: High Priority in Windows to prevent background OS interrupts.
+:: 5. Note on MTP (Speculative Decoding) on CPU: While llama.cpp supports MTP on CPU, testing shows
+::    that enabling MTP does NOT speed up CPU inference. The draft head evaluation overhead and memory
+::    bandwidth contention actually slow down decoding. Thus, MTP parameters are omitted here.
+
+:: Verify paths exist before executing to prevent silent crashes
+if not exist "%LLAMA_EXE%" (
+    echo ========================================================
+    echo [CRITICAL ERROR] llama-server.exe was not found at:
+    echo "%LLAMA_EXE%"
+    echo.
+    echo Please open this .bat file in a text editor and update
+    echo the LLAMA_EXE path variable to point to your actual executable!
+    echo ========================================================
+    pause
+    exit /b
+)
+
+if not exist "%MODEL%" (
+    echo ========================================================
+    echo [CRITICAL ERROR] GGUF Model file was not found at:
+    echo "%MODEL%"
+    echo.
+    echo Please open this .bat file in a text editor and update
+    echo the MODEL path variable to point to your actual .gguf file!
+    echo ========================================================
+    pause
+    exit /b
+)
 
 "%LLAMA_EXE%" ^
   -m "%MODEL%" ^
@@ -343,6 +417,7 @@ set MODEL=D:\MyProject\llama\Qwopus3.6-7B-IQ4_XS.gguf
 
 pause
 ```
+</details>
 
 #### 🛠️ CPU 極致優化解析：
 * **`-ngl 0`**：強制關閉所有 GPU offload，將運算全數留置在實體 CPU 與系統記憶體中。
@@ -351,26 +426,9 @@ pause
     * **16GB RAM**：足夠載入 7B 模型並將 `-c` 輕鬆推至 **32K** 上下文。
     * **32GB RAM**：不僅能以高精度模型 (如 `IQ4_XS` 等級) 運作，還可以**直接將 `-c` 上下文開滿 128K (131072)**，這在 20GB VRAM 的 GPU 上是極難實現的。
     * **64GB+ RAM**：可輕鬆運行 27B 或更大型模型，並無痛開啟 **128K 以上** 的超巨型上下文。
-* **⚠️ Prefill 效能權衡提醒 (核心 Trade-off)**：雖然 32GB RAM 就能輕鬆吞下 128K 的超大上下文而不會崩潰，但**由於 CPU 記憶體頻寬遠不及 GPU 顯存，Prefill 階段 (提示詞預評估 / 載入大文字庫) 的速度會非常緩慢**。這意味著開滿 128K 時的首字生成延遲 (Time to First Token, TTFT) 會明顯增加。若您的應用場景（例如大型代碼庫重構、長文本合約分析）著重在「一次性讀入巨大上下文且不介意首字等待時間」，那麼把 CPU 版本的 `-c` 直接開滿 128K 將會是您最強大的智商武器。
+* **⚠️ Prefill 效能權衡提醒 (核心 Trade-off)**：雖然 32GB RAM 就能輕鬆吞下 128K 的超大上下文而不會崩潰，但**由於 CPU 記憶體頻寬遠不及 GPU 顯存，Prefill 階段 (提示詞預評估 / 載入大文字庫) 的速度會非常緩慢**。這意味著開滿 128K時的首字生成延遲 (Time to First Token, TTFT) 會明顯增加。若您的應用場景（例如大型代碼庫重構、長文本合約分析）著重在「一次性讀入巨大上下文且不介意首字等待時間」，那麼把 CPU 版本的 `-c` 直接開滿 128K 將會是您最強大的智商武器。
 * **`--threads 8` & `--threads-batch 12`**：計算線程強制派發至主機 CPU 的 8 顆實體 P-cores（Performance cores），避免背景計算任務被派發到 E-cores（Efficient cores）或超線程中而大幅拉高生成延遲。
 * **⚠️ 避免在 CPU 啟用 MTP 投機解碼 (Speculative Decoding)**：雖然 `llama.cpp` 技術上支援在 CPU 模式下配置 MTP，但**實測結果證實，在純 CPU 模式下啟用 MTP 投機解碼並不能達到提速效果**。由於 CPU 記憶體頻寬限制，額外評估 Draft heads 的計算開銷與頻寬爭搶反而會拖慢解碼速率。因此 CPU 專用啟動檔中已完全移除投機解碼參數，維持純粹的標準解碼路徑。
-
----
-
-### 🧠 極致玩家推薦：超強混合精度壓縮 MoE 模型 — Cerebellum
-如果您是追求技術極限的玩家，在實體記憶體有限的消費級硬體下，我們強烈推薦您嘗試這款採用特殊敏感度引導壓縮處理的頂級 MoE 模型：
-👉 [**deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF (Hugging Face)**](https://huggingface.co/deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF)
-
-#### 🌟 核心特色解析：
-* **極致瘦身 (12 GB GGUF)**：原版 Qwen3.6-35B-A3B 是一款搭載 **35B 總參數** 的頂級 MoE 混合模型。Cerebellum 透過**張量敏感度評估 (Sensitivity-guided mixed-precision)** 進行深度手術，套用了 400 個張量層級的精細 Override（將不敏感張量 demote 至 Q2_K，保留高敏感張量在 Q3_K_M 或 F32），最終將模型壓縮至僅 **12 GB (2.73 BPW)**。
-* **🧠 前沿的 SSM + Attention + MoE 混合黑科技 (qwen35moe)**：根據 GGUF 元數據（Metadata）底層分析，此模型融合了多項頂級硬體最佳化結構設計：
-  * **超省運算開銷**：總參數高達 35B，擁有 **256 個專家 (Experts)**，但每個 Token 僅啟用 **8 個專家 (Active Experts)**。這意味著**推理時活化參數僅約 3B (3B active parameters per token)**，在 CPU 上運作極為輕量省資源！
-  * **SSM 線性時間複雜度優勢**：每 4 層進行一次 Full Attention（共 10 層），其餘 30 層皆採用線性注意力與 **SSM (State Space Model / Mamba 狀態空間模型)** 區塊（元數據標註 `ssm.state_size: 128`）。由於 SSM 對上下文長度的計算複雜度呈線性增長，相較傳統 Transformer 的二次方增長，能以極低的 CPU 負荷和記憶體開銷，無痛推展超長對話！
-  * **原生支援 262K 超巨型上下文**：模型元數據原生配置 `context_length` 高達 **262,144 (262K)**，是處理超大型程式庫重構與海量文檔分析的終極武器。
-* **不減智商的實測表現**：實測表明，Cerebellum v1 版在 ARC-Challenge 達到了 **94.8%**、HumanEval 達到了 **75.0%**，其視覺能力與原版 Q3_K_M (16 GB) 完全一致，甚至因為 imatrix 導引量化在 MoE 門控張量上帶來了正向的正規化效果，部分表現更優。
-* **硬體友善度爆表**：僅需 12 GB 記憶體，因此不論是在 16GB VRAM 的消費級顯示卡（尚能留有空間供 Context 緩衝與 Vision Projector 載入），還是在 16GB/32GB RAM 的 CPU 主機上，都能以非常驚人的速度流暢玩轉！
-
-*(若要啟用視覺多模態輸入，請至該 Repo 下載 `mmproj-F16.gguf` 投影器並透過 `--mmproj` 載入即可。)*
 
 ---
 

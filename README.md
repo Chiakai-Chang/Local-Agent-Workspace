@@ -19,14 +19,28 @@ graph TD
 
 ## 🟢 軌道一：硬體選型與本機算力極致壓榨 (Hardware Track)
 
-為防範不同硬體平台的使用者因 VRAM 限制遭遇崩潰，我們提供以下最佳化的啟動腳本範本。您可以直接複製對應的配置，建立您的本機 `.bat` 啟動檔：
-
 ### 📊 本地算力平台快速選取看板
 | 硬體環境 (Hardware Platform) | 核心推薦模型 (Recommended Model) | 檔案大小 (Size) | 推理效能 (Inference Performance) |
 | :--- | :--- | :--- | :--- |
 | **高階顯卡 (20GB+ VRAM)** | GRM-2.6-Opus 27B / Qwopus 27B | 15.3G / 15.4G | MTP 投機解碼 (~49 T/s) |
 | **中階顯卡 (16GB VRAM)** | Qwen3.6-35B-A3B-Cerebellum | **12 GB** | **GPU 全卸載** MoE 線性推理 |
 | **純 CPU / 大 RAM (32GB+)** | Qwen3.6-35B-A3B-Cerebellum | **12 GB** | MoE+SSM **純 CPU** 線性推理 |
+
+### 📦 運算引擎與模型權重下載 (Llama.cpp & Models Download)
+* **⚡ 推薦一鍵自動更新**：雙擊本專案根目錄的 `run-update.bat` 即可全自動下載最新版 `llama.cpp` 並完成解壓合併。
+  * ⚠️ **首次使用**：請先以文字編輯器開啟 `update-llama-cpp.ps1`，將第 6 行的 `$TargetDir = "D:\MyProject\llama"` 修改為您本機實際要安裝的資料夾路徑！
+* **📦 備用手動下載**：前往 [Llama.cpp Releases](https://github.com/ggml-org/llama.cpp/releases) 下載以下雙檔解壓至同一個目錄：
+  1. **推論引擎**：`llama-b...-bin-win-cuda-cu12.4-x64.zip` (推薦 cu12.4 版本)
+  2. **運行依賴**：`cudart-llama-bin-win-cu12.4-x64.zip`
+* **🧠 推薦模型下載**：
+  * **🔥 NVIDIA 首選**：[GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF (15.3 GB)](https://huggingface.co/mradermacher/GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF) (高階顯卡強烈推薦，啟用 MTP 極速推理)
+  * **⚡ NVIDIA 次選**：[Qwopus3.6-27B-v2-MTP-GGUF (15.4 GB)](https://huggingface.co/Jackrong/Qwopus3.6-27B-v2-MTP-GGUF/)
+  * **🧠 CPU / 中階顯卡最適**：[Qwen3.6-35B-A3B-Cerebellum-GGUF (12 GB MoE)](https://huggingface.co/deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF)
+
+---
+
+### ⚙️ 本機 Server 啟動腳本配置 (Startup Scripts Setup)
+請根據您的硬體環境複製對應的配置，在您本機上建立對應的 `.bat` 啟動檔：
 
 > [!IMPORTANT]
 > **⚠️ 必做步驟：建立本機啟動檔時請務必修改路徑！**
@@ -356,22 +370,6 @@ pause
   * **實測結論**：實測證實，在純 CPU 模式下啟用 MTP 投機解碼**並不能**達到提速效果。
   * **原因剖析**：受限於 CPU 記憶體頻寬，額外評估 Draft heads 的計算開銷與頻寬爭搶反而會拖慢解碼速率。
   * **應對方案**：CPU 專用啟動設定已完全移除投機解碼參數，維持最純粹的標準解碼路徑。
-</details>
-
-<details>
-<summary><b>📦 展開檢視運算引擎與模型權重下載指引 (Llama.cpp & Models Download)</b></summary>
-
-#### 1. 下載並安裝 Llama.cpp 官方版 (推薦一鍵自動更新)
-* **⚡ 推薦一鍵自動更新**：雙擊根目錄的 `run-update.bat` 即可全自動下載最新版並完成解壓合併。
-  * ⚠️ **首次使用**：請先以文字編輯器開啟 `update-llama-cpp.ps1`，將第 6 行的 `$TargetDir = "D:\MyProject\llama"` 修改為您本機實際要安裝的資料夾路徑！
-* **📦 備用手動下載**：前往 [Llama.cpp Releases](https://github.com/ggml-org/llama.cpp/releases) 下載以下雙檔解壓至同一個目錄：
-  1. **推論引擎**：`llama-b...-bin-win-cuda-cu12.4-x64.zip` (推薦 cu12.4 版本)
-  2. **運行依賴**：`cudart-llama-bin-win-cu12.4-x64.zip`
-
-#### 2. 推薦模型權重下載連結：
-* **🔥 NVIDIA 首選：[GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF (15.3 GB)](https://huggingface.co/mradermacher/GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF)**
-* **⚡ NVIDIA 次選：[Qwopus3.6-27B-v2-MTP-GGUF (15.4 GB)](https://huggingface.co/Jackrong/Qwopus3.6-27B-v2-MTP-GGUF/)**
-* **🧠 CPU & 16GB GPU 最適：[Qwen3.6-35B-A3B-Cerebellum-GGUF (12 GB MoE)](https://huggingface.co/deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF)**
 </details>
 
 ---

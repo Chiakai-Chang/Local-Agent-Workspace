@@ -10,9 +10,12 @@
 本專案的核心目標在於解決雲端 API 的隱私疑慮、頻繁的審查限制以及長文本處理成本，為後續銜接自動化 Agent 工具打造最堅實的底層引擎。
 
 > [!IMPORTANT]
-> **⚡ 3秒一鍵下載 & AI 自適應配置 C.A.S.E 規範 (極簡低摩擦力設計)**
+> **⚡ 3 分鐘快速上手（將 C.A.S.E 規範一鍵植入任何 AI 專案）**
 >
-> 1️⃣ **第一步：在您想開發的任何專案根目錄下，開啟終端機執行指令下載規則檔**：
+> <details>
+> <summary><b>1️⃣ 第一步：一鍵下載 C.A.S.E. Agent 規則手冊 (CASE_framework_for_agents.md)</b></summary>
+>
+> 請在您的專案根目錄下，開啟終端機並執行以下指令下載唯讀規則檔：
 > * **💻 Linux / macOS / Git Bash (cURL)**:
 >   ```bash
 >   curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md -o CASE_framework_for_agents.md
@@ -21,11 +24,27 @@
 >   ```powershell
 >   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
 >   ```
+> </details>
 >
-> 2️⃣ **第二步：啟動您的 AI Agent (如 Claude Code / Codex / Antigravity CLI / Pi) 並貼上下列 Prompt**：
+> <details>
+> <summary><b>2️⃣ 第二步：給您的 AI Agent 貼上引導 Prompt</b></summary>
+>
+> 啟動您的 AI Agent (如 `Claude Code`、`Codex`、`Antigravity CLI`、`Pi`，或是 `Cursor` 等），將下載好的 `CASE_framework_for_agents.md` 文件作為參考（例如在 Cursor 中使用 `@`），並輸入以下 Prompt：
+>
 > > 「請閱讀我專案中的 [CASE_framework_for_agents.md](CASE_framework_for_agents.md) 文件。閱讀後，請分析我目前的專案結構，規劃如何以最合適的方式為本專案建立 C.A.S.E 物理目錄結構（包含 Constitution、Roadmap、Task_Queue 任務資料夾），並將此執行期規則妥善整合寫入您的長效記憶配置中（例如 `CLAUDE.md`、`.cursorrules`、`gemini.md` 或 `memory.md` 等對應位置）。在建立目錄與寫入配置前，請先向我報告您的規劃並取得我的同意。」
+> </details>
 >
-> 🌟 **結果**：AI Agent 將會**自己動手**幫您做好專案分析、創立所有目錄、並配置好原生規則設定（如 `CLAUDE.md` 或 `memory.md`）！完全不需要您手動搬移任何檔案，安全、乾淨且優雅！
+> <details>
+> <summary><b>3️⃣ 第三步：檢閱並同意 AI 的自動配置</b></summary>
+>
+> AI Agent 讀取 Prompt 後，將會**自己動手**完成：
+> 1. 分析您目前的程式語言與專案結構。
+> 2. 自動建立 `00_Constitution/`、`01_Roadmap/` 與 `02_Task_Queue/` 等實體目錄。
+> 3. 自動將 C.A.S.E. 執行期規則妥善整合寫入到您的本機長效記憶配置中。
+>
+> 您只需輸入同意，AI 就會自己幫您全部設定妥當！完全不需要您手動搬移任何檔案，安全、乾淨且優雅！
+> </details>
+>
 > 👉 **[進入詳細 C.A.S.E. 框架設計說明](C.A.S.E._Framework/README.md)**
 
 > [!TIP]

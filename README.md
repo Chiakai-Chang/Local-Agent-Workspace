@@ -422,4 +422,9 @@ pause
 
 如果您在部署過程中有任何技術問題或參數優化的建議，歡迎透過以下管道聯繫：
 
+<p align="left">
+  <a href="mailto:lotifv@gmail.com"><img src="https://img.shields.io/badge/Email-lotifv@gmail.com-D14836?style=flat-square&logo=gmail&logoColor=white" alt="Email"></a>
+  <a href="https://www.linkedin.com/in/chiakai-chang-htciu/"><img src="https://img.shields.io/badge/LinkedIn-Chang,%20Chia--Kai-0077B5?style=flat-square&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
+</p>
+
 **May the Local AI be with you.**

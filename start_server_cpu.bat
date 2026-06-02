@@ -2,6 +2,10 @@
 setlocal
 title Llama.cpp CPU Server [Unified CPU Performance Tuning]
 
+:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+:: !!! CRITICAL: YOU MUST UPDATE THE PATHS BELOW TO REFLECT YOUR     !!!
+:: !!! LOCAL ENVIRONMENT BEFORE RUNNING THIS SCRIPT.                 !!!
+:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 :: ====================================================================
 :: [Configuration Paths] Please modify the paths below to match your system.
 :: ====================================================================
@@ -41,6 +45,31 @@ echo ========================================================
 :: 5. Note on MTP (Speculative Decoding) on CPU: While llama.cpp supports MTP on CPU, testing shows
 ::    that enabling MTP does NOT speed up CPU inference. The draft head evaluation overhead and memory
 ::    bandwidth contention actually slow down decoding. Thus, MTP parameters are omitted here.
+
+:: Verify paths exist before executing to prevent silent crashes
+if not exist "%LLAMA_EXE%" (
+    echo ========================================================
+    echo [CRITICAL ERROR] llama-server.exe was not found at:
+    echo "%LLAMA_EXE%"
+    echo.
+    echo Please open this .bat file in a text editor and update
+    echo the LLAMA_EXE path variable to point to your actual executable!
+    echo ========================================================
+    pause
+    exit /b
+)
+
+if not exist "%MODEL%" (
+    echo ========================================================
+    echo [CRITICAL ERROR] GGUF Model file was not found at:
+    echo "%MODEL%"
+    echo.
+    echo Please open this .bat file in a text editor and update
+    echo the MODEL path variable to point to your actual .gguf file!
+    echo ========================================================
+    pause
+    exit /b
+)
 
 "%LLAMA_EXE%" ^
   -m "%MODEL%" ^

@@ -125,6 +125,11 @@
 
 本專案已將優化後的啟動批次檔 (.bat) 直接存於專案根目錄，您可以直接複製或修改使用。
 
+> [!IMPORTANT]
+> **⚠️ 必做步驟：請務必開啟並修改批次檔中的路徑！**
+> 本專案提供之 `.bat` 啟動檔中，`LLAMA_EXE` 與 `MODEL` 路徑預設為開發環境之預設路徑（如 `D:\MyProject\...`）。**在您首次執行前，請務必用文字編輯器（如 Notepad、VS Code）打開 `.bat` 檔案，將這兩個變數修改為您本機的實際路徑！**
+> * 為了防範未修改路徑造成的無預警閃退，我們已在所有 `.bat` 中內建了 **「檔案路徑自動校驗機制」**，若路徑未修改或檔案不存在，啟動時將會在 Console 顯示錯誤警告並自動暫停（Pause）供您排查，徹底告別閃退！
+
 > [!WARNING]
 > **💡 批次檔語系相容性注意**：
 > 舊版 batch 檔常因包含中文括號 `(` 與 `)` 導致 Windows CMD 解析錯誤閃退。本專案啟動檔已全面改為 **100% 純英文語法與括號**，徹底消除任何語系 Code Page 閃退問題。
@@ -139,10 +144,42 @@
 setlocal
 title GRM-2.6-Opus-Heretic-Abliterated-MTP [RTX A4500 128K Max Performance]
 
+:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+:: !!! CRITICAL: YOU MUST UPDATE THE PATHS BELOW TO REFLECT YOUR     !!!
+:: !!! LOCAL ENVIRONMENT BEFORE RUNNING THIS SCRIPT.                 !!!
+:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+:: ====================================================================
+:: [Configuration Paths] Please modify the paths below to match your system.
+:: ====================================================================
 set LLAMA_EXE=D:\MyProject\llama\llama-server.exe
 set MODEL=D:\MyProject\llama\GRM-2.6-Opus-Heretic-Abliterated-MTP-IQ4_XS.gguf
 set CTX_SIZE=131072
 set PORT=8080
+
+:: Verify paths exist before executing to prevent silent crashes
+if not exist "%LLAMA_EXE%" (
+    echo ========================================================
+    echo [CRITICAL ERROR] llama-server.exe was not found at:
+    echo "%LLAMA_EXE%"
+    echo.
+    echo Please open this .bat file in a text editor and update
+    echo the LLAMA_EXE path variable to point to your actual executable!
+    echo ========================================================
+    pause
+    exit /b
+)
+
+if not exist "%MODEL%" (
+    echo ========================================================
+    echo [CRITICAL ERROR] GGUF Model file was not found at:
+    echo "%MODEL%"
+    echo.
+    echo Please open this .bat file in a text editor and update
+    echo the MODEL path variable to point to your actual .gguf file!
+    echo ========================================================
+    pause
+    exit /b
+)
 
 "%LLAMA_EXE%" ^
   -m "%MODEL%" ^
@@ -195,10 +232,42 @@ pause
 setlocal
 title Qwopus3.6-27B-v2-MTP [RTX A4500 128K Max Performance]
 
+:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+:: !!! CRITICAL: YOU MUST UPDATE THE PATHS BELOW TO REFLECT YOUR     !!!
+:: !!! LOCAL ENVIRONMENT BEFORE RUNNING THIS SCRIPT.                 !!!
+:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+:: ====================================================================
+:: [Configuration Paths] Please modify the paths below to match your system.
+:: ====================================================================
 set LLAMA_EXE=D:\MyProject\llama\llama-server.exe
 set MODEL=D:\MyProject\llama\Qwopus3.6-27B-v2-MTP-GGUF.gguf
 set CTX_SIZE=131072
 set PORT=8080
+
+:: Verify paths exist before executing to prevent silent crashes
+if not exist "%LLAMA_EXE%" (
+    echo ========================================================
+    echo [CRITICAL ERROR] llama-server.exe was not found at:
+    echo "%LLAMA_EXE%"
+    echo.
+    echo Please open this .bat file in a text editor and update
+    echo the LLAMA_EXE path variable to point to your actual executable!
+    echo ========================================================
+    pause
+    exit /b
+)
+
+if not exist "%MODEL%" (
+    echo ========================================================
+    echo [CRITICAL ERROR] GGUF Model file was not found at:
+    echo "%MODEL%"
+    echo.
+    echo Please open this .bat file in a text editor and update
+    echo the MODEL path variable to point to your actual .gguf file!
+    echo ========================================================
+    pause
+    exit /b
+)
 
 "%LLAMA_EXE%" ^
   -m "%MODEL%" ^

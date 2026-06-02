@@ -2,6 +2,10 @@
 setlocal
 title Qwopus3.6-27B-v2-MTP [RTX A4500 128K Max Performance]
 
+:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+:: !!! CRITICAL: YOU MUST UPDATE THE PATHS BELOW TO REFLECT YOUR     !!!
+:: !!! LOCAL ENVIRONMENT BEFORE RUNNING THIS SCRIPT.                 !!!
+:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 :: ====================================================================
 :: [Configuration Paths] Please modify the paths below to match your system.
 :: ====================================================================
@@ -26,6 +30,31 @@ echo ========================================================
 :: 3. Unified KV Buffer: --kv-unified shares memory between model and draft
 :: 4. Prompt Cache: --cache-ram 12288 holds 12GB chat history in system RAM for sub-second responses
 :: 5. Threads optimization: --threads 8 binds to 12700K P-cores, --threads-batch 12 accelerates batching
+
+:: Verify paths exist before executing to prevent silent crashes
+if not exist "%LLAMA_EXE%" (
+    echo ========================================================
+    echo [CRITICAL ERROR] llama-server.exe was not found at:
+    echo "%LLAMA_EXE%"
+    echo.
+    echo Please open this .bat file in a text editor and update
+    echo the LLAMA_EXE path variable to point to your actual executable!
+    echo ========================================================
+    pause
+    exit /b
+)
+
+if not exist "%MODEL%" (
+    echo ========================================================
+    echo [CRITICAL ERROR] GGUF Model file was not found at:
+    echo "%MODEL%"
+    echo.
+    echo Please open this .bat file in a text editor and update
+    echo the MODEL path variable to point to your actual .gguf file!
+    echo ========================================================
+    pause
+    exit /b
+)
 
 "%LLAMA_EXE%" ^
   -m "%MODEL%" ^

@@ -293,8 +293,12 @@ pause
 👉 [**deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF (Hugging Face)**](https://huggingface.co/deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF)
 
 #### 🌟 核心特色解析：
-* **極致瘦身 (12 GB GGUF)**：原版 Qwen3.6-35B-A3B 是一款搭載 **35B 總參數 (每個 Token 僅啟用 3B 參數)** 的 SSM + MoE 混合架構模型。Cerebellum 透過**張量敏感度評估 (Sensitivity-guided mixed-precision)** 進行深度手術，套用了 400 個張量層級的精細 Override（將不敏感張量 demote 至 Q2_K，保留高敏感張量在 Q3_K_M 或 F32），最終將模型壓縮至僅 **12 GB (2.73 BPW)**。
-* **不減智商的黑科技**：實測表明，Cerebellum v1 版在 ARC-Challenge 達到了 **94.8%**、HumanEval 達到了 **75.0%**，其視覺能力與原版 Q3_K_M (16 GB) 完全一致，甚至因為 imatrix 導引量化在 MoE 門控張量上帶來了正向的正規化效果，部分表現更優。
+* **極致瘦身 (12 GB GGUF)**：原版 Qwen3.6-35B-A3B 是一款搭載 **35B 總參數** 的頂級 MoE 混合模型。Cerebellum 透過**張量敏感度評估 (Sensitivity-guided mixed-precision)** 進行深度手術，套用了 400 個張量層級的精細 Override（將不敏感張量 demote 至 Q2_K，保留高敏感張量在 Q3_K_M 或 F32），最終將模型壓縮至僅 **12 GB (2.73 BPW)**。
+* **🧠 前沿的 SSM + Attention + MoE 混合黑科技 (qwen35moe)**：根據 GGUF 元數據（Metadata）底層分析，此模型融合了多項頂級硬體最佳化結構設計：
+  * **超省運算開銷**：總參數高達 35B，擁有 **256 個專家 (Experts)**，但每個 Token 僅啟用 **8 個專家 (Active Experts)**。這意味著**推理時活化參數僅約 3B (3B active parameters per token)**，在 CPU 上運作極為輕量省資源！
+  * **SSM 線性時間複雜度優勢**：每 4 層進行一次 Full Attention（共 10 層），其餘 30 層皆採用線性注意力與 **SSM (State Space Model / Mamba 狀態空間模型)** 區塊（元數據標註 `ssm.state_size: 128`）。由於 SSM 對上下文長度的計算複雜度呈線性增長，相較傳統 Transformer 的二次方增長，能以極低的 CPU 負荷和記憶體開銷，無痛推展超長對話！
+  * **原生支援 262K 超巨型上下文**：模型元數據原生配置 `context_length` 高達 **262,144 (262K)**，是處理超大型程式庫重構與海量文檔分析的終極武器。
+* **不減智商的實測表現**：實測表明，Cerebellum v1 版在 ARC-Challenge 達到了 **94.8%**、HumanEval 達到了 **75.0%**，其視覺能力與原版 Q3_K_M (16 GB) 完全一致，甚至因為 imatrix 導引量化在 MoE 門控張量上帶來了正向的正規化效果，部分表現更優。
 * **硬體友善度爆表**：僅需 12 GB 記憶體，因此不論是在 16GB VRAM 的消費級顯示卡（尚能留有空間供 Context 緩衝與 Vision Projector 載入），還是在 16GB/32GB RAM 的 CPU 主機上，都能以非常驚人的速度流暢玩轉！
 
 *(若要啟用視覺多模態輸入，請至該 Repo 下載 `mmproj-F16.gguf` 投影器並透過 `--mmproj` 載入即可。)*

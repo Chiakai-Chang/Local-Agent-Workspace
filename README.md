@@ -59,6 +59,9 @@ graph TD
 ---
 
 ### 1. 🟢 高階顯卡 MTP 極速版 (20GB+ VRAM 專屬)
+<details>
+<summary><b>📂 點此展開檢視高階顯卡啟動腳本與參數優化</b></summary>
+
 * **核心優勢**：適合 RTX A4500 等 20GB+ 高階顯卡：
   * **極速推理**：透過 `llama.cpp` 內建預測頭（MTP）實現 **5 倍推理速度提升**。
   * **超大上下文**：配合 4-bit KV Cache 壓縮技術，無痛實現 **128K** 超大 Context 且完全不溢位（OOM）。
@@ -69,9 +72,7 @@ graph TD
 * **4-bit KV 快取壓縮 (`-ctk q4_0 -ctv q4_0`)**：壓縮 KV Cache，節省 72% VRAM，大上下文不溢位。
 * **P-cores 綁定 (`--threads 8`)**：鎖定 8 顆實體 Performance Cores 以獲取最低延遲。
 
-<details>
-<summary><b>📂 點此複製 BAT 啟動腳本 (NVIDIA MTP 旗艦版)</b></summary>
-
+##### 💻 BAT 啟動腳本範本 (NVIDIA MTP 旗艦版)：
 ```batch
 @echo off
 setlocal
@@ -153,11 +154,8 @@ if not exist "%MODEL%" (
 
 pause
 ```
-</details>
 
-<details>
-<summary><b>📖 展開檢視 NVIDIA 參數深度解析</b></summary>
-
+##### 📖 NVIDIA 參數深度解析：
 * **`--spec-type draft-mtp` & `--spec-draft-ngl all`**：自動載入 GGUF 內建預測頭，並將 base model 與 draft heads 全數塞入 VRAM 進行 GPU 滿載加速。
 * **`-ctk q4_0 -ctv q4_0` 與 `-ctkd q4_0 -ctvd q4_0`**：將 KV Cache 進行 4-bit 量化壓縮，節省 72% VRAM！在 128K Context 時 KV 快取僅佔 ~200MB，徹底防範 VRAM 溢出。
 * **`--kv-unified`**：令主模型與預測頭共享 KV Buffer 快取以節省記憶體。
@@ -169,6 +167,9 @@ pause
 ---
 
 ### 2. 🟡 中階顯卡 GPU 極速版 (16GB VRAM 專屬)
+<details>
+<summary><b>📂 點此展開檢視中階顯卡啟動腳本與效能調校精華</b></summary>
+
 * **實體限制**：16GB VRAM 扣除 Windows 系統與顯卡 WDDM 佔用後，實際僅剩約 **14GB VRAM**。若強行載入 15.4GB 的 27B 模型，會溢出至系統 RAM，因 PCIe 頻寬瓶頸使運算速度暴跌！
 * **極佳解法**：選用僅 **12 GB** 大小、敏感度引導量化的 `Qwen3.6-35B-A3B-Cerebellum`：
   * **完全載入**：將模型 100% 塞入 VRAM 運行，免受 PCIe 慢速交換所苦。
@@ -176,12 +177,10 @@ pause
 
 ##### ⚡ NVIDIA GPU 卸載效能調校精華 (Tuning Essence)：
 * **GPU 完全卸載 (`-ngl 999`)**：確保 100% 的模型張量全數塞在 VRAM 中運行。
-* **4-bit KV 快取壓縮 (`-ctk q4_0 -ctv q4_0`)**：壓縮 KV 快取，預留大上下文空間。
+* **4-bit KV 快取壓縮 (`-ctk q4_0 -ctv q4_0`)**：壓縮 KV 快取，預留大上下文空間.
 * **物理線程綁定 (`--threads 8`)**：由實體效能核心協同高頻調度。
 
-<details>
-<summary><b>📂 點此複製 BAT 啟動腳本 (Cerebellum GPU 全卸載版)</b></summary>
-
+##### 💻 BAT 啟動腳本範本 (Cerebellum GPU 全卸載版)：
 ```batch
 @echo off
 setlocal
@@ -251,6 +250,9 @@ pause
 ---
 
 ### 3. 🔵 純 CPU 與大記憶體優化版 (無 GPU / 大 RAM 主機)
+<details>
+<summary><b>📂 點此展開檢視 CPU 啟動腳本與參數優化</b></summary>
+
 * **物理優勢**：**系統記憶體 (RAM) 容量充沛且成本極低**：
   * **高上下文**：16GB RAM 可輕鬆開啟 32K 上下文，32GB 記憶體更可直接拉滿至 128K 而不崩潰。
   * **關鍵調整**：必須關閉 MTP 投機解碼（因為 CPU 上啟用 MTP 反而會因頻寬爭搶而變慢）。
@@ -262,9 +264,7 @@ pause
 * **鎖定 P-cores 實體效能核心 (`--threads 8`)**：避免背景任務被分發至 E-cores，大幅降低解碼延遲。
 * **記憶體 vs Prefill 速度權衡**：32GB RAM 開 128K context 不會 OOM，但 CPU 頻寬低，Prefill 首字延遲 (TTFT) 會很長。
 
-<details>
-<summary><b>📂 點此複製 BAT 啟動腳本 (CPU Optimized)</b></summary>
-
+##### 💻 BAT 啟動腳本範本 (CPU Optimized)：
 ```batch
 @echo off
 setlocal
@@ -358,11 +358,8 @@ if not exist "%MODEL%" (
 
 pause
 ```
-</details>
 
-<details>
-<summary><b>📖 展開檢視 CPU 參數深度解析</b></summary>
-
+##### 📖 CPU 參數深度解析：
 * **`-ngl 0`**：強制關閉所有 GPU offload，將運算全數留置在實體 CPU 與系統記憶體中。
 * **`-c 16384`**：預設設定為 16K 作為效能平衡點：
   * **主記憶體優勢**：CPU 運作的核心本錢在於系統主記憶體 (RAM) 相比 GPU 顯存 (VRAM) 便宜且容量巨大。在 CPU 模式下，完全不需要斤斤計較 VRAM OOM 溢位問題。

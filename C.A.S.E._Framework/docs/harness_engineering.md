@@ -220,7 +220,122 @@ def run_harnessed_task(task_folder):
 
 ---
 
-## 5. Summary of Optimization Benefits
+## 5. Concrete Technical Recipes (TypeScript Blueprints)
+
+To facilitate building C.A.S.E.-compliant runtimes, developers or agents can reference the following concrete TypeScript implementation blueprints inspired by best practices in deterministic orchestration:
+
+### 🧩 Recipe A: Composable Guardrails Combinator
+This pattern allows stacking multiple stateless checks (iteration caps, context size limits, command blacklist) cleanly:
+```typescript
+import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+
+export type GuardrailInput = { iterations: number; messages: ChatCompletionMessageParam[] };
+export type GuardrailResult = { ok: true } | { ok: false; reason: string };
+export type GuardrailFn = (input: GuardrailInput) => GuardrailResult;
+
+export function combineGuardrails(...fns: GuardrailFn[]): GuardrailFn {
+  return (input) => {
+    for (const check of fns) {
+      const result = check(input);
+      if (!result.ok) return result;
+    }
+    return { ok: true };
+  };
+}
+
+// Example individual guardrails
+export const maxIterations = (limit: number): GuardrailFn => 
+  ({ iterations }) => iterations >= limit ? { ok: false, reason: `Reached iteration limit (${limit})` } : { ok: true };
+
+export const maxMessages = (limit: number): GuardrailFn =>
+  ({ messages }) => messages.length > limit ? { ok: false, reason: `Context messages limit exceeded (${messages.length})` } : { ok: true };
+```
+
+### 💾 Recipe B: Sliding Context Trimmer
+This recipe prevents context explosion and attention drift by keeping core setup prompts locked in while sliding intermediate messages:
+```typescript
+export function trimContext(
+  messages: ChatCompletionMessageParam[],
+  maxMessages: number
+): ChatCompletionMessageParam[] {
+  if (messages.length <= maxMessages) return messages;
+
+  // Always lock and preserve: System Core [0] and Original User Directive [1]
+  const [system, user] = messages;
+  const intermediateTurns = messages.slice(2);
+  
+  // Truncate oldest turns, sliding only the latest conversational history
+  const trimmedTurns = intermediateTurns.slice(intermediateTurns.length - (maxMessages - 2));
+  
+  return [system, user, ...trimmedTurns];
+}
+```
+
+### 🔑 Recipe C: Programmatic Env State Interceptor
+This blueprint intercepts tool pipelines programmatically when the agent gets blocked by authentication or environmental hurdles (e.g. dependency locks, credential checks):
+```typescript
+export type InterceptorResult = { tool: string; args: any; result: string } | null;
+
+export async function runEnvironmentInterceptor(
+  currentUrlOrContext: string,
+  session: any
+): Promise<InterceptorResult> {
+  // If the agent navigates to a login redirect or hits a credential wall
+  if (currentUrlOrContext.includes("login") || currentUrlOrContext.includes("auth-required")) {
+    console.log("[Harness] Auth boundary detected — resolving programmatically...");
+    
+    // Inject deterministic session credentials securely without showing them to LLM prompts
+    await session.fill("input[name='acct']", process.env.LOCAL_HARNESS_USER);
+    await session.fill("input[name='pw']", process.env.LOCAL_HARNESS_PASS);
+    await session.click("input[type='submit']");
+    
+    return {
+      tool: "harness_auto_login",
+      args: {},
+      result: "Harness automatically bypassed authentication and successfully logged in."
+    };
+  }
+  return null;
+}
+```
+
+### 🛡️ Recipe D: Tool Execution Hooks & Trace Verification
+Instead of relying on natural language evaluation, the harness binds programmatic callback hooks on tool execution to collect trace metadata and verify outputs:
+```typescript
+export type ToolHooks = {
+  onArtifactWritten?: (filePath: string, contentHash: string) => void;
+};
+
+// Bind hooks directly into tool actions
+export function createTools(session: any, hooks?: ToolHooks) {
+  return [
+    {
+      name: "write_artifact",
+      execute: async ({ path, content }) => {
+        const result = await session.writeFile(path, content);
+        if (hooks?.onArtifactWritten) {
+          hooks.onArtifactWritten(path, calculateHash(content));
+        }
+        return result;
+      }
+    }
+  ];
+}
+
+// Verify execution trace at review phase
+export function verifyTraceLog(actionTrace: any[], expectedFiles: string[]): boolean {
+  // Inspect action trace log programmatically (L0 Verification)
+  const writtenFiles = actionTrace
+    .filter(event => event.tool === "write_artifact")
+    .map(event => event.args.path);
+    
+  return expectedFiles.every(file => writtenFiles.includes(file));
+}
+```
+
+---
+
+## 6. Summary of Optimization Benefits
 
 Integrating **Harness Engineering** into the **C.A.S.E. Framework** yields immense practical benefits for development teams operating in resource-constrained local environments:
 

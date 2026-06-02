@@ -276,6 +276,20 @@ pause
     * **64GB+ RAM**：可輕鬆運行 27B 或更大型模型，並無痛開啟 **128K 以上** 的超巨型上下文。
 * **⚠️ Prefill 效能權衡提醒 (核心 Trade-off)**：雖然 32GB RAM 就能輕鬆吞下 128K 的超大上下文而不會崩潰，但**由於 CPU 記憶體頻寬遠不及 GPU 顯存，Prefill 階段 (提示詞預評估 / 載入大文字庫) 的速度會非常緩慢**。這意味著開滿 128K 時的首字生成延遲 (Time to First Token, TTFT) 會明顯增加。若您的應用場景（例如大型代碼庫重構、長文本合約分析）著重在「一次性讀入巨大上下文且不介意首字等待時間」，那麼把 CPU 版本的 `-c` 直接開滿 128K 將會是您最強大的智商武器。
 * **`--threads 8` & `--threads-batch 12`**：計算線程強制派發至主機 CPU 的 8 顆實體 P-cores（Performance cores），避免背景計算任務被派發到 E-cores（Efficient cores）或超線程中而大幅拉高生成延遲。
+* **⚠️ 避免在 CPU 啟用 MTP 投機解碼 (Speculative Decoding)**：雖然 `llama.cpp` 技術上支援在 CPU 模式下配置 MTP，但**實測結果證實，在純 CPU 模式下啟用 MTP 投機解碼並不能達到提速效果**。由於 CPU 記憶體頻寬限制，額外評估 Draft heads 的計算開銷與頻寬爭搶反而會拖慢解碼速率。因此 CPU 專用啟動檔中已完全移除投機解碼參數，維持純粹的標準解碼路徑。
+
+---
+
+### 🧠 極致玩家推薦：超強混合精度壓縮 MoE 模型 — Cerebellum
+如果您是追求技術極限的玩家，在實體記憶體有限的消費級硬體下，我們強烈推薦您嘗試這款採用特殊敏感度引導壓縮處理的頂級 MoE 模型：
+👉 [**deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF (Hugging Face)**](https://huggingface.co/deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF)
+
+#### 🌟 核心特色解析：
+* **極致瘦身 (12 GB GGUF)**：原版 Qwen3.6-35B-A3B 是一款搭載 **35B 總參數 (每個 Token 僅啟用 3B 參數)** 的 SSM + MoE 混合架構模型。Cerebellum 透過**張量敏感度評估 (Sensitivity-guided mixed-precision)** 進行深度手術，套用了 400 個張量層級的精細 Override（將不敏感張量 demote 至 Q2_K，保留高敏感張量在 Q3_K_M 或 F32），最終將模型壓縮至僅 **12 GB (2.73 BPW)**。
+* **不減智商的黑科技**：實測表明，Cerebellum v1 版在 ARC-Challenge 達到了 **94.8%**、HumanEval 達到了 **75.0%**，其視覺能力與原版 Q3_K_M (16 GB) 完全一致，甚至因為 imatrix 導引量化在 MoE 門控張量上帶來了正向的正規化效果，部分表現更優。
+* **硬體友善度爆表**：僅需 12 GB 記憶體，因此不論是在 16GB VRAM 的消費級顯示卡（尚能留有空間供 Context 緩衝與 Vision Projector 載入），還是在 16GB/32GB RAM 的 CPU 主機上，都能以非常驚人的速度流暢玩轉！
+
+*(若要啟用視覺多模態輸入，請至該 Repo 下載 `mmproj-F16.gguf` 投影器並透過 `--mmproj` 載入即可。)*
 
 ---
 

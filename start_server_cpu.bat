@@ -4,6 +4,8 @@ title Llama.cpp CPU Server [Unified CPU Performance Tuning]
 
 :: ====================================================================
 :: [Configuration Paths] Please modify the paths below to match your system.
+:: Recommended model for hardware-constrained players:
+:: Qwen3.6-35B-A3B-Cerebellum-GGUF (12GB sensitivity-guided MoE)
 :: ====================================================================
 set LLAMA_EXE=D:\MyProject\llama\llama-server.exe
 set MODEL=D:\MyProject\llama\Qwopus3.6-7B-MTP-IQ3_M.gguf
@@ -30,6 +32,9 @@ echo ========================================================
 ::    If you accept slower prefill times, feel free to adjust CTX_SIZE above to 131072 to unlock maximum capacity.
 :: 3. threads 8: Binds thread pool directly to P-cores to prevent scheduling onto E-cores or hyperthreads.
 :: 4. prio 2: High Priority in Windows to prevent background OS interrupts.
+:: 5. Note on MTP (Speculative Decoding) on CPU: While llama.cpp supports MTP on CPU, testing shows
+::    that enabling MTP does NOT speed up CPU inference. The draft head evaluation overhead and memory
+::    bandwidth contention actually slow down decoding. Thus, MTP parameters are omitted here.
 
 "%LLAMA_EXE%" ^
   -m "%MODEL%" ^

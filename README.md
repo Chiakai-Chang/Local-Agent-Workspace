@@ -361,23 +361,12 @@ pause
 <details>
 <summary><b>📦 展開檢視運算引擎與模型權重下載指引 (Llama.cpp & Models Download)</b></summary>
 
-#### 1. 下載並安裝 Llama.cpp 官方版 (推薦：使用內附一鍵更新腳本)
-本專案已在根目錄內附帶了 **「Windows 一鍵自動更新/升級腳本」** (`run-update.bat` 與 `update-llama-cpp.ps1`)，能全自動處理繁瑣的下載與合併工作：
-* **腳本特色**：
-  * **安全偵測**：自動檢測本機 `llama-server.exe` 進程是否仍在執行，防範檔案被鎖定而更新失敗。
-  * **CUDA 自適應**：全自動檢測您電腦的 CUDA 驅動版本，並從 GitHub 釋出清單中精準篩選下載最穩定/最高支援的 `cu` 版本（免去手動查閱之苦）。
-  * **雙檔合一**：自動下載 `llama-bin` 主程式與 `cudart` 依賴包，全自動解壓縮並無痛合併至目標資料夾。
-* **⚠️ 首次使用必看（注意路徑調整）**：
-  * 使用前，請務必用文字編輯器開啟根目錄的 **`update-llama-cpp.ps1`**，將第 6 行的 **`$TargetDir = "D:\MyProject\llama"`** 修改為您本機實際要安裝 `llama.cpp` 的資料夾路徑！
-  * 修改後，只需雙擊根目錄的 **`run-update.bat`** 即可在 30 秒內全自動下載最新官方版本！
-
----
-
-##### 💡 備用方案：手動下載與安裝說明
-若您偏好手動安裝，請前往 [Llama.cpp Releases](https://github.com/ggml-org/llama.cpp/releases) 同時下載以下兩個 `.zip` 包，並解壓縮至同一個目標資料夾中（例如 `C:\llama.cpp`）：
-1. **主程式：** `llama-b...-bin-win-cuda-cu12.4-x64.zip` (強烈建議尋找 cu12.4 版本)
-2. **CUDA 依賴包：** `cudart-llama-bin-win-cu12.4-x64.zip`
-解壓後確保 `llama-server.exe` 旁邊有 `.dll` 依賴檔即可。
+#### 1. 下載並安裝 Llama.cpp 官方版 (推薦一鍵自動更新)
+* **⚡ 推薦一鍵自動更新**：雙擊根目錄的 `run-update.bat` 即可全自動下載最新版並完成解壓合併。
+  * ⚠️ **首次使用**：請先以文字編輯器開啟 `update-llama-cpp.ps1`，將第 6 行的 `$TargetDir = "D:\MyProject\llama"` 修改為您本機實際要安裝的資料夾路徑！
+* **📦 備用手動下載**：前往 [Llama.cpp Releases](https://github.com/ggml-org/llama.cpp/releases) 下載以下雙檔解壓至同一個目錄：
+  1. **推論引擎**：`llama-b...-bin-win-cuda-cu12.4-x64.zip` (推薦 cu12.4 版本)
+  2. **運行依賴**：`cudart-llama-bin-win-cu12.4-x64.zip`
 
 #### 2. 推薦模型權重下載連結：
 * **🔥 NVIDIA 首選：[GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF (15.3 GB)](https://huggingface.co/mradermacher/GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF)**

@@ -3,144 +3,49 @@
 > [!IMPORTANT]
 > **個人立場聲明：** 本專案僅為個人技術研究分享，所有內容與參數調校均基於公開開源數據。專案內容不代表任何機關立場，亦不涉及任何公務機敏資料。
 
-### 開發者本地 AI 部署指南：Llama.cpp 極致性能壓榨與 Agent 銜接
+### 本地 AI 極致壓榨與開發規範雙軌指南 (Hardware & Software Dual-Track Guide)
 
-本專案旨在協助開發者在本地環境快速部署高效能大語言模型（LLM），解決雲端 API 的隱私疑慮、頻繁審查限制以及長文本成本。透過 **Llama.cpp** 與精準的參數調校，在有限硬體資源下榨出最大 Context 空間與極致推論速度。
+本專案提供兩大獨立且可平行參考的本地 AI 實戰維度：
+
+```mermaid
+graph TD
+    A["本地 AI 開發實戰專案 (Local-Agent-Workspace)"] --> B["🟢 軌道一：硬體選型與算力壓榨 (Hardware Track)"]
+    A --> C["🔵 軌道二：軟體框架與 AI 規範 (Software Track)"]
+    B --> B1["選擇硬體平台 -> 複製配置啟動本地 Server"]
+    C --> C1["一鍵植入 C.A.S.E 規則手冊 -> AI Agent 自動建立專案規範"]
+```
 
 ---
 
-## ⚡ 30 秒硬體與平台快速選取看板 (Dashboard)
+## 🟢 軌道一：硬體選型與本機算力極致壓榨 (Hardware Track)
 
-請依據您的本機硬體配置，直接選用最合適的啟動腳本與推薦模型：
+為防範不同硬體平台的使用者因 VRAM 限制遭遇崩潰，我們提供以下最佳化的啟動腳本範本。您可以直接複製對應的配置，建立您的本機 `.bat` 啟動檔：
 
-| 平台 / 硬體環境 (Platform) | 核心推薦模型 (Recommended Model) | 檔案大小 (Size) | 推理優化技術 (Inference Tech) | 啟動批次檔 (BAT Script) |
+### 📊 本地算力平台快速選取看板
+| 硬體環境 (Hardware Platform) | 核心推薦模型 (Recommended Model) | 檔案大小 (Size) | 推理效能 (Inference Performance) | 啟動設定說明 (BAT Setup) |
 | :--- | :--- | :--- | :--- | :--- |
-| **🟢 NVIDIA 高階卡 (20GB VRAM)** | GRM-2.6-Opus-Heretic 27B | 15.3 GB | MTP 投機解碼 (~49 T/s) | [`start_server_nvidia.bat`](start_server_nvidia.bat) |
-| **🟡 NVIDIA 中階卡 (16GB VRAM)** | Qwopus3.6-27B-v2 | 15.4 GB | MTP 投機解碼 (~44 T/s) | [`start_server_nvidia_mtp.bat`](start_server_nvidia_mtp.bat) |
-| **🔵 純 CPU / 大 RAM (32GB+)** | Qwen3.6-35B-A3B-Cerebellum | **12 GB** | SSM+MoE 混合線性推理 | [`start_server_cpu.bat`](start_server_cpu.bat) |
-
----
-
-## 🚀 3 分鐘快速上手 (將 C.A.S.E 規範一鍵植入任何 AI 專案)
-
-<details>
-<summary><b>1️⃣ 第一步：一鍵下載 C.A.S.E. Agent 規則手冊 (CASE_framework_for_agents.md)</b></summary>
-
-請在您的開發專案根目錄下，開啟終端機並執行以下指令下載唯讀規則檔：
-* **💻 Linux / macOS / Git Bash (cURL)**:
-  ```bash
-  curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md -o CASE_framework_for_agents.md
-  ```
-* **💻 Windows (PowerShell)**:
-  ```powershell
-  Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
-  ```
-</details>
-
-<details>
-<summary><b>2️⃣ 第二步：給您的 AI Agent 貼上引導 Prompt</b></summary>
-
-啟動您的 AI Agent (如 `Claude Code`、`Codex`、`Antigravity CLI`、`Pi`，或是 `Cursor` 等），將下載好的 `CASE_framework_for_agents.md` 文件作為參考（例如在 Cursor 中使用 `@`），並輸入以下 Prompt：
-
-> 「請閱讀我專案中的 [CASE_framework_for_agents.md](CASE_framework_for_agents.md) 文件。閱讀後，請分析我目前的專案結構，規劃如何以最合適的方式為本專案建立 C.A.S.E 物理目錄結構（包含 Constitution、Roadmap、Task_Queue 任務資料夾），並將此執行期規則妥善整合寫入您的長效記憶配置中（例如 `CLAUDE.md`、`.cursorrules`、`gemini.md` 或 `memory.md` 等對應位置）。在建立目錄與寫入配置前，請先向我報告您的規劃並取得我的同意。」
-</details>
-
-<details>
-<summary><b>3️⃣ 第三步：檢閱並同意 AI 的自動配置</b></summary>
-
-AI Agent 讀取 Prompt 後，將會**自己動手**完成：
-1. 分析您目前的程式語言與專案結構。
-2. 自動建立 `00_Constitution/`、`01_Roadmap/` 與 `02_Task_Queue/` 等實體目錄。
-3. 自動將 C.A.S.E. 執行期規則妥善整合寫入到您的本機長效記憶配置中。
-
-您只需輸入同意，AI 就會自己幫您全部設定妥當！安全、乾淨且優雅！
-
-👉 **[進入詳細 C.A.S.E. 框架設計說明](C.A.S.E._Framework/README.md)**
-</details>
-
----
-
-## 🧩 CK 的 AI 開發生態系 (The Ecosystem)
-
-我們提倡 **「Hybrid AI (雲端架構師 + 本地執行者)」** 的高效能高 CP 值開發流：
-* **雲端前沿模型（Claude/Gemini/GPT）**：擔任 **「架構師」**，處理高智力規劃、大方向架構與關聯研究。
-* **本地生態系**：擔任 **「執行者與稽核員」**，進行極度消耗 Token 的「依序執行、代碼撰寫、TDD 測試與全案掃描」。
-
-<p align="center">
-  <img src="assets/ecosystem.svg" alt="CK's AI Development Ecosystem" width="100%">
-</p>
-
-<details>
-<summary><b>🔍 展開檢視開發生態系三大核心 Tier</b></summary>
-
-* 🧠 **[Tier 1: 核心大腦 (Local-Agent-Workspace)](https://github.com/Chiakai-Chang/Local-Agent-Workspace)：** 建立極致優化的 Llama.cpp 本地伺服器。作為承接雲端架構師規劃後，能無情消耗 Token 進行打底運算的強大本地算力引擎。（📍 **您目前在這裡**）
-* 🤖 **[Tier 2: 代理工程師 (CK's Pi Code Agent Harness)](https://github.com/Chiakai-Chang/CKs_PI_Code_Agent_Harness)：** 混合開發的指揮樞紐。負責接收雲端模型開出的「任務菜譜與 SOP」，在本地端化身為懂工程紀律的虛擬同事，按部就班地切換目標檔案、撰寫程式碼並嚴格執行 TDD 測試。
-* 👁️ **[Tier 3: 全域修復雷達 (OmniHeal)](https://github.com/Chiakai-Chang/OmniHeal)：** 零安裝的全局專案健檢工具。全案掃描是最耗 Token 的環節，直接交由本工具在本地一鍵免費深漸，自動抓出技術債並開立精準的修復處方箋，讓雲端模型或代理工程師能針對性地進行修復。
-
-#### 🏅 延伸工具：知識資產提煉
-📝 **[InfoGold - 經歷提煉與知識資產增值](https://github.com/Chiakai-Chang/InfoGold)**：扮演「聯金助理」的角色，將會議逐字稿、工作手稿、閱讀筆記等原始文字資產，透過四部曲系統化增值：**洗礦→精煉金磚→圓桌思辨→鑄造策略貨幣**，讓「曾經發生過的事」持續產生知識複利。
-</details>
-
-<details>
-<summary><b>💎 展開檢視本地部署的四大優勢 (隱私、高上下文、免安全中斷、零Token成本)</b></summary>
-
-* **🔒 物理性資料隔離：** 程式碼與專案架構保留在本地，特別適合高度重視資料邊界、數位鑑識與 OSINT 封閉分析等專案。
-* **🧠 高上下文容量：** 透過優化的 KV 快取壓縮技術，在 20GB VRAM 下依然可支援至 **128K+ Context**。
-* **🔓 任務連續性：** 選擇特徵消融（Abliterated）模型，可避免 Agent 在執行特定分析腳本時因安全機制而強行中斷。
-* **💰 成本效益：** 適合頻繁開發與自動化迭代，無懼雲端 API 昂貴的 Token 費用。
-</details>
-
----
-
-## 🛠️ 第一步：運算引擎與權重下載
-
-為了維持頁面簡潔，詳細的下載與配置指南已整理至折疊卡片中：
-
-<details>
-<summary><b>📦 1. 下載並安裝 Llama.cpp 官方版 (雙檔案合併解壓縮)</b></summary>
-
-請至 [Llama.cpp Releases](https://github.com/ggml-org/llama.cpp/releases) 下載。必須同時下載兩個檔案並解壓縮至同一個資料夾：
-1. **主程式：** `llama-b...-bin-win-cuda-cu12.4-x64.zip` (尋找標註 win-cuda-cu12.4 的版本)
-2. **CUDA 依賴包：** `cudart-llama-bin-win-cu12.4-x64.zip`
-
-💡 **強烈建議選擇 `cu12.4` 版本**以確保最高推論穩定性。解壓至例如 `C:\llama.cpp`，確保 `llama-server.exe` 旁邊有 `.dll` 依賴檔即可。
-</details>
-
-<details>
-<summary><b>📦 2. 下載推薦模型權重 (MTP 自我推測性能怪獸 & 頂級 MoE)</b></summary>
-
-* **🔥 NVIDIA 首選：GRM-2.6-Opus-Heretic-Abliterated-MTP-IQ4_XS (15.3 GB)**
-  * **特點**：融合極強的 GRM 推理邏輯與 Claude Opus 思考風格，完全移除安全限制，執行 Agent 指令最穩定。
-  * **實測效能**：平均推論速度 **`49.12 tokens/sec`**，MTP 預測草案接受率高達 **`69.58%`**！
-  * **[下載連結](https://huggingface.co/mradermacher/GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF)**
-* **⚡ NVIDIA 中階選：Qwopus3.6-27B-v2-MTP-IQ4_XS (15.4 GB)**
-  * **特點**：專為寫程式與複雜架構分析優化的 27B 推理巨獸，本地最強代碼生產力機器。
-  * **實測效能**：平均推論速度 **`44.14 tokens/sec`** (峰值可達 **`50.79 T/s`**)。
-  * **[下載連結](https://huggingface.co/Jackrong/Qwopus3.6-27B-v2-MTP-GGUF/)**
-* **🧠 CPU 首選：Qwen3.6-35B-A3B-Cerebellum (12 GB)**
-  * **特點**：SSM+Attention+MoE 混合架構，活化參數僅 3B。原生支援 262K 上下文，Cerebellum 敏感度引導壓縮至 12GB，實體記憶體充足下是 CPU 智商與效能的極限選擇。
-  * **[下載連結](https://huggingface.co/deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF)**
-
-*(科普提示：`IQ` 量化搭配 `i1` 矩陣技術，能在相同檔案下保留更多智商。檔案大小與 VRAM 之間務必保留 4~5GB 以上作為 Context 運算空間。)*
-</details>
-
----
-
-## 🚀 第二步：一鍵啟動伺服器 (Server Startup Scripts)
+| **高階顯卡 (20GB+ VRAM)** | GRM-2.6-Opus-Heretic 27B | 15.3 GB | MTP 投機解碼 (~49 T/s) | [▶️ 檢視配置](#-高階顯卡-mtp-極速版-rtx-a4500-20gb-vram-甜蜜點) |
+| **中階顯卡 (16GB VRAM)** | Qwopus3.6-27B-v2 | 15.4 GB | MTP 投機解碼 (~44 T/s) | [▶️ 檢視配置](#-中階顯卡-mtp-性能版-16gb-vram-消費級環境) |
+| **純 CPU / 大 RAM (32GB+)** | Qwen3.6-35B-A3B-Cerebellum | **12 GB** | MoE+SSM 混合線性推理 | [▶️ 檢視配置](#-純-cpu-與大記憶體優化版-無-gpu--大-ram-主機) |
 
 > [!IMPORTANT]
-> **⚠️ 必做步驟：請務必開啟並修改批次檔中的路徑！**
-> 本專案提供之 `.bat` 啟動檔中，`LLAMA_EXE` 與 `MODEL` 路徑預設為開發環境預設路徑（如 `D:\MyProject\...`）。**在您首次執行前，請務必用文字編輯器打開 `.bat` 檔案，將這兩個變數修改為您本機的實際路徑！**
-> * 為了防範路徑錯誤造成的閃退，我們已在所有 `.bat` 中內建了 **「檔案路徑自動校驗機制」**，若路徑未修改或檔案不存在，啟動時將會在 Console 顯示錯誤警告並自動暫停（Pause），便於您排查！
+> **⚠️ 必做步驟：建立本機啟動檔時請務必修改路徑！**
+> 下列腳本範本中，`LLAMA_EXE` 與 `MODEL` 預設為開發環境路徑（如 `D:\MyProject\...`）。**在您首次執行前，請務必將這兩個變數修改為您本機的實際路徑！**
+> * 💡 為了防範閃退，腳本中已內建了 **「路徑自動校驗機制」**，若路徑未修改或檔案不存在，啟動時將會在 Console 顯示錯誤警告並自動暫停（Pause），便於您排查！
 
-> [!WARNING]
-> **💡 批次檔語系相容性注意**：
-> 舊版 batch 檔常因包含中文括號 `(` 與 `)` 導致 Windows CMD 解析錯誤閃退。本專案啟動檔已全面改為 **100% 純英文語法與括號**，徹底消除任何語系 Code Page 閃退問題。
+---
 
-### 🟢 A. GRM-Opus MTP 啟動檔 ([`start_server_nvidia.bat`](start_server_nvidia.bat))
-適合配置 20GB VRAM (如 RTX A4500) 之高階 NVIDIA 環境，啟用最高效能推測解碼：
+### 1. 🟢 高階顯卡 MTP 極速版 (RTX A4500 20GB VRAM 甜蜜點)
+* **核心優勢**：透過 `llama.cpp` 內建預測頭（MTP）實現 **5 倍推理速度提升**，配合 4-bit KV Cache 壓縮技術，實現 **128K** 超大 Context 且完全不溢位（OOM）。
+* **適合模型**：`GRM-2.6-Opus-Heretic-Abliterated-MTP-IQ4_XS` (15.3 GB)
+
+##### ⚡ NVIDIA MTP 效能調校精華 (Tuning Essence)：
+* **MTP 自我投機解碼 (`--spec-type draft-mtp`)**：免掛載外部小模型，推理速度狂飆 4x-5x（達 49 T/s）。
+* **4-bit KV 快取壓縮 (`-ctk q4_0 -ctv q4_0`)**：壓縮 KV Cache，節省 72% VRAM，大上下文不溢位。
+* **P-cores 綁定 (`--threads 8`)**：鎖定 8 顆實體 Performance Cores 以獲取最低延遲。
+
 <details>
-<summary><b>點此展開查看批次檔代碼與優化參數說明</b></summary>
+<summary><b>📂 點此複製 BAT 啟動腳本 (GRM-Opus MTP)</b></summary>
 
 ```batch
 @echo off
@@ -215,8 +120,11 @@ if not exist "%MODEL%" (
 
 pause
 ```
+</details>
 
-#### 🛠️ 終極性能參數解析：
+<details>
+<summary><b>📖 展開檢視 NVIDIA 參數深度解析</b></summary>
+
 * **`--spec-type draft-mtp` & `--spec-draft-ngl all`**：自動載入 GGUF 內建預測頭，並將 base model 與 draft heads 全數塞入 VRAM 進行 GPU 滿載加速。
 * **`-ctk q4_0 -ctv q4_0` 與 `-ctkd q4_0 -ctvd q4_0`**：將 KV Cache 進行 4-bit 量化壓縮，節省 72% VRAM！在 128K Context 時 KV 快取僅佔 ~200MB，徹底防範 VRAM 溢出。
 * **`--kv-unified`**：令主模型與預測頭共享 KV Buffer 快取以節省記憶體。
@@ -225,10 +133,14 @@ pause
 * **`--reasoning-format deepseek`**：自動提取模型推理時產生的 `<think>` 思考流，完美對接 Open WebUI 等折疊式思維泡泡 UI。
 </details>
 
-### ⚡ B. Qwopus 27B MTP 啟動檔 ([`start_server_nvidia_mtp.bat`](start_server_nvidia_mtp.bat))
-適合搭配 `Qwopus3.6-27B-v2-MTP` 權重，提供中階 NVIDIA 環境最優寫程式與推理性能：
+---
+
+### 2. 🟡 中階顯卡 MTP 性能版 (16GB VRAM 消費級環境)
+* **核心優勢**：專為 16GB VRAM 顯示卡量身打造，在極小顯示記憶體開銷下，依然提供自我投機解碼加速（~44 tokens/sec），預留空間供 Context 與多輪對話使用。
+* **適合模型**：`Qwopus3.6-27B-v2-MTP-IQ4_XS` (15.4 GB)
+
 <details>
-<summary><b>點此展開查看批次檔代碼</b></summary>
+<summary><b>📂 點此複製 BAT 啟動腳本 (Qwopus MTP)</b></summary>
 
 ```batch
 @echo off
@@ -305,10 +217,19 @@ pause
 ```
 </details>
 
-### 🔵 C. 純 CPU 平台專用啟動檔 ([`start_server_cpu.bat`](start_server_cpu.bat))
-專為無 NVIDIA GPU 環境或超巨型長上下文優化。受益於大容量 RAM（如 32GB/64GB），能無痛加載大模型並直推至 128K 超大上下文而不擔心 VRAM OOM：
+---
+
+### 3. 🔵 純 CPU 與大記憶體優化版 (無 GPU / 大 RAM 主機)
+* **核心優勢**：**主記憶體 (RAM) 容量充足為最大優勢**（16GB RAM 可開 32K，32GB 可開滿 128K！）。**此平台必須關閉 MTP（投機解碼在 CPU 上會拖慢速度）**，且 prefill（提示詞預評估）速度會較為緩慢，但對話解碼速率穩定。
+* **適合模型**：首選 `Qwen3.6-35B-A3B-Cerebellum` (12 GB MoE 混合模型，活化參數僅 3B)，備用單體 `Qwopus3.6-7B-IQ4_XS`。
+
+##### 🛠️ CPU 效能調校精華 (Tuning Essence)：
+* **關閉 GPU (`-ngl 0`)**：強制算力全部保留在實體 CPU與系統記憶體中。
+* **鎖定 P-cores 實體效能核心 (`--threads 8`)**：避免背景任務被分發至 E-cores，大幅降低解碼延遲。
+* **記憶體 vs Prefill 速度權衡**：32GB RAM 開 128K context 不會 OOM，但 CPU 頻寬低，Prefill 首字延遲 (TTFT) 會很長。
+
 <details>
-<summary><b>點此展開查看批次檔代碼與優化參數說明</b></summary>
+<summary><b>📂 點此複製 BAT 啟動腳本 (CPU Optimized)</b></summary>
 
 ```batch
 @echo off
@@ -405,45 +326,93 @@ pause
 ```
 </details>
 
-#### 🛠️ CPU 極致優化解析：
-* **`-ngl 0`**：強制關閉所有 GPU offload，運算全數留置在 CPU 與系統記憶體中。
-* **`-c 16384`**：預設為 16K 平衡點。CPU 運行的核心優勢在於**主記憶體 (RAM) 相比 GPU 顯存便宜且容量巨大**。您完全不需要擔心 GPU VRAM OOM 崩潰的問題。
-  * **💡 RAM 與 Context 的對照指南**：
-    * **16GB RAM**：可將 `-c` 輕鬆推至 **32K**。
-    * **32GB RAM**：不僅能以高精度模型 (如 `IQ4_XS` 等級) 運作，還可**直接將 `-c` 開滿 128K**，這在多數 20GB VRAM 的 GPU 上是極難實現的。
-    * **64GB+ RAM**：可輕鬆運行 27B/35B 級模型，並開啟 **128K 以上** 的超巨型上下文。
-* **⚠️ Prefill 效能權衡提醒 (核心 Trade-off)**：雖然 32GB RAM 就能吞下 128K 大上下文，但**由於 CPU 記憶體頻寬遠不及 GPU 顯存，Prefill 階段 (提示詞載入評估) 速度會非常緩慢**。這意味著開滿 128K 時的首字生成時間 (TTFT) 會拉長。若您的場景（例如大型代碼庫重構、長文本分析）著重在「一次性讀入巨大上下文且不介意首字等待時間」，那麼在 CPU 將 `-c` 直接開滿 128K 將會是您最強大的智商武器。
+<details>
+<summary><b>📖 展開檢視 CPU 參數深度解析</b></summary>
+
+* **`-ngl 0`**：強制關閉所有 GPU offload，將運算全數留置在實體 CPU 與系統記憶體中。
+* **`-c 16384`**：預設設定為 16K 作為效能平衡點。**CPU 運作的核心本錢在於系統主記憶體 (RAM) 相比 GPU 顯存 (VRAM) 便宜且容量巨大**。在 CPU 模式下，您完全不需要像在 GPU 一樣斤斤計較 VRAM 溢位 (OOM) 的問題。
+  * **💡 RAM 容量與開超大 Context 的對照指南**：
+    * **16GB RAM**：足夠載入 7B 模型並將 `-c` 輕鬆推至 **32K** 上下文。
+    * **32GB RAM**：不僅能以高精度模型 (如 `IQ4_XS` 等級) 運作，還可以**直接將 `-c` 上下文開滿 128K (131072)**，這在 20GB VRAM 的 GPU 上是極難實現的。
+    * **64GB+ RAM**：可輕鬆運行 27B 或更大型模型，並無痛開啟 **128K 以上** 的超巨型上下文。
+* **⚠️ Prefill 效能權衡提醒 (核心 Trade-off)**：雖然 32GB RAM 就能輕鬆吞下 128K 的超大上下文而不會崩潰，但**由於 CPU 記憶體頻寬遠不及 GPU 顯存，Prefill 階段 (提示詞預評估 / 載入大文字庫) 的速度會非常緩慢**。這意味著開滿 128K 時的首字生成延遲 (Time to First Token, TTFT) 會明顯增加。若您的應用場景（例如大型代碼庫重構、長文本合約分析）著重在「一次性讀入巨大上下文且不介意首字等待時間」，那麼把 CPU 版本的 `-c` 直接開滿 128K 將會是您最強大的智商武器。
 * **`--threads 8` & `--threads-batch 12`**：計算線程強制派發至主機 CPU 的 8 顆實體 P-cores（Performance cores），避免背景計算任務被派發到 E-cores（Efficient cores）或超線程中而大幅拉高生成延遲。
 * **⚠️ 避免在 CPU 啟用 MTP 投機解碼 (Speculative Decoding)**：雖然 `llama.cpp` 技術上支援在 CPU 模式下配置 MTP，但**實測結果證實，在純 CPU 模式下啟用 MTP 投機解碼並不能達到提速效果**。由於 CPU 記憶體頻寬限制，額外評估 Draft heads 的計算開銷與頻寬爭搶反而會拖慢解碼速率。因此 CPU 專用啟動檔中已完全移除投機解碼參數，維持純粹的標準解碼路徑。
+</details>
+
+<details>
+<summary><b>📦 展開檢視運算引擎與模型權重下載指引 (Llama.cpp & Models Download)</b></summary>
+
+#### 1. 下載並安裝 Llama.cpp 官方版 (雙檔案合併解壓縮)
+請至 [Llama.cpp Releases](https://github.com/ggml-org/llama.cpp/releases) 下載。必須同時下載兩個檔案並解壓縮至同一個資料夾：
+1. **主程式：** `llama-b...-bin-win-cuda-cu12.4-x64.zip` (尋找標註 win-cuda-cu12.4 的版本)
+2. **CUDA 依賴包：** `cudart-llama-bin-win-cu12.4-x64.zip`
+
+💡 **強烈建議選擇 `cu12.4` 版本**以確保最高推論穩定性。解壓至例如 `C:\llama.cpp`，確保 `llama-server.exe` 旁邊有 `.dll` 依賴檔即可。
+
+#### 2. 推薦模型權重下載連結：
+* **🔥 NVIDIA 首選：[GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF (15.3 GB)](https://huggingface.co/mradermacher/GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF)**
+* **⚡ NVIDIA 中階選：[Qwopus3.6-27B-v2-MTP-GGUF (15.4 GB)](https://huggingface.co/Jackrong/Qwopus3.6-27B-v2-MTP-GGUF/)**
+* **🧠 CPU 首選：[Qwen3.6-35B-A3B-Cerebellum-GGUF (12 GB MoE)](https://huggingface.co/deucebucket/Qwen3.6-35B-A3B-Cerebellum-GGUF)**
+</details>
 
 ---
 
-## 🤖 第三步：銜接自動化 Agent (Pi Coding Agent + Harness)
+## 🔵 軌道二：軟體框架與開發規範導入 (C.A.S.E. Framework)
 
-本地伺服器啟動完成後（預設運行於 `http://127.0.0.1:8080`），您就可以將其接入各類 Coding Agent。
+軌道二專注於 AI Agent 的工程紀律管束。我們提倡 **「Hybrid AI (雲端架構師 + 本地執行者)」** 的高 CP 值開發流：
+* **雲端前沿模型 (如 Claude/Gemini/GPT)**：擔任 **「架構師」**，處理高智力規劃、大方向架構與關聯研究。
+* **本地生態系 (如 Pi Agent + OmniHeal)**：擔任 **「執行者與稽核員」**，進行極度消耗 Token 的「依序執行、代碼撰寫、TDD 測試與全案掃描」。
 
-### 🌟 核心推薦：Pi Coding Agent + Harness 套件
-在本地實戰中，我們強烈建議使用更輕量、更具擴充性的 **Pi Coding Agent**，並搭配我們的專屬套件：
-👉 前往 [**CK's Pi Code Agent Harness**](https://github.com/Chiakai-Chang/CKs_PI_Code_Agent_Harness)
+<p align="center">
+  <img src="assets/ecosystem.svg" alt="CK's AI Development Ecosystem" width="100%">
+</p>
 
-**為什麼推薦這個組合？**
-1. **解決 Context 溢位：** 雲端 CLI 工具（如 Claude Code）無法精準控制本地端 auto-compact 觸發時機，容易造成本地 LLM 的 Context 溢出。Pi Agent 可以完美依照本機模型的限制設定。
+### 🌟 銜接自動化 Agent (Pi Coding Agent + Harness)
+本地伺服器啟動後（預設運行於 `http://127.0.0.1:8080`），您就可以將其接入各類 Coding Agent：
+👉 前往 [**CK's Pi Code Agent Harness (GitHub)**](https://github.com/Chiakai-Chang/CKs_PI_Code_Agent_Harness)
+
+**為什麼推薦此組合？**
+1. **解決 Context 溢位：** 雲端 CLI 工具（如 Claude Code）無法精準控制本地端 auto-compact 觸發時機。Pi Agent 可以完美依照本機模型的限制設定。
 2. **極致輕量：** 本地 GGUF 模型對於冗餘 Token 極度敏感。Harness 精選了核心 plugins 與 skills，能以最精簡的 prompt 格式發揮本地模型的最大智商。
 3. **無縫整合健康診斷：** 與 **OmniHeal** 工具完美串接，一鍵檢查專案技術債，再交由本地算力精準修復。
 
 *(若您仍需使用 Claude Code，只需在專案目錄下設定環境變數 `set ANTHROPIC_BASE_URL=http://127.0.0.1:8080`，並參考根目錄的 `start_local_claude.bat` 啟動。)*
 
+<details>
+<summary><b>🔍 展開檢視開發生態系三大核心 Tier 及延伸工具</b></summary>
+
+* 🧠 **[Tier 1: 核心大腦 (Local-Agent-Workspace)](https://github.com/Chiakai-Chang/Local-Agent-Workspace)：** 建立極致優化的 Llama.cpp 本地伺服器。作為承接雲端架構師規劃後，能無情消耗 Token 進行打底運算的強大本地算力引擎。（📍 **您目前在這裡**）
+* 🤖 **[Tier 2: 代理工程師 (CK's Pi Code Agent Harness)](https://github.com/Chiakai-Chang/CKs_PI_Code_Agent_Harness)：** 混合開發的指揮樞紐。負責接收雲端模型開出的「任務菜譜與 SOP」，在本地端化身為懂工程紀律的虛擬同事，按部就班地切換目標檔案、撰寫程式碼並嚴格執行 TDD 測試。
+* 👁️ **[Tier 3: 全域修復雷達 (OmniHeal)](https://github.com/Chiakai-Chang/OmniHeal)：** 零安裝的全局專案健檢工具。全案掃描是最耗 Token 的環節，直接交由本工具在本地一鍵免費深潛，自動抓出技術債並開立精準的修復處方箋，讓雲端模型或代理工程師能針對性地進行修復。
+
+#### 🏅 延伸工具：知識資產提煉
+📝 **[InfoGold - 經歷提煉與知識資產增值](https://github.com/Chiakai-Chang/InfoGold)**：扮演「煉金助理」的角色，將會議逐字稿、工作手稿、閱讀筆記等原始文字資產，透過四部曲系統化增值：**洗礦→精煉金磚→圓桌思辨→鑄造策略貨幣**，讓「曾經發生過的事」持續產生知識複利。
+</details>
+
+<details>
+<summary><b>💎 展開檢視本地部署的四大優勢 (隱私、高上下文、免安全中斷、零Token成本)</b></summary>
+
+* **🔒 物理性資料隔離：** 程式碼與專案架構保留在本地，特別適合高度重視資料邊界、數位鑑識與 OSINT 封閉分析等專案。
+* **🧠 高上下文容量：** 透過優化的 KV 快取壓縮技術，在 20GB VRAM 下依然可支援至 **128K+ Context**。
+* **🔓 任務連續性：** 選擇特徵消融（Abliterated）模型，可避免 Agent 在執行特定分析腳本時因安全機制而強行中斷。
+* **💰 成本效益：** 適合頻繁開發與自動化迭代，無懼雲端 API 昂貴的 Token 費用。
+</details>
+
 ---
 
 ## 🙏 參考先驅與開源致敬 (Prior Art & Acknowledgements)
 
-本專案的 **C.A.S.E 框架** 與 **Harness 控制座** 設計理念，深受 IBM Developer Advocate **Tejas Kumar** 於 **AI Engineer Europe 2026** 發表之經典專題演講所啟發。我們在此對先驅者的無私分享致以最誠摯的敬意：
+> **💡 開發歷程與觀念驗證說明：**
+> 本專案的 **C.A.S.E. 框架** 與 **Harness 控制座** 設計理念，最初是由作者在本地開發 AI Agent 的實戰過程中，為解決 Prompt 二次震盪與黑盒子模型失控而**獨立摸索、設計並成功實踐出來的成果**。
+>
+> 隨後，作者在觀摩技術社群時，驚喜地發現 **IBM Developer Advocate Tejas Kumar** 於 **AI Engineer Europe 2026** 發表之經典專題演講中，也**英雄所見略同地提出了極為相似的 Harness 控制座思維**！這極大地驗證了作者本地實踐方向的正確性。因此，作者迅速參考並整合了 IBM 的大廠工程規範，將其精髓納入本專案的文檔中。我們在此向同樣獨立推動此工程觀念的先驅者致以最誠摯的敬意：
 
 * **📺 經典演講影片**：[Harnesses in AI: A Deep Dive — Tejas Kumar, IBM (YouTube)](https://youtu.be/C_GG5g38vLU?si=NVt8LgZaIRPOO6-Z)
 * **💻 官方開源示範**：[TejasQ/agent-harness-demo (GitHub)](https://github.com/TejasQ)
 * **🐦 講者社群連結**：[@TejasKumar_ (X/Twitter)](https://x.com/TejasKumar_) | [@TejasQ (GitHub)](https://github.com/TejasQ)
 
-我們強烈推薦所有使用本生態系的開發者觀看該演講，以深入理解「不該過度依賴寫死 Prompt，而應透過 Harness 外部程式碼來管束黑盒子模型」的控制座工程核心思維。
+我們強烈推薦所有使用本生態系的開發者觀看該演講，這將能讓您雙重印證「不該過度依賴寫死 Prompt，而應透過 Harness 外部程式碼與規則來管束黑盒子模型」的控制座工程核心思維。
 
 ---
 

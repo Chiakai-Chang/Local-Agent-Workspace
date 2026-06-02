@@ -60,7 +60,7 @@ graph TD
 
 ## 3. Four Core Pillars of C.A.S.E. Harness Engineering
 
-To optimize the C.A.S.E. ecosystem, we implement four technical pillars derived from Tejas Kumar’s best practices.
+To optimize the C.A.S.E. ecosystem, we implement four core technical pillars independently developed by the author and validated by industry best practices.
 
 ### 🛡️ Pillar A: Trace-Based Verification (Catching Lies & Hallucinations)
 
@@ -233,7 +233,10 @@ Integrating **Harness Engineering** into the **C.A.S.E. Framework** yields immen
 
 ## 🙏 Citing Prior Art & Acknowledgements
 
-The Harness Engineering specifications integrated into the C.A.S.E. Framework are directly inspired by and adapted from the pioneering work of **Tejas Kumar** (IBM Developer Advocate) presented at **AI Engineer Europe 2026**. 
+> **💡 Developmental Sequence & Concept Validation:**
+> The **C.A.S.E. Framework** and **Harness Controller** engineering philosophies were originally designed, developed, and successfully practiced by the author in local AI Agent integration pipelines. 
+> 
+> Later, the author discovered that **Tejas Kumar (IBM Developer Advocate)** had independently formulated a strikingly similar engineering philosophy in his landmark presentation at **AI Engineer Europe 2026**. This served as a powerful validation of the author's independent discovery. The author subsequently incorporated IBM's structured specifications to enrich and adapt this project's specifications. We extend our deep gratitude to Tejas Kumar for formulating these concepts from first principles and helping solidify these practices across the industry:
 
 We highly recommend all engineers utilizing this repository to review the following resources for a deeper understanding:
 
@@ -244,7 +247,7 @@ We highly recommend all engineers utilizing this repository to review the follow
   - GitHub: [@TejasQ](https://github.com/TejasQ)
   - Personal Website: [tejaskumar.com](https://tejaskumar.com)
 
-We extend our deep gratitude to Tejas Kumar for formulating these concepts from first principles and showcasing how smart harness engineering can elevate lightweight, affordable models to rival the execution reliability of enterprise-tier black boxes.
+We extend our deep gratitude to Tejas Kumar for his outstanding advocacy of Harness Engineering, showcasing how programmatically constraining black-box models can programmatically elevate local AI agents.
 
 ---
 

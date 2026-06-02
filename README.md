@@ -22,11 +22,11 @@ graph TD
 為防範不同硬體平台的使用者因 VRAM 限制遭遇崩潰，我們提供以下最佳化的啟動腳本範本。您可以直接複製對應的配置，建立您的本機 `.bat` 啟動檔：
 
 ### 📊 本地算力平台快速選取看板
-| 硬體環境 (Hardware Platform) | 核心推薦模型 (Recommended Model) | 檔案大小 (Size) | 推理效能 (Inference Performance) | 啟動設定說明 (Setup Link) |
-| :--- | :--- | :--- | :--- | :--- |
-| **高階顯卡 (20GB+ VRAM)** | GRM-2.6-Opus 27B / Qwopus 27B | 15.3G / 15.4G | MTP 投機解碼 (~49 T/s) | [▶️ 檢視配置](#1-grm-opus--qwopus-mtp-20gb-vram-) |
-| **中階顯卡 (16GB VRAM)** | Qwen3.6-35B-A3B-Cerebellum | **12 GB** | **GPU 全卸載** MoE 線性推理 | [▶️ 檢視配置](#2-qwen36-cerebellum-gpu--16gb-vram-) |
-| **純 CPU / 大 RAM (32GB+)** | Qwen3.6-35B-A3B-Cerebellum | **12 GB** | MoE+SSM **純 CPU** 線性推理 | [▶️ 檢視配置](#3-cpu-moessm--32gb-ram-) |
+| 硬體環境 (Hardware Platform) | 核心推薦模型 (Recommended Model) | 檔案大小 (Size) | 推理效能 (Inference Performance) |
+| :--- | :--- | :--- | :--- |
+| **高階顯卡 (20GB+ VRAM)** | GRM-2.6-Opus 27B / Qwopus 27B | 15.3G / 15.4G | MTP 投機解碼 (~49 T/s) |
+| **中階顯卡 (16GB VRAM)** | Qwen3.6-35B-A3B-Cerebellum | **12 GB** | **GPU 全卸載** MoE 線性推理 |
+| **純 CPU / 大 RAM (32GB+)** | Qwen3.6-35B-A3B-Cerebellum | **12 GB** | MoE+SSM **純 CPU** 線性推理 |
 
 > [!IMPORTANT]
 > **⚠️ 必做步驟：建立本機啟動檔時請務必修改路徑！**

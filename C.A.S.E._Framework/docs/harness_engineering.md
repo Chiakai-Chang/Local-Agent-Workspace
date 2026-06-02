@@ -241,7 +241,7 @@ Integrating **Harness Engineering** into the **C.A.S.E. Framework** yields immen
 We highly recommend all engineers utilizing this repository to review the following resources for a deeper understanding:
 
 * **📺 Full Presentation (YouTube)**: [Harnesses in AI: A Deep Dive — Tejas Kumar, IBM](https://youtu.be/C_GG5g38vLU?si=NVt8LgZaIRPOO6-Z)
-* **💻 Open-Source Reference / Demo Repo**: [TejasQ/agent-harness-demo](https://github.com/TejasQ) (A lightweight browser agent using GPT-3.5 designed to showcase harness-level safety, guardrails, context compaction, programmatic authentication, and trace-based verification)
+* **💻 Open-Source Reference / Demo Repo**: [TejasQ/basically-ai-harness](https://github.com/TejasQ/basically-ai-harness) (A lightweight browser agent using GPT-3.5 designed to showcase harness-level safety, guardrails, context compaction, programmatic authentication, and trace-based verification)
 * **🐦 Connect with the Speaker**:
   - Twitter/X: [@TejasKumar_](https://x.com/TejasKumar_)
   - GitHub: [@TejasQ](https://github.com/TejasQ)

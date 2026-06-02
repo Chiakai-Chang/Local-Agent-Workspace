@@ -243,9 +243,17 @@ setlocal
 title Llama.cpp CPU Server [Unified CPU Performance Tuning]
 
 set LLAMA_EXE=D:\MyProject\llama\llama-server.exe
-set MODEL=D:\MyProject\llama\Qwopus3.6-7B-MTP-IQ3_M.gguf
-set CTX_SIZE=16384
 set PORT=8080
+set CTX_SIZE=16384
+
+:: --------------------------------------------------------------------
+:: [Model Selection] Uncomment the one you want to run.
+:: --------------------------------------------------------------------
+:: Option A: High-Precision 7B CPU Baseline (Recommended IQ4_XS for balanced speed/quality)
+set MODEL=D:\MyProject\llama\Qwopus3.6-7B-IQ4_XS.gguf
+
+:: Option B: Extreme MoE Player Choice (Qwen3.6-35B-A3B-Cerebellum 12GB GGUF)
+:: set MODEL=D:\MyProject\llama\Qwen3.6-35B-A3B-Cerebellum.gguf
 
 "%LLAMA_EXE%" ^
   -m "%MODEL%" ^

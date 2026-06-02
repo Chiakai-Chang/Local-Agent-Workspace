@@ -426,5 +426,3 @@ pause
   <a href="mailto:lotifv@gmail.com"><img src="https://img.shields.io/badge/Email-lotifv@gmail.com-D14836?style=flat-square&logo=gmail&logoColor=white" alt="Email"></a>
   <a href="https://www.linkedin.com/in/chiakai-chang-htciu/"><img src="https://img.shields.io/badge/LinkedIn-Chang,%20Chia--Kai-0077B5?style=flat-square&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
 </p>
-
-**May the Local AI be with you.**

@@ -107,12 +107,12 @@
 在 20GB VRAM (如 RTX A4500) 或 64GB 記憶體的環境下，強烈推薦以下兩款 **27B 自我推測解碼 (MTP)** 模型。
 這兩款模型在 GGUF 中內建了二次預測 draft heads，搭配最新版 `llama.cpp` 可在**完全不掛載外部小模型**的情況下啟動「自我推測解碼 (Self-Speculative Decoding)」，生成速度高達 **44 ~ 50 tokens/sec**，比一般 dense 27B 執行快上 4x - 5x！
 
-### 🔥 推薦 A. GRM-2.6-Opus-Heretic-Abliterated-MTP-IQ4_XS (~14.3 GB)
+### 🔥 推薦 A. GRM-2.6-Opus-Heretic-Abliterated-MTP-IQ4_XS (15.3 GB)
 * **特點**：融合極強的 GRM 推理邏輯與 Claude Opus 思考風格，且完全移除了安全審查限制（Abliterated），執行複雜 Agent 指令時最為穩定。
 * **實測效能**：平均生成速度 **`49.12 tokens/sec`**，MTP 預測草案接受率高達 **`69.58%`**！
 * **下載連結**：[GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF (HuggingFace)](https://huggingface.co/mradermacher/GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF)
 
-### ⚡ 推薦 B. Qwopus3.6-27B-v2-MTP-IQ4_XS (~14.3 GB)
+### ⚡ 推薦 B. Qwopus3.6-27B-v2-MTP-IQ4_XS (15.4 GB)
 * **特點**：專為寫程式與複雜架構分析優化的 27B 推理型巨獸，思考深度極佳，是本地最強大代碼生產機器。
 * **實測效能**：平均生成速度 **`44.14 tokens/sec`** (峰值可達 **`50.79 T/s`**)，MTP 預測草案接受率 **`58.40%`**！
 * **下載連結**：[Qwopus3.6-27B-v2-MTP-GGUF (HuggingFace)](https://huggingface.co/Jackrong/Qwopus3.6-27B-v2-MTP-GGUF/)

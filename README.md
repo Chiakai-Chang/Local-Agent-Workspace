@@ -28,6 +28,15 @@ graph TD
 
 ### 📦 運算引擎與模型權重下載 (Llama.cpp & Models Download)
 * **⚡ 推薦一鍵自動更新**：雙擊本專案根目錄的 `run-update.bat` 即可全自動下載最新版 `llama.cpp` 並完成解壓合併。
+  * 📥 **一鍵下載更新腳本 (免克隆專案)**：於目標安裝資料夾開啟終端機，貼上執行以下指令即可直接取得更新雙檔：
+    * **PowerShell**:
+      ```powershell
+      Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/run-update.bat" -OutFile "run-update.bat"; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/update-llama-cpp.ps1" -OutFile "update-llama-cpp.ps1"
+      ```
+    * **cURL (Git Bash/Linux)**:
+      ```bash
+      curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/run-update.bat -o run-update.bat && curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/update-llama-cpp.ps1 -o update-llama-cpp.ps1
+      ```
   * ⚠️ **首次使用**：請先以文字編輯器開啟 `update-llama-cpp.ps1`，將第 6 行的 `$TargetDir = "D:\MyProject\llama"` 修改為您本機實際要安裝的資料夾路徑！
 * **📦 備用手動下載**：前往 [Llama.cpp Releases](https://github.com/ggml-org/llama.cpp/releases) 下載以下雙檔解壓至同一個目錄：
   1. **推論引擎**：`llama-b...-bin-win-cuda-cu12.4-x64.zip` (推薦 cu12.4 版本)

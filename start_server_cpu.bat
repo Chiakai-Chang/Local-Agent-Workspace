@@ -21,7 +21,11 @@ echo ========================================================
 
 :: Parameters Explained:
 :: 1. ngl 0: Disables GPU offloading completely, forcing running on host CPU.
-:: 2. c 16384: Caps context size to 16K. CPU prompt evaluation is bound by single-pass limits; 16K provides optimal speed.
+:: 2. c 16384: Default context size is 16K.
+::    Note: Large physical RAM (e.g. 64GB) is the main advantage of CPU mode.
+::    This allows loading high-precision models (e.g., IQ4_XS) and setting a huge context size (e.g. 32K/64K) without VRAM OOM.
+::    However, since CPU bandwidth is much lower than GPU, prefill speed (TTFT) will scale slowly at higher contexts.
+::    Adjust CTX_SIZE above to 32768 or 65536 if your application requires huge context and you accept slower prefill times.
 :: 3. threads 8: Binds thread pool directly to P-cores to prevent scheduling onto E-cores or hyperthreads.
 :: 4. prio 2: High Priority in Windows to prevent background OS interrupts.
 

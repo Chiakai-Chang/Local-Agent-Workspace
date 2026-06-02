@@ -233,64 +233,44 @@ pause
 ```
 </details>
 
-### 🔵 C. Intel Arc / SYCL 平台專用啟動檔 ([`start_server_sycl.bat`](file:///D:/Myproject/Local-Agent-Workspace/start_server_sycl.bat))
-適合 MSI Claw 8 AI+、Intel 內顯、Arc 獨立顯卡或 Intel CPU，透過 level_zero 驅動加速：
+### 🔵 C. 純 CPU 平台專用啟動檔 ([`start_server_cpu.bat`](start_server_cpu.bat))
+由於 `llama.cpp` 官方自 `b9455+` 起已正式停用 Windows/Linux 的 SYCL (Intel Arc GPU) binary 自動打包，為防範無 NVIDIA 顯示卡的使用者無法啟動，我們提供了一套專門針對**純 CPU 環境優化**的極速效能啟動檔。
+適合任何標準筆記型電腦、辦公桌上型電腦或無 GPU 的伺服器環境：
+
 ```batch
 @echo off
-chcp 65001 >nul
-title Llama Server (Intel SYCL - Claw 8 AI+)
+setlocal
+title Llama.cpp CPU Server [Unified CPU Performance Tuning]
 
-:: 載入 Intel oneAPI 環境變數
-call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
-
-:: SYCL 執行優化環境變數
-set SYCL_PI_LEVEL_ZERO_USE_IMMEDIATE_COMMANDLISTS=1
-set SYCL_CACHE_PERSISTENT=1
-set SYCL_DEVICE_FILTER=level_zero:gpu:0
-set ZES_ENABLE_SYSMAN=1
-
-:: ====================================================================
-:: ⚠️ 請修改以下變數以配合您的實際檔案與路徑
-:: ====================================================================
-set LLAMA_DIR=D:\Myproject\llama-win-sycl-x64
-set MODEL=C:\models\GRM-2.6-Opus.i1-IQ3_M.gguf
-set CTX_SIZE=98304
+set LLAMA_EXE=D:\MyProject\llama\llama-server.exe
+set MODEL=D:\MyProject\llama\Qwopus3.6-7B-MTP-IQ3_M.gguf
+set CTX_SIZE=16384
 set PORT=8080
 
-cd /d "%LLAMA_DIR%"
-
-echo Starting Local LLM Server (Intel SYCL)...
-echo ========================================================
-echo Model  : %MODEL%
-echo Server : http://127.0.0.1:%PORT%
-echo GPU    : Intel Arc Graphics (Level Zero GPU 0)
-echo Context: %CTX_SIZE% (96K)
-echo KV     : q4_0 / q4_0
-echo Batch  : 512 / 128
-echo ========================================================
-
-llama-server.exe ^
+"%LLAMA_EXE%" ^
   -m "%MODEL%" ^
+  -ngl 0 ^
+  -c %CTX_SIZE% ^
   --host 127.0.0.1 ^
   --port %PORT% ^
-  -ngl 99 ^
-  -c %CTX_SIZE% ^
   -np 1 ^
   -b 512 ^
   -ub 128 ^
-  --cache-type-k q4_0 ^
-  --cache-type-v q4_0 ^
-  --flash-attn on ^
   --mmap ^
   --no-warmup ^
   --jinja ^
-  --cache-ram 0 ^
-  --threads 12 ^
+  --threads 8 ^
+  --threads-batch 12 ^
   --prio 2 ^
   --timeout 1200
 
 pause
 ```
+
+#### 🛠️ CPU 極致優化解析：
+* **`-ngl 0`**：強制關閉所有 GPU offload，將運算全數留置在實體 CPU 與系統記憶體中。
+* **`-c 16384`**：將 Context 上下文大小限制在 16K。CPU 對話快取的重新評估 (re-eval) 開銷非常吃 CPU 週期的單次傳遞頻寬；將長度控制在 16K 可以提供最優的響應速度與吞吐平衡。
+* **`--threads 8` & `--threads-batch 12`**：計算線程強制派發至主機 CPU 的 8 顆實體 P-cores（Performance cores），避免背景計算任務被派發到 E-cores（Efficient cores）或超線程中而大幅拉高生成延遲。
 
 ---
 

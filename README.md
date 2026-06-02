@@ -36,7 +36,9 @@ graph TD
 ---
 
 ### 1. 🟢 高階顯卡 MTP 極速版 (20GB+ VRAM 專屬)
-* **核心優勢**：適合 RTX A4500 等 20GB+ 高階顯卡。透過 `llama.cpp` 內建預測頭（MTP）實現 **5 倍推理速度提升**，配合 4-bit KV Cache 壓縮技術，實現 **128K** 超大 Context 且完全不溢位（OOM）。
+* **核心優勢**：適合 RTX A4500 等 20GB+ 高階顯卡：
+  * **極速推理**：透過 `llama.cpp` 內建預測頭（MTP）實現 **5 倍推理速度提升**。
+  * **超大上下文**：配合 4-bit KV Cache 壓縮技術，無痛實現 **128K** 超大 Context 且完全不溢位（OOM）。
 * **適合模型**：首選 `GRM-2.6-Opus-Heretic-Abliterated-MTP-IQ4_XS` (15.3 GB) 或 `Qwopus3.6-27B-v2-MTP-IQ4_XS` (15.4 GB)。
 
 ##### ⚡ NVIDIA MTP 效能調校精華 (Tuning Essence)：
@@ -144,8 +146,10 @@ pause
 ---
 
 ### 2. 🟡 中階顯卡 GPU 極速版 (16GB VRAM 專屬)
-* **核心優勢**：**16GB VRAM 扣除 Windows 系統與顯卡 WDDM 佔用後實際僅剩約 14GB VRAM**。在此物理限制下，若強行載入 15.4GB 的 27B 模型，會導致大批層數溢出至系統 RAM，因 PCIe 頻寬瓶頸而速度暴跌！
-* **極佳解法**：強烈推薦選用僅 **12 GB** 大小、採用敏感度引導混合壓縮的 `Qwen3.6-35B-A3B-Cerebellum`。這能將模型**全數載入 16GB VRAM**，並保留充足的 **2.5GB 運算空間**，完美在顯卡內執行 Flash-Attention、量化 KV Cache 與多模態視覺投影，享受流暢無PCIe 交換的極致運算！
+* **實體限制**：16GB VRAM 扣除 Windows 系統與顯卡 WDDM 佔用後，實際僅剩約 **14GB VRAM**。若強行載入 15.4GB 的 27B 模型，會溢出至系統 RAM，因 PCIe 頻寬瓶頸使運算速度暴跌！
+* **極佳解法**：選用僅 **12 GB** 大小、敏感度引導量化的 `Qwen3.6-35B-A3B-Cerebellum`：
+  * **完全載入**：將模型 100% 塞入 VRAM 運行，免受 PCIe 慢速交換所苦。
+  * **充沛空間**：預留充足的 2.5GB 運算空間，供 Flash-Attention、量化 KV Cache 與多模態視覺投影暢行無阻。
 
 ##### ⚡ NVIDIA GPU 卸載效能調校精華 (Tuning Essence)：
 * **GPU 完全卸載 (`-ngl 999`)**：確保 100% 的模型張量全數塞在 VRAM 中運行。
@@ -224,7 +228,10 @@ pause
 ---
 
 ### 3. 🔵 純 CPU 與大記憶體優化版 (無 GPU / 大 RAM 主機)
-* **核心優勢**：**系統記憶體 (RAM) 容量充足為最大優勢**（16GB RAM 可開 32K，32GB 可開滿 128K！）。**此平台必須關閉 MTP（投機解碼在 CPU 上會拖慢速度）**，且 prefill（提示詞預評估）速度會較為緩慢，但對話解碼速率穩定。
+* **物理優勢**：**系統記憶體 (RAM) 容量充沛且成本極低**：
+  * **高上下文**：16GB RAM 可輕鬆開啟 32K 上下文，32GB 記憶體更可直接拉滿至 128K 而不崩潰。
+  * **關鍵調整**：必須關閉 MTP 投機解碼（因為 CPU 上啟用 MTP 反而會因頻寬爭搶而變慢）。
+  * **性能權衡**：Prefill（提示詞預評估）速度較慢，但對話解碼速率相當穩定。
 * **適合模型**：首選 `Qwen3.6-35B-A3B-Cerebellum` (12 GB MoE 混合模型，推理時活化參數僅約 3B)，備用單體 `Qwopus3.6-7B-IQ4_XS`。
 
 ##### 🛠️ CPU 效能調校精華 (Tuning Essence)：
@@ -334,14 +341,21 @@ pause
 <summary><b>📖 展開檢視 CPU 參數深度解析</b></summary>
 
 * **`-ngl 0`**：強制關閉所有 GPU offload，將運算全數留置在實體 CPU 與系統記憶體中。
-* **`-c 16384`**：預設設定為 16K 作為效能平衡點。**CPU 運作的核心本錢在於系統主記憶體 (RAM) 相比 GPU 顯存 (VRAM) 便宜且容量巨大**。在 CPU 模式下，您完全不需要像在 GPU 一樣斤斤計較 VRAM 溢位 (OOM) 的問題。
-  * **💡 RAM 容量與開超大 Context 的對照指南**：
+* **`-c 16384`**：預設設定為 16K 作為效能平衡點：
+  * **主記憶體優勢**：CPU 運作的核心本錢在於系統主記憶體 (RAM) 相比 GPU 顯存 (VRAM) 便宜且容量巨大。在 CPU 模式下，完全不需要斤斤計較 VRAM OOM 溢位問題。
+  * **💡 RAM 容量與大 Context 對照表**：
     * **16GB RAM**：足夠載入 7B 模型並將 `-c` 輕鬆推至 **32K** 上下文。
-    * **32GB RAM**：不僅能以高精度模型 (如 `IQ4_XS` 等級) 運作，還可以**直接將 `-c` 上下文開滿 128K (131072)**，這在 20GB VRAM 的 GPU 上是極難實現的。
-    * **64GB+ RAM**：可輕鬆運行 27B 或更大型模型，並無痛開啟 **128K 以上** 的超巨型上下文。
-* **⚠️ Prefill 效能權衡提醒 (核心 Trade-off)**：雖然 32GB RAM 就能輕鬆吞下 128K 的超大上下文而不會崩潰，但**由於 CPU 記憶體頻寬遠不及 GPU 顯存，Prefill 階段 (提示詞預評估 / 載入大文字庫) 的速度會非常緩慢**。這意味著開滿 128K 時的首字生成延遲 (Time to First Token, TTFT) 會明顯增加。若您的應用場景（例如大型代碼庫重構、長文本合約分析）著重在「一次性讀入巨大上下文且不介意首字等待時間」，那麼把 CPU 版本的 `-c` 直接開滿 128K 將會是您最強大的智商武器。
-* **`--threads 8` & `--threads-batch 12`**：計算線程強制派發至主機 CPU 的 8 顆實體 P-cores（Performance cores），避免背景計算任務被派發到 E-cores（Efficient cores）或超線程中而大幅拉高生成延遲。
-* **⚠️ 避免在 CPU 啟用 MTP 投機解碼 (Speculative Decoding)**：雖然 `llama.cpp` 技術上支援在 CPU 模式下配置 MTP，但**實測結果證實，在純 CPU 模式下啟用 MTP 投機解碼並不能達到提速效果**。由於 CPU 記憶體頻寬限制，額外評估 Draft heads 的計算開銷與頻寬爭搶反而會拖慢解碼速率。因此 CPU 專用啟動檔中已完全移除投機解碼參數，維持純粹的標準解碼路徑。
+    * **32GB RAM**：能運行高精度模型，並**直接將 `-c` 上下文開滿 128K (131072)**（這在 20GB VRAM 的 GPU 上是極難實現的）。
+    * **64GB+ RAM**：可輕鬆運行 27B/72B 等中大型模型，並無痛開啟 **128K 以上** 的超巨型上下文。
+* **⚠️ Prefill 效能權衡提醒 (核心 Trade-off)**：
+  * **頻寬瓶頸**：由於 CPU 記憶體頻寬遠不及 GPU 顯存，在 Prefill 階段 (提示詞預評估 / 載入大文字庫) 的速度會非常緩慢。
+  * **延遲代價**：上下文開滿 128K 時，首字生成延遲 (Time to First Token, TTFT) 會顯著增加。
+  * **適用場景**：特別適合「需要一次性讀入巨量上下文、且不介意首字等待時間」的任務（例如大型代碼庫重構、長文本合約分析）。若是這類場景，將 CPU 版本的 `-c` 開滿 128K 將會是您的最佳智力武器。
+* **`--threads 8` & `--threads-batch 12`**：鎖定計算線程至 8 顆實體 P-cores（Performance cores），避免計算任務被分派到 E-cores（Efficient cores）或超線程中而大幅拉高生成延遲。
+* **⚠️ 避免在 CPU 啟用 MTP 投機解碼 (Speculative Decoding)**：
+  * **實測結論**：實測證實，在純 CPU 模式下啟用 MTP 投機解碼**並不能**達到提速效果。
+  * **原因剖析**：受限於 CPU 記憶體頻寬，額外評估 Draft heads 的計算開銷與頻寬爭搶反而會拖慢解碼速率。
+  * **應對方案**：CPU 專用啟動設定已完全移除投機解碼參數，維持最純粹的標準解碼路徑。
 </details>
 
 <details>
@@ -377,9 +391,15 @@ pause
 👉 前往 [**CK's Pi Code Agent Harness (GitHub)**](https://github.com/Chiakai-Chang/CKs_PI_Code_Agent_Harness)
 
 **為什麼推薦此組合？**
-1. **解決 Context 溢位：** 雲端 CLI 工具（如 Claude Code）無法精準控制本地端 auto-compact 觸發時機。Pi Agent 可以完美依照本機模型的限制設定。
-2. **極致輕量：** 本地 GGUF 模型對於冗餘 Token 極度敏感。Harness 精選了核心 plugins 與 skills，能以最精簡的 prompt 格式發揮本地模型的最大智商。
-3. **無縫整合健康診斷：** 與 **OmniHeal** 工具完美串接，一鍵檢查專案技術債，再交由本地算力精準修復。
+1. **🛡️ 解決 Context 溢位**：
+   * 雲端 CLI 工具（如 Claude Code）無法精準控制本地端的 auto-compact 觸發時機。
+   * Pi Agent 可完美對接並限制本地模型的 Context 規模，防止記憶體溢出。
+2. **⚡ 極致輕量化**：
+   * 本地 GGUF 模型對冗餘 Token 極度敏感。
+   * Harness 精選核心 plugins 與 skills，能以最精簡的 Prompt 格式發揮本地模型最大智力。
+3. **👁️ 無縫整合健康診斷**：
+   * 與 **OmniHeal** 診斷工具完美串接。
+   * 一鍵檢查專案的技術債，再交給本地算力進行無痛、免費的精準修復。
 
 *(若您仍需使用 Claude Code，只需在專案目錄下設定環境變數 `set ANTHROPIC_BASE_URL=http://127.0.0.1:8080`，並參考根目錄的 `start_local_claude.bat` 啟動。)*
 

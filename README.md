@@ -385,12 +385,24 @@ pause
 
 ### 🔍 開發生態系三大核心 Tier 及延伸工具
 
-* 🧠 **[Tier 1: 核心大腦 (Local-Agent-Workspace)](https://github.com/Chiakai-Chang/Local-Agent-Workspace)：** 建立極致優化的 Llama.cpp 本地伺服器。作為承接雲端架構師規劃後，能無情消耗 Token 進行打底運算的強大本地算力引擎。（📍 **您目前在這裡**）
-* 🤖 **[Tier 2: 代理工程師 (CK's Pi Code Agent Harness)](https://github.com/Chiakai-Chang/CKs_PI_Code_Agent_Harness)：** 混合開發的指揮樞紐。負責接收雲端模型開出的「任務菜譜與 SOP」，在本地端化身為懂工程紀律的虛擬同事，按部就班地切換目標檔案、撰寫程式碼並嚴格執行 TDD 測試。
-* 👁️ **[Tier 3: 全域修復雷達 (OmniHeal)](https://github.com/Chiakai-Chang/OmniHeal)：** 零安裝的全局專案健檢工具。全案掃描是最耗 Token 的環節，直接交由本工具在本地一鍵免費深潛，自動抓出技術債並開立精準的修復處方箋，讓雲端模型或代理工程師能針對性地進行修復。
+* 🧠 **[Tier 1: 核心大腦 (Local-Agent-Workspace)](https://github.com/Chiakai-Chang/Local-Agent-Workspace)**：
+  * **定位**：建立極致優化的 `llama.cpp` 本地伺服器。
+  * **作用**：承接雲端架構師的規劃，作為無情消耗 Token 進行打底運算的強大本地算力引擎。
+  * 📍 **您目前在這裡**
+* 🤖 **[Tier 2: 代理工程師 (CK's Pi Code Agent Harness)](https://github.com/Chiakai-Chang/CKs_PI_Code_Agent_Harness)**：
+  * **定位**：混合開發的指揮樞紐。
+  * **任務**：接收雲端模型開出的「任務菜單與 SOP」，在本地端化身為嚴守工程紀律的虛擬同事。
+  * **執行**：按部就班地切換目標檔案、撰寫程式碼，並在本地嚴格執行 TDD 單元測試。
+* 👁️ **[Tier 3: 全域修復雷達 (OmniHeal)](https://github.com/Chiakai-Chang/OmniHeal)**：
+  * **定位**：零安裝的全局專案健檢與自動修復診斷器。
+  * **任務**：本地一鍵免費深潛分析，自動抓出專案中的技術債，並開立精準的修復處方箋。
+  * **優勢**：解決全案掃描中最耗費 Token 的環節，並引導雲端模型或代理工程師進行針對性修復。
 
 #### 🏅 延伸工具：知識資產提煉
-📝 **[InfoGold - 經歷提煉與知識資產增值](https://github.com/Chiakai-Chang/InfoGold)**：扮演「煉金助理」的角色，將會議逐字稿、工作手稿、閱讀筆記等原始文字資產，透過四部曲系統化增值：**洗礦→精煉金磚→圓桌思辨→鑄造策略貨幣**，讓「曾經發生過的事」持續產生知識複利。
+* 📝 **[InfoGold - 經歷提煉與知識資產增值](https://github.com/Chiakai-Chang/InfoGold)**：
+  * **定位**：個人的「文字資產煉金助理」。
+  * **任務**：將會議逐字稿、工作手稿、閱讀筆記等原始碎片資產，進行系統化增值。
+  * **流程**：四部曲增值：**洗礦 ➔ 精煉金磚 ➔ 圓桌思辨 ➔ 鑄造策略貨幣**，讓「曾經發生過的事」持續產生知識複利。
 
 ---
 

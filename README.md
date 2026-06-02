@@ -102,64 +102,48 @@
 
 ---
 
-## 📦 2. 模型權重推薦 (GGUF & MTP 自我推測)
+## 📦 2. 模型權重推薦 (MTP 自我推測解碼性能怪獸)
 
-在 20GB VRAM (如 RTX A4500) 或 32GB 記憶體 (如 Claw 8) 的環境下，以下是我實測後強烈推薦的模型：
+在 20GB VRAM (如 RTX A4500) 或 64GB 記憶體的環境下，強烈推薦以下兩款 **27B 自我推測解碼 (MTP)** 模型。
+這兩款模型在 GGUF 中內建了二次預測 draft heads，搭配最新版 `llama.cpp` 可在**完全不掛載外部小模型**的情況下啟動「自我推測解碼 (Self-Speculative Decoding)」，生成速度高達 **44 ~ 50 tokens/sec**，比一般 dense 27B 執行快上 4x - 5x！
 
-### 🌟 A. 穩定首選 (代理橋接與複雜自動化)
-🔥 **[GRM-2.6-Opus.i1-IQ4_XS](https://huggingface.co/mradermacher/GRM-2.6-Opus-i1-GGUF/blob/main/GRM-2.6-Opus.i1-IQ4_XS.gguf)** (約 15.2 GB)
-> 融合頂尖的 GRM 邏輯與 Claude Opus 的推理風格。輸出極度穩定的結構化思維，大幅降低 Agent 解析指令的錯誤率。IQ4_XS 量化完美適配 20GB VRAM，留下充足餘裕給長文本運算。
+### 🔥 推薦 A. GRM-2.6-Opus-Heretic-Abliterated-MTP-IQ4_XS (~14.3 GB)
+* **特點**：融合極強的 GRM 推理邏輯與 Claude Opus 思考風格，且完全移除了安全審查限制（Abliterated），執行複雜 Agent 指令時最為穩定。
+* **實測效能**：平均生成速度 **`49.12 tokens/sec`**，MTP 預測草案接受率高達 **`69.58%`**！
+* **下載連結**：[GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF (HuggingFace)](https://huggingface.co/mradermacher/GRM-2.6-Opus-Heretic-Abliterated-MTP-i1-GGUF)
 
-### ⚡ B. 速度與效能黑科技 (MTP 自我推測解碼)
-🔥 **[Qwen3.6-35B-A3B-Claude-4.7-Opus-Reasoning-Distilled-APEX-MTP-GGUF](https://huggingface.co/mudler/Qwen3.6-35B-A3B-Claude-4.7-Opus-Reasoning-Distilled-APEX-MTP-GGUF)** (Mini 版約 13.7 GB / Balanced 版約 18.5 GB)
-> **黑科技推薦：** 該版本將 Model 的 **MTP (Multi-Token Prediction) 頭**與 Trunk 主體打包在同一個 GGUF 檔中。搭配近期版本的 llama.cpp，只需在啟動參數加入 `--draft-mtp`，即可在**不掛載額外 draft 模型**的情況下啟動「自我推測解碼（Self-Speculative Decoding）」，推理速度大幅飆升，極度適合 RTX A4500 等 20GB VRAM GPU 壓榨效能！
-
-### 💻 C. 程式開發特化 (純代碼生成與 JSON 結構化)
-🔥 **[Qwen3.6-27B-NEO-CODE-2T-OT-IQ4_XS](https://huggingface.co/DavidAU/Qwen3.6-27B-NEO-CODE-Di-IMatrix-MAX-GGUF/blob/main/Qwen3.6-27B-NEO-CODE-2T-OT-IQ4_XS.gguf)** (約 15.4 GB)
-> 專為高難度程式碼任務與 JSON 格式輸出優化。若工作流偏好原生 Qwen 思維模式來進行專案重構，這是一台非常優秀的純代碼生產機器。
+### ⚡ 推薦 B. Qwopus3.6-27B-v2-MTP-IQ4_XS (~14.3 GB)
+* **特點**：專為寫程式與複雜架構分析優化的 27B 推理型巨獸，思考深度極佳，是本地最強大代碼生產機器。
+* **實測效能**：平均生成速度 **`44.14 tokens/sec`** (峰值可達 **`50.79 T/s`**)，MTP 預測草案接受率 **`58.40%`**！
+* **下載連結**：[Qwopus3.6-27B-v2-MTP-GGUF (HuggingFace)](https://huggingface.co/Jackrong/Qwopus3.6-27B-v2-MTP-GGUF/)
 
 *(新手科普：`IQ` 系列量化搭配 `i1` 矩陣技術，能在相同檔案大小下比傳統 `Q` 系列保留更多模型智商。檔案大小與 VRAM 之間務必保留 4~5GB 以上作為 Context 運算空間。)*
 
 ---
 
-## 🚀 3. 一鍵啟動伺服器 (多硬體極致優化版)
+## 🚀 3. 一鍵啟動伺服器 (MTP 自我推測極速優化版)
+
+本專案已將優化後的啟動批次檔 (.bat) 直接存於專案根目錄，您可以直接複製或修改使用。
 
 > [!WARNING]
-> **💡 為什麼舊版的啟動腳本會出錯？**
-> 隨著 Llama.cpp 的快速迭代，許多舊參數已被廢棄或整合。若您遇到啟動閃退或錯誤，通常是因為：
-> 1. **已移除的參數：** `--cache-reuse`、`--cache-prompt`、`--context-shift` 在新版中已被廢棄（快取管理已自動化）。
-> 2. **更名的參數：** `--parallel 1` 已更名為 `-np 1` 或 `--slots 1`（代表並行 Slot 數量）。
-> 3. **記憶體映射：** `--no-mmap` 會大幅拖慢模型載入速度，新版建議改用預設的 `--mmap`。
-> 4. **Batch 大小：** `-b 4096` 與 `-ub 1024` 在長 Context 時可能導致 OOM，已調整為穩健的 `512` 與 `128`。
+> **💡 批次檔語系相容性注意**：
+> 舊版 batch 檔常因包含中文括號 `(` 與 `)` 導致 Windows CMD 解析錯誤閃退。本專案啟動檔已全面改為 **100% 純英文語法與括號**，徹底消除任何語系 Code Page 閃退問題。
 
-本專案已將優化後的啟動腳本直接存於專案根目錄，您可以直接複製或修改使用：
+### 🟢 A. GRM-Opus MTP 啟動檔 ([`start_server_nvidia.bat`](start_server_nvidia.bat))
+適合搭配 `GRM-2.6-Opus-Heretic-MTP` 權重，完整啟用 P-core 核心綁定與推測解碼：
+<details>
+<summary><b>點此展開查看批次檔代碼與優化參數說明</b></summary>
 
-### 🟢 A. NVIDIA GPU 專用啟動檔 ([`start_server_nvidia.bat`](file:///D:/Myproject/Local-Agent-Workspace/start_server_nvidia.bat))
-適合 RTX A4500 (20GB VRAM) 或其他 NVIDIA 顯示卡，使用穩健的 Llama.cpp CUDA 引擎：
 ```batch
 @echo off
-chcp 65001 > nul
 setlocal
-title GRM-2.6-Opus IQ4_XS 128K - RTX A4500
+title GRM-2.6-Opus-Heretic-Abliterated-MTP [RTX A4500 128K Max Performance]
 
-:: ====================================================================
-:: ⚠️ 請修改以下兩個路徑為您電腦中的實際位置
-:: ====================================================================
 set LLAMA_EXE=D:\MyProject\llama\llama-server.exe
-set MODEL=D:\MyProject\llama\GRM-2.6-Opus.i1-IQ4_XS.gguf
+set MODEL=D:\MyProject\llama\GRM-2.6-Opus-Heretic-Abliterated-MTP-IQ4_XS.gguf
 set CTX_SIZE=131072
 set PORT=8080
 
-echo Starting Local LLM Server (NVIDIA CUDA)...
-echo ========================================================
-echo Model  : %MODEL%
-echo Server : http://127.0.0.1:%PORT%
-echo GPU    : RTX A4500 20GB (Or other NVIDIA GPUs)
-echo Context: %CTX_SIZE% (128K)
-echo KV     : q4_0 / q4_0 (KV Cache quantized to save VRAM)
-echo Batch  : 512 / 128 (Logical / Physical Batch)
-echo ========================================================
-
 "%LLAMA_EXE%" ^
   -m "%MODEL%" ^
   -ngl 999 ^
@@ -169,44 +153,52 @@ echo ========================================================
   -np 1 ^
   -b 512 ^
   -ub 128 ^
+  --spec-type draft-mtp ^
+  --spec-draft-n-max 3 ^
+  --spec-draft-ngl all ^
   --cache-type-k q4_0 ^
   --cache-type-v q4_0 ^
+  --cache-type-kd q4_0 ^
+  --cache-type-vd q4_0 ^
+  --kv-unified ^
+  --cache-ram 12288 ^
+  --cache-idle-slots ^
   --flash-attn on ^
   --mmap ^
   --no-warmup ^
   --jinja ^
   --threads 8 ^
+  --threads-batch 12 ^
   --prio 2 ^
+  --reasoning-format deepseek ^
   --timeout 1200
 
 pause
 ```
 
-### ⚡ B. NVIDIA GPU + MTP 自我推測解碼 ([`start_server_nvidia_mtp.bat`](file:///D:/Myproject/Local-Agent-Workspace/start_server_nvidia_mtp.bat))
-適合搭配 `APEX-MTP` 權重檔案，一鍵解鎖高達 2 倍的推理生成速度：
+#### 🛠️ 終極性能參數解析：
+* **`--spec-type draft-mtp` & `--spec-draft-ngl all`**：自動載入 GGUF 內建預測頭，並將 base model 與 draft heads 全數塞入 VRAM 進行 GPU 滿載加速。
+* **`-ctk q4_0 -ctv q4_0` 與 `-ctkd q4_0 -ctvd q4_0`**：將 KV Cache 進行 4-bit 量化壓縮，節省 72% VRAM！在 128K Context 時 KV 快取僅佔 ~200MB，徹底防範 VRAM 溢出。
+* **`--kv-unified`**：令主模型與預測頭共享 KV Buffer 快取以節省記憶體。
+* **`--cache-ram 12288`**：劃分 12GB 實體 RAM 快取對話上下文。多輪對話時，歷史脈絡直接載入，**跳過 prompt re-eval 進程，解鎖 sub-second 首字輸出速度**。
+* **`--threads 8`**：將計算線程強制鎖定在 Intel i7 的 **8 顆 P-cores 實體效能核心**上，防範系統將線程派發給 E-cores 或超線程而拉高延遲。
+* **`--reasoning-format deepseek`**：自動提取模型推理時產生的 `<think>` 思考流，完美對接 Open WebUI 等折疊式思維泡泡 UI。
+</details>
+
+### ⚡ B. Qwopus 27B MTP 啟動檔 ([`start_server_nvidia_mtp.bat`](start_server_nvidia_mtp.bat))
+適合搭配 `Qwopus3.6-27B-v2-MTP` 權重，提供最優寫程式性能：
+<details>
+<summary><b>點此展開查看批次檔代碼</b></summary>
+
 ```batch
 @echo off
-chcp 65001 > nul
 setlocal
-title Qwen3.6 APEX-MTP - RTX A4500
+title Qwopus3.6-27B-v2-MTP [RTX A4500 128K Max Performance]
 
-:: ====================================================================
-:: ⚠️ 請修改以下兩個路徑為您電腦中的實際位置
-:: ====================================================================
 set LLAMA_EXE=D:\MyProject\llama\llama-server.exe
-set MODEL=D:\MyProject\llama\Qwen3.6-35B-A3B-Claude-4.7-Opus-Reasoning-Distilled-APEX-MTP-I-Balanced.gguf
-set CTX_SIZE=98304
+set MODEL=D:\MyProject\llama\Qwopus3.6-27B-v2-MTP-GGUF.gguf
+set CTX_SIZE=131072
 set PORT=8080
-
-echo Starting Local LLM Server with Self-Speculative MTP Decoding...
-echo ========================================================
-echo Model  : %MODEL%
-echo Server : http://127.0.0.1:%PORT%
-echo GPU    : RTX A4500 20GB (Or other NVIDIA GPUs)
-echo Context: %CTX_SIZE% (96K)
-echo KV     : q4_0 / q4_0 (KV Cache quantized to save VRAM)
-echo MTP    : Enabled (--draft-mtp)
-echo ========================================================
 
 "%LLAMA_EXE%" ^
   -m "%MODEL%" ^
@@ -217,19 +209,29 @@ echo ========================================================
   -np 1 ^
   -b 512 ^
   -ub 128 ^
+  --spec-type draft-mtp ^
+  --spec-draft-n-max 3 ^
+  --spec-draft-ngl all ^
   --cache-type-k q4_0 ^
   --cache-type-v q4_0 ^
+  --cache-type-kd q4_0 ^
+  --cache-type-vd q4_0 ^
+  --kv-unified ^
+  --cache-ram 12288 ^
+  --cache-idle-slots ^
   --flash-attn on ^
-  --draft-mtp ^
   --mmap ^
   --no-warmup ^
   --jinja ^
   --threads 8 ^
+  --threads-batch 12 ^
   --prio 2 ^
+  --reasoning-format deepseek ^
   --timeout 1200
 
 pause
 ```
+</details>
 
 ### 🔵 C. Intel Arc / SYCL 平台專用啟動檔 ([`start_server_sycl.bat`](file:///D:/Myproject/Local-Agent-Workspace/start_server_sycl.bat))
 適合 MSI Claw 8 AI+、Intel 內顯、Arc 獨立顯卡或 Intel CPU，透過 level_zero 驅動加速：

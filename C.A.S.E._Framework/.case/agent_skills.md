@@ -45,3 +45,23 @@ You are a **C.A.S.E. Executor Agent**. You must obey the following boundaries at
 ### 🛡️ Auditor (Checker Role)
 - **Mindset**: Skeptical, boundary-testing, strict validator.
 - **Workflow**: Parse `recipe.md > Local Definition of Done` $\rightarrow$ Validate `output.md` against every criteria $\rightarrow$ Inspect `action_log.jsonl` for execution trace proof $\rightarrow$ Transition status to `DONE` or reject to `PENDING` with feedback.
+
+---
+
+## 3. Self-Optimizing Learning Loop (SkillOpt Pattern)
+
+C.A.S.E. uses a **file-driven, zero-command text-space optimization process** to continuously improve AI behavior. The file `00_Constitution/learnings.md` serves as the trainable state of this repository.
+
+1. **Read learnings on Init**:
+   - At the beginning of any task (`IN_PROGRESS`), you MUST read `00_Constitution/learnings.md` (if it exists) alongside `core.md`.
+   - Incorporate all documented anti-patterns, abbreviations, and best practices directly into your planning phase.
+
+2. **Self-Correction on Rejection (Review Feedback Loop)**:
+   - If a Checker rejects your work (status transitions back to `PENDING` with `feedback.md`), you MUST reflect on the failure.
+   - Summarize the mistake and write a concrete prevention rule under `## Anti-Patterns & Mistakes` in `00_Constitution/learnings.md` before refactoring.
+
+3. **Context Accumulation on Completion**:
+   - Upon successful verification (status transitions to `DONE`), the Checker or Worker MUST capture any valuable technical discoveries, reusable API endpoints, or environment setups.
+   - Append these to `00_Constitution/learnings.md` under `## Reusable Patterns & Discoveries`.
+
+This cycle requires **zero user operation and no scripting code**. The AI directly reads, writes, and trains itself on `learnings.md` in text-space, naturally accumulating repository-specific intelligence over time.

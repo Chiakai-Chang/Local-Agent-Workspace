@@ -70,6 +70,22 @@ def main():
 """)
         print(f"📄 Generated core constitution: {core_path}")
 
+    # Generate 00_Constitution/learnings.md (Trainable Skill Document)
+    learnings_path = os.path.join("00_Constitution", "learnings.md")
+    if not os.path.exists(learnings_path):
+        with open(learnings_path, "w", encoding="utf-8") as f:
+            f.write("""# 🧠 C.A.S.E. Trainable Learnings (SkillOpt Space)
+
+This document is the trainable state of this repository. The AI Agent writes findings here and reads them during task initialization.
+
+## ## Anti-Patterns & Mistakes
+*(AI will auto-populate this section when mistakes are identified or tasks are rejected)*
+
+## ## Reusable Patterns & Discoveries
+*(AI will auto-populate this section when new patterns, configurations, or endpoints are successfully completed)*
+""")
+        print(f"📄 Generated learnings template: {learnings_path}")
+
     # 5. Generate 01_Roadmap/roadmap.md & global_dod.md
     roadmap_path = os.path.join("01_Roadmap", "roadmap.md")
     if not os.path.exists(roadmap_path):

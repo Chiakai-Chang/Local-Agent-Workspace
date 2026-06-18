@@ -1,16 +1,16 @@
 # C.A.S.E. Framework Guardrails
 
 ## 1. Task Lifecycle & Execution
-- Before modifying any code, identify the active task folder inside `02_Task_Queue/` (where `status.txt` is `PENDING` or `IN_PROGRESS`).
+- Before modifying any code or deliverable files, identify the active task folder inside `02_Task_Queue/` (where `status.txt` is `PENDING` or `IN_PROGRESS`).
 - Claim the task by writing `IN_PROGRESS` to that task's `status.txt`.
 - Load that task's `role.md` as your System Prompt and `recipe.md` as your instruction manual.
-- Write or update `planning.md` within the task folder detailing execution steps **before** modifying production code.
-- Modify files **ONLY** as specified in `recipe.md > Input Sources / Output Specification`.
+- Write or update `planning.md` within the task folder detailing execution steps **before** editing deliverables.
+- Modify files/content **ONLY** as specified in `recipe.md > Input Sources / Output Specification`.
 - Track and append all tool calls to `action_log.jsonl` in the current task folder.
 - Submit for review by writing `REVIEW` to `status.txt`. Do NOT set the status to `DONE` yourself.
 
 ## 2. Planning, Spec-by-Example & Compaction
-- **BDD Spec-by-Example**: When writing `planning.md`, specify clear Given-When-Then scenarios. Ensure failing tests (RED) are observed and documented before implementing code (GREEN).
+- **BDD Spec-by-Example**: When writing `planning.md`, specify clear Given-When-Then scenarios or factual verification steps. Ensure verification checks are defined and tested before completing work.
 - **Handoff Capsule**: For tasks requiring multiple sessions or when facing imminent context compaction/clear, document the current status and decisions in the `planning.md` Handoff section.
 
 ## 3. Knowledge Base & Sharded Memory
@@ -19,3 +19,4 @@
 
 ## 4. Cross-Model Peer Review
 - For checker-level verification, recommend routing review tasks to a different model family (e.g. Claude executor, Gemini checker) in a fresh context thread to avoid same-model self-verification bias.
+

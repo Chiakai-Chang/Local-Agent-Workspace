@@ -1,9 +1,9 @@
 # C.A.S.E. Framework — System Protocol for AI Agents
 
-> **Audience:** AI agents (Coding Agents, local LLMs, cloud models, automated tools) operating within the C.A.S.E. framework.
+> **Audience:** AI agents (Coding Agents, Content/Data Agents, local LLMs, cloud models, automated tools) operating within the C.A.S.E. framework.
 > **Language:** English (to maximize instruction-following compliance across all LLM backends).
 > **Authority:** This document is a Macro Layer (Architect Role) protocol. It MUST be followed by all Micro Layer (Executor/Worker Role) agents.
-> **Compatibility:** Model-Agnostic. Fully supports Full-Cloud, Full-Local, and Hybrid cloud-local topologies.
+> **Compatibility:** Model-Agnostic. Fully supports Full-Cloud, Full-Local, and Hybrid cloud-local topologies. Suitable for code development, intelligence patrolling, slide generation, thesis writing, and data analysis.
 
 ---
 
@@ -258,11 +258,11 @@ If an executor agent attempts to modify any files in `00_Constitution/` or `01_R
 
 ---
 
-## 15. BDD Spec-by-Example & Acceptance Gating
+## 15. BDD Spec-by-Example & Acceptance Gating (起草 - 驗證 - 潤飾)
 
-To eliminate guesswork during implementation:
-- **Given-When-Then Formulation**: Workers should translate local DoD conditions into explicit Cucumber-like examples in `planning.md` prior to any code edits.
-- **Red-Green-Refactor Gating**: Workers MUST observe a failing state (RED) of their tests or assertions before making changes to product files, and refactor (REFACTOR) only under green coverage.
+To eliminate guesswork during execution (regardless of whether the task is programming, intelligence patrolling, slide generation, or academic writing):
+- **Given-When-Then Formulation**: Workers should translate local DoD conditions into explicit Cucumber-like scenarios or factual checks in `planning.md` prior to any content/deliverable edits.
+- **Draft-Verify-Refine Gating (RED-GREEN-REFACTOR equivalent)**: Workers MUST specify the draft state, define how to verify it (e.g., verifying links, testing syntax, or fact-checking citations), and only refine/polish (REFINE) the draft once it satisfies all validation tests.
 
 ## 16. Context Compaction & Handoff Capsules
 
@@ -345,7 +345,29 @@ pending_blockers: []
 - [V] Verify Given-When-Then scenarios pass successfully.
 - [V] Confirm all checkboxes in recipe.md DoD are completed.
 ```
+
+### E. Example: OSINT Web Patrol Task Recipe (Non-Code Workload)
+To demonstrate non-code usage, here is how a patrol task `recipe.md` is structured:
+```markdown
+# Task Recipe: Illegal Gambling Patrol and Information Report
+
+## Objective
+Identify active illegal gambling platforms targeting the region and compile a structured intelligence report containing domain hosts, active IPs, and promotional screenshots.
+
+## Input Sources
+- `inputs/patrol_keywords.txt` (list of localized keywords)
+- Online intelligence sources via `search_web`
+
+## Output Specification
+- `output.md` (markdown table showing Domain, Active IP, Registrar, Evidence Link, and Severity Score)
+
+## Local Definition of Done (DoD)
+- [ ] Query all keywords and identify at least 5 active gambling domain URLs.
+- [ ] Resolve each domain's active server IP and registrar using network lookup tools.
+- [ ] Verify that all domain links are indeed active and serve gambling content (no dead links).
+- [ ] Format findings into a clean markdown table.
 ```
+
 
 ---
 

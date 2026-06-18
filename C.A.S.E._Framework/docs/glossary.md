@@ -62,7 +62,7 @@
 | **宏觀回饋** | Macro-Level Feedback (⑥) | 所有任務全部結案後，總指揮發現全案標準仍有缺漏，重新規劃下一階段 | Global Aggregation 核對 `global_dod.md` 未達標 → Layer 2 重規劃 → 新 Task Packages 進入 `02_Task_Queue/` |
 | **幻覺** | Hallucination | AI 一本正經地捏造了不存在的資料或方法 | LLM 輸出與現實不符的虛假內容；C.A.S.E. 透過 File as State 與 Dual-track Verification 降低此風險 |
 | **上下文遺忘** | Context Forgetting / Attention Decay | AI 對話太長，忘記了前面說過的重要指示 | 超出 Context Window 後的資訊衰減；C.A.S.E. 透過把狀態寫入實體檔案來規避此問題 |
-| **規格先導驗收** | Spec-by-Example | 程式碼撰寫前先列出 Given-When-Then 實例，作為不可妥協的規範 | 規劃期先擬定測試情境（RED），執行後核實無誤（GREEN）再做重構（REFACTOR） |
+| **規格先導驗收** | Spec-by-Example | 內容或程式編修前先列出 Given-When-Then 實例或事實核對清單，作為不可妥協的規範 | 規劃期先擬定檢驗/測試情境（起草），執行後核實無誤（驗證）再做潤飾（潤飾） |
 | **交接艙** | Handoff Capsule | 儲存在微觀規劃中的 YAML 格式對話摘要與當前指引，用於抵禦 context 清除 | `planning.md` 中專門記錄當前 Session 狀態與 Pivots 的模組，方便 AI 冷啟動恢復 |
 | **分片知識庫** | Sharded Knowledge Base | 將歷史大檔案和領域知識切成標籤化的微型 Markdown 檔進行局部檢索 | 存放於 `00_Constitution/knowledge_base/`；當 Wiki/Memory 頁數過多時進行分片索引 |
 | **對抗審查** | Adversarial Audit | 由與執行者不同家族的冷啟動 Checker 模型對產出進行交叉驗收 | 避免「自我放水」；Checker 在乾淨 thread 中直接審查物理成果檔案而非依靠 AI 自行匯報 |

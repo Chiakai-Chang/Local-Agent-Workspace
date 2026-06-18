@@ -442,7 +442,7 @@ AI Agent 讀取 Prompt 後，將會依據手冊指南自動建立實體目錄（
 ### 🤝 雲地協同實例：如何具體啟動、執行與交接？
 
 1. **雲端規劃大腦 (Cloud Strategic Planning)**：
-   * 在雲端 AI（如 Claude Code 雲端、ChatGPT 等）貼上指令：
+   * 在具備檔案系統寫入權限的雲端 AI Agent（如 `Claude Code`、`Windsurf`/`Cursor` 雲端模式、`Codex`、`Agy` 等）輸入指令：
      > 「本專案採用 C.A.S.E. 框架。請閱讀專案目標，在 `01_Roadmap/roadmap.md` 中規劃開發階段，並在 `02_Task_Queue/Task_001_xxx/` 下建立任務，填寫 `recipe.md`、`role.md`。完成後將 `status.txt` 設為 `PENDING`。」
    * 雲端 AI 快速產出 Roadmap 與任務卷宗。
 

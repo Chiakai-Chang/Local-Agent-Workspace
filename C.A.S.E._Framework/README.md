@@ -133,7 +133,7 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 ### 🤝 雲地協同實例：如何具體啟動、執行與交接？
 
 1. **雲端規劃大腦 (Cloud Strategic Planning)**：
-   * 使用雲端 AI（如網頁版 ChatGPT/Claude Pro 或 Claude Code 雲端連線），給予極簡指令：
+   * 使用具備檔案系統寫入權限的雲端 AI Agent（如 `Claude Code`、`Windsurf`/`Cursor` 雲端模式、`Codex`、`Agy` 等），給予極簡指令：
      > 「本專案採用 C.A.S.E. 框架。請閱讀專案目標，在 `01_Roadmap/roadmap.md` 中規劃開發階段，並在 `02_Task_Queue/Task_001_xxx/` 下建立任務，填寫 `recipe.md`、`role.md`。完成後將 `status.txt` 設為 `PENDING`。」
    * 雲端 AI 將會拆解好任務並在本地生成資料夾，設定 `status.txt` 為 `PENDING`。
 

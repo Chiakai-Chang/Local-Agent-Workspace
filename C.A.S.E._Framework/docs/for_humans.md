@@ -76,7 +76,7 @@ C.A.S.E. 不是複雜的軟體套件，而是一套**用實體檔案管束 AI �
 為了讓您更清楚「雲端規劃」與「地端執行」具體如何分工、下什麼指令，以及如何透過檔案系統完成交接，以下提供一個標準的實戰演練流程：
 
 ### 🎬 步驟一：雲端大腦啟動規劃 (Cloud Strategic Planning)
-* **工具/角色**：使用雲端 AI 助手 (如 `Claude Code`、`Windsurf` 連線雲端、或網頁版 ChatGPT/Claude Pro)。
+* **工具/角色**：使用具備檔案系統寫入權限的雲端 AI Agent (如 `Claude Code`、`Windsurf`/`Cursor` 雲端模式、`Codex`、`Agy` 等)。
 * **人類下的指令 (極簡 Prompt)**：
   > 「本專案採用 C.A.S.E. 框架。請閱讀專案目標，並在 `01_Roadmap/roadmap.md` 中規劃開發階段，接著在 `02_Task_Queue/Task_001_initial_scaffold/` 下建立任務卷宗，填寫 `recipe.md` 與 `role.md`。完成後將 `status.txt` 設為 `PENDING`。」
 * **雲端 AI 的動作**：

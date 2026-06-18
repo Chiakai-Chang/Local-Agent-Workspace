@@ -24,6 +24,7 @@ You are a **C.A.S.E. Executor Agent**. You must obey the following boundaries at
    - Run unit tests immediately after edits to verify behavior.
    - For every tool call or action you perform (e.g. read_file, edit, test run), append a JSON log entry to `action_log.jsonl` in your task folder.
    - Format: `{"ts": "ISO_8601_TIMESTAMP", "role": "worker", "tool": "tool_name", "args": {...}, "result": "ok/error"}`
+   - **Weak Model Fallback**: If generating JSONL triggers syntax issues, you may instead record tool call logs as simple markdown bullets inside a `log.md` file in the task directory.
 
 4. **Information Isolation**:
    - Do not search the external web or read unrelated directories unless explicitly authorized in `recipe.md > Input Sources`.
@@ -79,3 +80,70 @@ To optimize context window efficiency and minimize VRAM footprint on local devic
 
 3. **Human-Facing Decompression Boundary**:
    - Any file read by humans (e.g., `output.md`, `README.md`, or chat responses) MUST be in natural human language (Traditional Chinese or English).
+
+---
+
+## 5. C.A.S.E. Pure-Text Scaffolding Blueprint
+
+When asked to initialize a new task folder (e.g., `02_Task_Queue/Task_<NNN>_<slug>/`), you MUST create the following four files verbatim:
+
+### A. File: `status.txt`
+```text
+PENDING
+```
+
+### B. File: `role.md`
+```markdown
+You are a [Insert Target Persona Role]. Your objective is to: [Brief target task goal].
+```
+
+### C. File: `recipe.md`
+```markdown
+# Task Recipe: [Task Title]
+
+## Objective
+[Clear explanation of what the task must achieve]
+
+## Input Sources
+- [Paths to read-only inputs or files that are allowed to be analyzed]
+
+## Output Specification
+- [Path and structure of files that must be created or modified]
+
+## Local Definition of Done (DoD)
+- [ ] Checklist item 1
+- [ ] Checklist item 2
+- [ ] Checklist item 3 (Must include verification test commands)
+
+## Constraints
+- Do not modify files outside: [List files]
+```
+
+### D. File: `planning.md`
+```markdown
+# 📝 Task Micro-Plan: Task_[NNN]_[slug]
+
+## [T] Constraints & Truths (Context & Anti-Repetition)
+- No modifications outside recipe boundaries.
+- Read learnings.md before executing.
+- Anti-Repetition Check: Review learnings.md to avoid repeating known mistakes.
+
+## [H] Compaction & Handoff Capsule (YAML syntax)
+```yaml
+session_summary: |
+  Describe the current progress and architecture decisions made so far to survive context compaction/reset.
+active_pivot_point: |
+  Name of the specific function, file, or test currently being worked on.
+pending_blockers: []
+```
+
+## [A] Planned Actions (BDD Flows / Spec-by-Example)
+- [A] Define acceptance criteria as Cucumber-like scenarios (Given-When-Then).
+- [A] Implement target logic incrementally (Red-Green-Refactor pipeline).
+- [A] Perform self-review and clean up code debt.
+
+## [V] Verification & Acceptance Criteria
+- [V] Verify Given-When-Then scenarios pass successfully.
+- [V] Confirm all checkboxes in recipe.md DoD are completed.
+```
+```

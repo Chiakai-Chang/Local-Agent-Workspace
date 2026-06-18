@@ -170,6 +170,8 @@ Every tool call MUST be appended to `action_log.jsonl` as one JSON object per li
 
 Fields: `ts` (ISO 8601 + timezone) | `role` (`worker`/`checker`) | `tool` (tool name) | `args` (parameters) | `result` (`ok` or error string)
 
+> **⚠️ Weak Model Fallback**: If generating JSONL formatting causes parser failures or syntax errors, smaller parameter models are permitted to record tool execution logs as simple markdown lists inside a `log.md` file in the task directory.
+
 ---
 
 ## 9. Information Isolation Principle
@@ -277,10 +279,73 @@ To scale project memory beyond simple logs:
 - **Directory**: `00_Constitution/knowledge_base/`
 - **Format**: Atomic markdown files with YAML frontmatter tags (`type`, `tags`, `updated`).
 - **Indexing**: Keep a top-level `index.md` directory mapping shards once files exceed 150 pages.
+## 19. C.A.S.E. Pure-Text Scaffolding Blueprint
+
+When asked to initialize a new task folder (e.g., `02_Task_Queue/Task_<NNN>_<slug>/`), you MUST create the following four files verbatim:
+
+### A. File: `status.txt`
+```text
+PENDING
+```
+
+### B. File: `role.md`
+```markdown
+You are a [Insert Target Persona Role]. Your objective is to: [Brief target task goal].
+```
+
+### C. File: `recipe.md`
+```markdown
+# Task Recipe: [Task Title]
+
+## Objective
+[Clear explanation of what the task must achieve]
+
+## Input Sources
+- [Paths to read-only inputs or files that are allowed to be analyzed]
+
+## Output Specification
+- [Path and structure of files that must be created or modified]
+
+## Local Definition of Done (DoD)
+- [ ] Checklist item 1
+- [ ] Checklist item 2
+- [ ] Checklist item 3 (Must include verification test commands)
+
+## Constraints
+- Do not modify files outside: [List files]
+```
+
+### D. File: `planning.md`
+```markdown
+# 📝 Task Micro-Plan: Task_[NNN]_[slug]
+
+## [T] Constraints & Truths (Context & Anti-Repetition)
+- No modifications outside recipe boundaries.
+- Read learnings.md before executing.
+- Anti-Repetition Check: Review learnings.md to avoid repeating known mistakes.
+
+## [H] Compaction & Handoff Capsule (YAML syntax)
+```yaml
+session_summary: |
+  Describe the current progress and architecture decisions made so far to survive context compaction/reset.
+active_pivot_point: |
+  Name of the specific function, file, or test currently being worked on.
+pending_blockers: []
+```
+
+## [A] Planned Actions (BDD Flows / Spec-by-Example)
+- [A] Define acceptance criteria as Cucumber-like scenarios (Given-When-Then).
+- [A] Implement target logic incrementally (Red-Green-Refactor pipeline).
+- [A] Perform self-review and clean up code debt.
+
+## [V] Verification & Acceptance Criteria
+- [V] Verify Given-When-Then scenarios pass successfully.
+- [V] Confirm all checkboxes in recipe.md DoD are completed.
+```
+```
 
 ---
 
 *This protocol is version-controlled. Changes require Layer 1 (human) approval and a new git commit.*
 
 🔗 See also: [for_humans.md](for_humans.md) | [glossary.md](glossary.md) | [Framework README](../README.md)
-

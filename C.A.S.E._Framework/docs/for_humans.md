@@ -116,6 +116,79 @@ C.A.S.E. 框架具有高度的**模組化設計**，宏觀規劃（Macro）與�
 
 ---
 
+## 3.8. 🔒 唯讀寫入防禦 (Write Defense) 的自動化藍圖
+
+因為 C.A.S.E. 框架為純文字設計，不強制在您的專案庫中包含任何專屬的程式腳本，我們建議在您的版本控制系統（例如 Git Hook 或 CI/CD 流程）中實施**唯讀寫入防禦**。這能防止 AI 助手在未經授權的情況下修改憲法目錄 `00_Constitution/` 或路線圖目錄 `01_Roadmap/`。
+
+以下提供兩種開箱即用的安全防禦範本：
+
+### 1️⃣ GitHub Actions 寫入防禦工作流 (`.github/workflows/case-defense.yml`)
+在專案中建立此工作流檔案。當 PR 被提交時，若偵測到非授權角色修改了 `00_Constitution/` 或 `01_Roadmap/` 且未經人類核准，CI 將會自動阻擋合併：
+
+```yaml
+name: C.A.S.E. Write Defense
+
+on:
+  pull_request:
+    paths:
+      - '00_Constitution/**'
+      - '01_Roadmap/**'
+
+jobs:
+  check-authorization:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Change Authorization
+        run: |
+          # 檢查 PR 是否有 'human-approved' 標籤
+          LABELS=$(curl -s "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" | jq -r '.labels[].name')
+          
+          if [[ ! "$LABELS" =~ "human-approved" ]]; then
+            echo "::error::偵測到唯讀目錄變更，且未附加 'human-approved' 標籤！"
+            exit 1
+          fi
+          echo "變更已通過人類審查授權。"
+```
+
+### 2️⃣ 本地 Git Pre-commit 鉤子腳本 (`.git/hooks/pre-commit`)
+在本地端，您可以將以下內容寫入 `.git/hooks/pre-commit`（並執行 `chmod +x`），以防本地 AI 助手（如 Cursor、Gemini CLI）在您不知情的情況下修改了憲法或路線圖：
+
+```bash
+#!/bin/bash
+
+# 獲取暫存區中即將提交的修改檔案列表
+CHANGED_FILES=$(git diff --cached --name-only)
+
+# 唯讀目錄清單
+READONLY_DIRS=("00_Constitution/" "01_Roadmap/")
+
+VIOLATION=0
+for FILE in $CHANGED_FILES; do
+  for DIR in "${READONLY_DIRS[@]}"; do
+    if [[ "$FILE" == "$DIR"* ]]; then
+      # 如果未設定特定繞過變數（代表非人類授權），則報錯
+      if [ -z "$CASE_HUMAN_BYPASS" ]; then
+        echo "❌ 錯誤：AI/指令試圖修改唯讀目錄下的檔案: $FILE"
+        VIOLATION=1
+      fi
+    fi
+  done
+done
+
+if [ $VIOLATION -eq 1 ]; then
+  echo "👉 若您是人類開發者且確實需要修改，請設定環境變數後再 commit："
+  echo "   CASE_HUMAN_BYPASS=1 git commit -m 'your message'"
+  exit 1
+fi
+```
+
+---
+
 ## 4. 如何在您現有的專案中快速使用？
 
 C.A.S.E. 提供兩種引入方式，您可以根據您的安全限制與工作習慣自由選擇：

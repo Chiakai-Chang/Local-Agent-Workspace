@@ -333,6 +333,23 @@ export function verifyTraceLog(actionTrace: any[], expectedFiles: string[]): boo
 }
 ```
 
+### 🌿 Pillar E: Isolated Workspace Branching (Git Worktree Sandboxing)
+To prevent parallel workers or developers from polluting the root repository or overwriting changes, the Harness supports **Git Worktree Isolation**:
+1. **Automated Setup**: When a task's status transitions to `IN_PROGRESS`, the Harness can automatically spawn a git worktree at `worktrees/Task_<NNN>_<slug>/` bound to a temporary branch (`task/Task_<NNN>_<slug>`).
+2. **Observation Linking**: The Harness uses filesystem Junctions (Windows) or Symlinks (Linux/macOS) to link the shared `.case/` configurations and metrics folder into the isolated worktree, preserving central logging and active context.
+3. **Automated Finalization**: Upon successful verification and Checker transition to `DONE`, the Harness merges the worktree branch into the integration branch, cleans up the worktree folder, and deletes the temporary branch, maintaining a zero-clutter root.
+
+### 🗳️ Pillar F: Multi-Agent Consensus Checking (Checker Voting)
+To eliminate the logical blindspots and hallucinations of a single checker agent (especially for critical tasks like security modifications or core database migrations), the Harness supports **Consensus-Based Verification**:
+1. **Critical Flag Check**: If a task's recipe contains the metadata flag `critical: true`, the Harness bypasses single-checker validation.
+2. **Consensus Panel**: The Harness queries three separate checker instances with varying inference temperatures (e.g. `T=0.5`, `T=0.7`, `T=0.9`) to decorrelate validation errors (using the MAKER consensus algorithm).
+3. **Consensus Rule**: The task state transitions to `DONE` if and only if a majority ($k \ge 2$) of the checker instances vote `Approve`. Otherwise, the aggregated failure feedback is written to `feedback.md` and returned to `PENDING`.
+
+### 🛡️ Pillar G: Task Queue Scope Guard (Avoiding Queue Bloat)
+Worker agents experiencing execution blocks can trigger task queue bloat by injecting endless recursive subtasks via `create_subtask`. The Harness enforces a **Deterministic Scope Guard**:
+1. **Context Comparison**: When `create_subtask` is called, the Harness interceptor compares the subtask's `recipe.md` objective against the project's global `01_Roadmap/roadmap.md` and `00_Constitution/core.md`.
+2. **Constraint Enforcement**: If the subtask attempts to implement features outside the parent sprint boundaries (feature creep) or the task queue depth exceeds a threshold (e.g., maximum queue depth of 3), the Harness blocks the subtask creation, rejects the Worker's task, and transitions the state immediately to `ESCALATED` for human triage.
+
 ---
 
 ## 6. Summary of Optimization Benefits

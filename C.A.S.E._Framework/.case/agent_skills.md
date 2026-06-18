@@ -75,7 +75,7 @@ To optimize context window efficiency and minimize VRAM footprint on local devic
    - Avoid conversational filler. Use direct operator chaining (`=>` or `⇒`).
 
 2. **Weak Model Fallback**:
-   - If you are a smaller model (e.g., 8B/14B parameters) and struggle to follow the bracketed shorthand, you MUST fall back to highly structured natural language. Do not get stuck in formatting loops.
+   - If you are a smaller or lighter parameter model and struggle to follow the bracketed shorthand, you MUST fall back to highly structured natural language. Do not get stuck in formatting loops.
 
 3. **Human-Facing Decompression Boundary**:
    - Any file read by humans (e.g., `output.md`, `README.md`, or chat responses) MUST be in natural human language (Traditional Chinese or English).

@@ -190,10 +190,12 @@ C.A.S.E. 框架是「為什麼要這樣建構本地 AI」的**哲學基礎**，�
 ```
 [ 您的目標 (憲法) ]
         ↓
-[ 雲端前沿 AI 規劃 (宏觀層) ]
+[ 宏觀規劃角色 (Strategic Planner) ]
         ↓
-[ Local-Agent-Workspace → Pi Agent → OmniHeal (微觀執行層) ]
+[ 微觀執行與驗收 (Tactical Executor & Checker) ]
 ```
+
+*(註：本架構不限定任何模型參數大小或部署拓撲。這兩層角色可以完全由本機同一個模型（例如本機單一 27B/32B 模型）跑完全流程；亦能透過「雲地混合」由雲端大模型規劃宏觀 Roadmap，再由本地端模型（如 Local-Agent-Workspace + Pi Agent + OmniHeal 生態系）專注於微觀執行與安全驗收，在資料隱私與性價比之間取得最佳平衡。)*
 
 ---
 

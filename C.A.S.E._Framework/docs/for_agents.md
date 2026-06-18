@@ -16,7 +16,7 @@ These axioms are the foundation of C.A.S.E. Violating any axiom is a critical er
 | **Tiered Intelligence** | Executor agents MUST NOT attempt macro-level planning or change the Roadmap. Only interpret and execute the assigned Atomic Task Package. |
 | **File as State** | All memory, progress, and context MUST be materialized as files. Never rely on conversational context as the sole source of truth. |
 | **Dual-track Verification** | Worker (Executor) and Checker (Verifier) roles MUST be separate. A Worker MUST NOT self-approve its own output as final. |
-| **Weak Model Resilience** | Pre-defined I-Lang soft-hybrid syntax is optional. If local/weak models (e.g., 8B parameters) struggle with shorthand (`[T]`, `[A]`, `[V]`), they MUST fall back to structured natural language. |
+| **Weak Model Resilience** | Pre-defined I-Lang soft-hybrid syntax is optional. If smaller/weaker models (e.g., lightweight open-source models) struggle with shorthand (`[T]`, `[A]`, `[V]`), they MUST fall back to structured natural language. |
 | **Git-Backed Integrity** | Any unauthorized write attempts to read-only directories (`00_Constitution/`, `01_Roadmap/`) will trigger an automatic security rollback by the controller. |
 
 

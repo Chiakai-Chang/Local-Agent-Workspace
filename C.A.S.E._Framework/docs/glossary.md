@@ -28,8 +28,8 @@
 | 名詞（中文） | 英文術語 | 人類理解 | AI 執行定義 |
 |------------|---------|---------|-----------|
 | **制憲者** | Architect / Constitution Author | 專案的總指揮，決定最高目標與禁止事項 | 人類使用者；唯一可修改 `00_Constitution/` 的對象 |
-| **宏觀層 / 指揮所** | Macro Layer / Strategic Planning Layer | 智囊團，負責看全局、出計畫、訂結案標準，但不碰具體案件資料 | Layer 2 角色；可由雲端大模型（Claude、Gemini、GPT 等）或本機大型高參數量模型（如 70B+）擔任；負責生成 Roadmap 與 Task Packages |
-| **微觀層 / 基層執行** | Micro Layer / Tactical Execution Layer | 基層調查員，領到任務卷宗，照指引辦事，資料絕不外流 | Layer 3 角色；可由本地開源模型（如 Llama 等 8B）或雲端輕量模型擔任；操作範圍限於當前 Task 資料夾 |
+| **宏觀層 / 指揮所** | Macro Layer / Strategic Planning Layer | 智囊團，負責看全局、出計畫、訂結案標準，但不碰具體案件資料 | Layer 2 角色；可由任何旗艦模型、高推理能力模型或專用規劃 Prompt 擔任；負責生成 Roadmap 與 Task Packages |
+| **微觀層 / 基層執行** | Micro Layer / Tactical Execution Layer | 基層調查員，領到任務卷宗，照指引辦事，資料絕不外流 | Layer 3 角色；可由任何開源模型、輕量模型或專用執行 Prompt 擔任（與宏觀層可以是同一個模型）；操作範圍限於當前 Task 資料夾 |
 | **執行者** | Worker Agent | 負責執行工作、寫成果報告的基層人員 | 讀取 recipe.md → 撰寫微觀規劃（planning.md）→ 處理 inputs/ → 寫入 output.md → 呼叫 submit_for_review |
 | **驗收者** | Checker Agent | 負責審查成果是否符合驗收標準的品管人員 | 讀取 recipe.md 的 Local DoD → 核對 output.md → 核准或退件 |
 

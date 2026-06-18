@@ -8,33 +8,50 @@
 
 ---
 
-## 一分鐘看懂架構
+## 一分鐘看懂架構 (C.A.S.E. 2.0)
 
 ```mermaid
 graph TD
-    H["👤 人類 / 制憲者<br/>定義最終目標與最高原則"]
-    C["🤖 宏觀層 AI 大腦<br/>（雲端旗艦模型 或 本地高參數量模型）"]
-    TQ[("📁 工作區 / Task Queue")]
-    T1["📂 卷宗 Task_01"]
-    T2["📂 卷宗 Task_02"]
-    TN["📂 ..."]
-    LA["🤖 微觀層 AI 手腳<br/>（本地開源小模型 或 輕量雲端模型）"]
-    AGG["🔍 全局聚合審查"]
-    DONE["✅ 全案結束"]
+    H["👤 人類 / 制憲者<br/>定義憲法與最終目標"]
+    C["🤖 宏觀大腦 (Cloud/70B)<br/>拆解任務與定義 Roadmap"]
+    TQ[("📁 任務佇列 Task Queue")]
+    T1["📂 任務卷宗 Task_01<br/>(status.txt / planning.md)"]
+    
+    %% case.py 媒介
+    CTRL["🛠️ 控制座 case.py<br/>(物理狀態引擎 / 安全守衛)"]
+    
+    LA["🤖 微觀手腳 (Local/8B)<br/>按 recipe 執行並測試"]
+    CH["🛡️ Checker 驗收者<br/>(審查 output.md)"]
+    
+    %% 安全防禦
+    SEC{"🔍 安全防禦 (Git Diff)"}
+    REVERT["🛡️ 安全回滾 (git restore)<br/>任務掛起 (ESCALATED)"]
+    
+    %% 記憶體
+    HOT[("🧠 熱學習 learnings.md<br/>(<40行)")]
+    COLD[("🗄️ 冷記憶 archive_learnings.md")]
+    
+    DONE["✅ 結案 DONE / Git Commit"]
 
-    H -->|"① 憲法：核心目標與禁止事項"| C
-    C -->|"② 宏觀：拆任務包 + 訂全案驗收標準"| TQ
+    %% 流程線
+    H -->|"① 定義憲法/核心目標"| C
+    C -->|"② 宏觀規劃生成任務"| TQ
     TQ --> T1
-    TQ --> T2
-    TQ --> TN
-    T1 -->|"③ 微觀：認領與細部規劃，照指引執行"| LA
-    LA -->|"寫入成果 + 更新狀態"| T1
-    T2 --> LA
-    T1 -->|"④ 單點驗收通過"| AGG
-    T2 --> AGG
-    AGG -->|"達到全案標準"| DONE
-    AGG -->|"⑥ 宏觀：缺少拼圖，開新階段"| C
-    LA -->|"⑤ 微觀：發現缺口，直接回饋新任務"| TQ
+    
+    %% Worker 執行
+    T1 -->|"③ 認領: case.py start"| CTRL
+    CTRL -->|"④ 產生 role/planning"| LA
+    LA -->|"⑤ 提交: case.py submit"| CTRL
+    CTRL -->|"⑥ 自動 Git Commit (REVIEW)"| CH
+    
+    %% Checker 與安全
+    CH -->|"⑦ 核實: case.py check"| SEC
+    SEC -->|"有毒寫入 (修改唯讀目錄)"| REVERT
+    SEC -->|"通過安全審查"| HOT
+    
+    %% 記憶整理與結案
+    HOT -->|"⑧ 超限 40 行自動整理"| COLD
+    HOT -->|"⑨ 標記 DONE"| DONE
 ```
 
 ---

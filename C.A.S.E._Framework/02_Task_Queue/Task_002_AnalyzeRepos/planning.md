@@ -27,7 +27,7 @@ Identify features that align with the C.A.S.E. philosophy (pure-text, decoupled,
 ## Step 4: Propose & Implement Optimizations for C.A.S.E.
 Formulate concrete enhancements to:
 - Task Queue planning templates (`planning.md`, `recipe.md`).
-- Security/integrity checks in `case.py` / `case.ps1`.
+- Security/integrity checks and guidelines.
 - Documentation rules for AI-first BDD validation or sleeping/background execution patterns.
 Implement them in the codebase.
 

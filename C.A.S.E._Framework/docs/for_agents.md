@@ -219,21 +219,7 @@ Git integration is **strongly recommended** but not mandatory. It provides the i
 - Upon Checker approval and transition to `DONE`, commit the finalized task folder (`git commit -m "task(Task_<NNN>): <slug> completed"`).
 - Optionally trigger `git push` if configured to sync with a remote repository.
 
-> **Note**: These operations can be performed manually by the user, automated via CI/CD pipelines, or assisted by the optional helper scripts. The protocol does not require any specific automation mechanism.
-
----
-
-## 12. Optional Helper Scripts — Reference Implementations
-
-> **⚠️ IMPORTANT**: These scripts are **optional reference implementations**, not mandatory components. The C.A.S.E. protocol is a **pure-text declarative specification**. Agents can (and should) operate by directly reading/writing the standard files (`status.txt`, `output.md`, `planning.md`, etc.) without any script dependency.
-
-For convenience, the repository provides `.case/case.py` (Python) and `.case/case.ps1` (PowerShell) as zero-dependency helpers:
-- **Initialize**: `python .case/case.py init "[optional mission goal]"` — Bootstraps folder structures.
-- **Start Task**: `python .case/case.py start <task_id>` — Transitions status to `IN_PROGRESS`, scaffolds `planning.md` template.
-- **Submit Task**: `python .case/case.py submit <task_id> "<one-line summary>"` — Sets status to `REVIEW`. Use `--commit` flag to optionally auto-commit.
-- **Check Task**: `python .case/case.py check <task_id>` — Performs Checker-level validation. Use `--commit` flag to optionally auto-commit.
-
-**Without scripts** (pure-text approach): Agents directly write `IN_PROGRESS` to `status.txt`, create `planning.md`, write `output.md`, then change status to `REVIEW` — all via standard file I/O.
+> **Note**: These operations can be performed manually by the user or automated via CI/CD pipelines. The protocol does not require any specific automation mechanism.
 
 ---
 

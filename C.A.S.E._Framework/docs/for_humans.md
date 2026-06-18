@@ -133,20 +133,6 @@ C.A.S.E. 提供兩種引入方式，您可以根據您的安全限制與工作�
 
 ---
 
-### 🛠️ 可選方式 B：使用輔助 CLI 控制工具自動化管理
-如果您不介意使用輔助腳本，並且希望對「認領、提交、驗收與 Git 提交」進行一鍵自動化管理，我們提供了一個不到 300 行的零依賴 Python/PowerShell 控制腳本作為**「參考實現（Reference Implementation）」**：
-
-1. **複製 `.case/` 目錄**：
-   將框架的 `.case/` 目錄（包含 `case.py` 與 `case.ps1`）複製到您的專案根目錄。
-2. **一鍵初始化**：
-   執行 `python .case/case.py init`，腳本會自動分析專案結構、引導您設定大目標，並生成 initial files。
-3. **任務管理指令（預設去侵入性，不強行干涉您的 Git）**：
-   * **認領並開始任務**：`python .case/case.py start <task_id>`（標記 `IN_PROGRESS` 並產生規劃範本）。
-   * **完成並提交審核**：`python .case/case.py submit <task_id> "msg"`（更新狀態至 `REVIEW`。加上 `--commit` / `-c` 參數可由腳本代勞 git commit，否則預設跳過 git commit 以尊重您的自建工作流）。
-   * **審查驗收**：`python .case/case.py check <task_id>`（Checker 自動執行：防寫防毒審計、DoD 檢查、Hot/Cold 學習日誌冷熱整理、標記 `DONE`。加上 `--commit` / `-c` 參數可自動執行 Git 結案存檔）。
-
----
-
 🔗 **相關文件**：
 - [AI 專屬執行協定 (System Protocol)](for_agents.md)
 - [Harness 控制座優化設計](harness_engineering.md)

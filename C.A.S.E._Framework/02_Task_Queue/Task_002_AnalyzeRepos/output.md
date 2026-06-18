@@ -52,11 +52,9 @@ This report analyzes six target repositories to extract key software engineering
 
 We have implemented the following upgrades to the C.A.S.E. Framework:
 
-1.  **Updated `case_start` Planning Template (`case.py` & `case.ps1`)**:
-    *   Added a `[H] Handoff & Compaction Capsule` section.
-    *   Added a BDD-style `[V] Executable Acceptance Scenarios` section (Spec-by-example).
-2.  **Enriched the C.A.S.E. Constitution & Core Rules (`docs/for_agents.md`, `.cursorrules`)**:
+1.  **Enriched the C.A.S.E. Constitution & Core Rules (`docs/for_agents.md`, `.cursorrules`)**:
     *   Defined the **Cross-Model Adversarial Protocol** for Worker/Checker separation.
     *   Introduced the **Sharded Knowledge Base Standard** under `00_Constitution/knowledge_base/` for scalable memories.
     *   Defined the **Anti-Repetition Memory Check** rules.
     *   Defined the **Roadmap Reconcile Cascade** protocol.
+    *   Added standard BDD-style Given-When-Then and Handoff capsule guidelines.

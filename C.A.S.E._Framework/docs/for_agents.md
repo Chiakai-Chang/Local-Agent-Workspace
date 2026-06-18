@@ -1,8 +1,9 @@
 # C.A.S.E. Framework — System Protocol for AI Agents
 
-> **Audience:** AI agents (Coding Agents, local LLMs, automated tools) operating within the C.A.S.E. framework.
+> **Audience:** AI agents (Coding Agents, local LLMs, cloud models, automated tools) operating within the C.A.S.E. framework.
 > **Language:** English (to maximize instruction-following compliance across all LLM backends).
-> **Authority:** This document is a Layer 2 (Macro Layer) protocol. It MUST be followed by all Layer 3 (Micro Layer) agents.
+> **Authority:** This document is a Macro Layer (Architect Role) protocol. It MUST be followed by all Micro Layer (Executor/Worker Role) agents.
+> **Compatibility:** Model-Agnostic. Fully supports Full-Cloud, Full-Local, and Hybrid cloud-local topologies.
 
 ---
 
@@ -12,9 +13,9 @@ These three axioms are the foundation of C.A.S.E. Violating any axiom is a criti
 
 | Axiom | Rule |
 |-------|------|
-| **Tiered Intelligence** | Layer 3 agents MUST NOT attempt macro-level planning. Only interpret and execute the assigned Atomic Task Package. |
+| **Tiered Intelligence** | Executor agents MUST NOT attempt macro-level planning or change the Roadmap. Only interpret and execute the assigned Atomic Task Package. |
 | **File as State** | All memory, progress, and context MUST be materialized as files. Never rely on conversational context as the sole source of truth. |
-| **Dual-track Verification** | Worker and Checker roles MUST be separate. A Worker MUST NOT self-approve its own output as final. |
+| **Dual-track Verification** | Worker (Executor) and Checker (Verifier) roles MUST be separate. A Worker MUST NOT self-approve its own output as final. |
 
 ---
 
@@ -125,10 +126,11 @@ Upon receiving a task (status = `PENDING`):
 1. **Set status** to `IN_PROGRESS` using `change_status`.
 2. **Load role**: Read `role.md` and apply as effective system persona.
 3. **Read recipe**: Parse all sections of `recipe.md`. If any required section is missing, call `escalate_issue("recipe.md missing required section: <section_name>")`.
-4. **Read inputs**: Process only files listed in `recipe.md > Input Sources`.
-5. **Execute**: Produce the artifact defined in `recipe.md > Output Specification`.
-6. **Write output**: Use `write_artifact("output.md", <content>)`.
-7. **Submit**: Call `submit_for_review(<one-sentence summary of what was produced>)`.
+4. **Draft Micro-Plan**: Write a `planning.md` file within the task folder describing the specific steps, targeted files, and testing strategy. Double check constraints to ensure alignment.
+5. **Read inputs**: Process only files listed in `recipe.md > Input Sources`.
+6. **Execute Cautiously**: Make modifications step-by-step. Keep edits atomic. Run unit tests frequently to confirm behavior and check trace integrity.
+7. **Write output**: Use `write_artifact("output.md", <content>)`.
+8. **Submit**: Call `submit_for_review(<one-sentence summary of what was produced>)`.
 
 **On error or uncertainty:**
 - Insufficient inputs where a prerequisite task can be defined → call `create_subtask(...)` first, then `escalate_issue(...)` (see Section 10a). Do NOT skip directly to `escalate_issue`.
@@ -212,6 +214,7 @@ The orchestrating system MUST:
 - Auto-commit after every `write_artifact`: `git commit -m "agent: <role> updated <filepath> in <task_id>"`.
 - Support `revert_task(task_id)` to restore last committed state of the task folder.
 - Never expose raw git commands to agents.
+- Upon Checker approval and transition to `DONE`, the system MUST auto-commit the finalized task folder (`git commit -m "task(Task_<NNN>): <slug> completed"`) and optionally trigger `git push` if configured to sync with the remote repository.
 
 ---
 

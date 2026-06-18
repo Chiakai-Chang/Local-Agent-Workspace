@@ -68,49 +68,49 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 
 ## 🚀 3 分鐘快速上手（將 C.A.S.E 規範一鍵植入任何 AI 專案）
 
-只需簡單三步，就能將本專案的 C.A.S.E 規範無縫植入您目前的任何 AI 專案中：
+我們提供兩種極簡的導入方式。不論您想使用「一鍵 CLI 自動化」還是「純文字檔引導」，體感皆能達到最佳狀態：
+
+### 💡 推薦：方式 A（一鍵 CLI 自動引導，最省心）
+直接在您想導入的專案根目錄下，開啟終端機執行以下一行指令。這會自動下載輕量控制腳本並引導初始化：
+*   **💻 Windows (PowerShell)**:
+    ```powershell
+    mkdir -p .case; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/.case/case.py" -OutFile ".case/case.py"; python .case/case.py init
+    ```
+*   **💻 Linux / macOS / Git Bash**:
+    ```bash
+    mkdir -p .case && curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/.case/case.py -o .case/case.py && python3 .case/case.py init
+    ```
+> 💡 *說明：本指令會自動在專案中建立 `.case/case.py`，建立物理目錄，並在您的 `.cursorrules` 中寫入 C.A.S.E 規則，完全免除手動配置負擔。*
+
+### 🛡️ 方式 B（免執行代碼，純 AI 自動配置）
+如果您所在的伺服器有嚴格的安全限制，不想在終端機執行任何外來 Python 腳本：
 
 <details>
-<summary><b>1️⃣ 第一步：一鍵下載 C.A.S.E. Agent 規則手冊 (CASE_framework_for_agents.md)</b></summary>
+<summary><b>💬 展開純 AI 引導步驟</b></summary>
 
-請在您的專案根目錄下，開啟終端機並執行以下指令下載唯讀規則檔：
-* **💻 Linux / macOS / Git Bash (cURL)**:
-  ```bash
-  curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md -o CASE_framework_for_agents.md
-  ```
-* **💻 Windows (PowerShell)**:
-  ```powershell
-  Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
-  ```
-> 💡 *說明：本指令僅會下載一個唯讀的 `.md` 規則文件，完全無任何代碼執行，絕無主機安全疑慮，亦不會覆蓋您現有的任何開發檔案。*
+1. **一鍵下載 C.A.S.E. Agent 規則手冊 (CASE_framework_for_agents.md)**：
+   * **💻 Linux / macOS**:
+     ```bash
+     curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md -o CASE_framework_for_agents.md
+     ```
+   * **💻 Windows (PowerShell)**:
+     ```powershell
+     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
+     ```
+2. **給您的 AI Agent 貼上引導 Prompt**：
+   > 「請閱讀我專案中的 [CASE_framework_for_agents.md](CASE_framework_for_agents.md) 文件。閱讀後，請分析我目前的專案結構，規劃如何以最合適的方式為本專案建立 C.A.S.E 物理目錄結構（包含 Constitution、Roadmap、Task_Queue 任務資料夾），並將此執行期規則妥善整合寫入您的長效記憶配置中（例如 `CLAUDE.md`、`.cursorrules` 等對應位置）。在建立目錄與寫入配置前，請先向我報告您的規劃並取得我的同意。」
+3. **確認 AI 的配置**：
+   AI Agent 將會自己動手完成目錄建立與長效記憶注入。
 </details>
 
-<details>
-<summary><b>2️⃣ 第二步：給您的 AI Agent 貼上引導 Prompt</b></summary>
+---
 
-啟動您的 AI 輔助軟體（如 `Claude Code`、`Codex`、`Antigravity CLI`、`Pi`，或是 `Cursor` 等，若是 Cursor 則可使用 `@` 參照此檔案），貼上以下 Prompt 給它：
+### 🛠️ 任務生命週期管理指令
 
-> 「請閱讀我專案中的 [CASE_framework_for_agents.md](CASE_framework_for_agents.md) 文件。閱讀後，請分析我目前的專案結構，規劃如何以最合適的方式為本專案建立 C.A.S.E 物理目錄結構（包含 Constitution、Roadmap、Task_Queue 任務資料夾），並將此執行期規則妥善整合寫入您的長效記憶配置中（例如 `CLAUDE.md`、`.cursorrules`、`gemini.md` 或 `memory.md` 等對應位置）。在建立目錄與寫入配置前，請先向我報告您的規劃並取得我的同意。」
-</details>
-
-<details>
-<summary><b>3️⃣ 第三步：檢閱並同意 AI 的自動配置</b></summary>
-AI Agent 讀取 Prompt 後，將會**自己動手**完成：
-1. 分析您目前的程式語言與專案結構。
-2. 自動建立 `00_Constitution/`、`01_Roadmap/` 與 `02_Task_Queue/` 等實體目錄。
-3. 自動將 C.A.S.E. 執行期規則妥善整合寫入到您的本機長效記憶配置中（如 `.cursorrules`）。
-
-您只需確認同意，AI 就能幫您全部設定妥當！完全不需要您手動搬移任何檔案，安全、乾淨且優雅！
-</details>
-
-<details>
-<summary><b>🛠️ 選擇性進階：使用微型控制工具 (.case/case.py) 進行流程自動化</b></summary>
-
-為提升開發體驗，本專案提供零依賴的微型控制腳本 `.case/case.py`，協助您與 AI 進行狀態流轉、自動提交與安全稽核：
-* **認領任務**：`python .case/case.py start Task_001_InitialScan` -> 自動將狀態設為執行中，並產生 `planning.md` 模板。
-* **提交任務**：`python .case/case.py submit Task_001_InitialScan "完成掃描"` -> 自動設為審核中，並產生 Git commit。
-* ** Checker 核實**：`python .case/case.py check Task_001_InitialScan` -> Checker 自動執行：比對唯讀目錄防篡改（安全攔截）、DoD 規範檢查、Hot/Cold 學習日誌超載轉移，通過後自動結案並 Git 存檔。
-</details>
+初始化完成後，不論是您還是 AI Agent，都能使用 `.case/case.py` 旗下的指令，以極簡的交互來推動任務進度：
+*   **認領並開始任務**：`python .case/case.py start <task_id>`（自動將狀態改為執行中，並產生 `planning.md` 規劃模板）。
+*   **完成並提交審核**：`python .case/case.py submit <task_id> "<summary>"`（自動改為審核中，並產生 Git commit）。
+*   **Checker 審查與冷熱記憶維護**：`python .case/case.py check <task_id>`（Checker 自動執行：比對唯讀目錄防篡改、DoD 規範檢查、Hot/Cold 學習日誌超載轉移，通過後自動結案並 Git 存檔）。
 
 ---
 

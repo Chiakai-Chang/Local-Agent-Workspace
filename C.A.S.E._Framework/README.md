@@ -23,7 +23,7 @@ graph TD
     LA["🤖 微觀手腳 (Local/8B)<br/>按 recipe 執行並測試"]
     CH["🛡️ Checker 驗收者<br/>(審查 output.md)"]
     
-    %% 安全防禦
+    %% 安全防禦與掛起
     SEC{"🔍 安全防禦 (Git Diff)"}
     REVERT["🛡️ 安全回滾 (git restore)<br/>任務掛起 (ESCALATED)"]
     
@@ -38,9 +38,13 @@ graph TD
     C -->|"② 宏觀規劃生成任務"| TQ
     TQ --> T1
     
-    %% Worker 執行
+    %% Worker 執行與微觀回饋
     T1 -->|"③ 認領: case.py start"| CTRL
     CTRL -->|"④ 產生 role/planning"| LA
+    
+    LA -.->|"★ ⑤ 微觀反饋 (create_subtask)<br/>發現前提缺口直接注入新任務"| TQ
+    LA -->|"⑥ Prerequisite 缺失掛起 (ESCALATED)"| REVERT
+    
     LA -->|"⑤ 提交: case.py submit"| CTRL
     CTRL -->|"⑥ 自動 Git Commit (REVIEW)"| CH
     

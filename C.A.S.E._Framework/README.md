@@ -17,8 +17,8 @@ graph TD
     TQ[("📁 任務佇列 Task Queue")]
     T1["📂 任務卷宗 Task_01<br/>(status.txt / planning.md)"]
     
-    %% case.py 媒介
-    CTRL["🛠️ 控制座 case.py<br/>(物理狀態引擎 / 安全守衛)"]
+    %% 狀態引擎（純文字檔案 + 可選腳本）
+    CTRL["🛠️ 協定狀態引擎<br/>(status.txt / 可選腳本輔助)"]
     
     LA["🤖 微觀執行角色 (認領/執行)<br/>按 recipe 執行並測試"]
     CH["🛡️ Checker 驗收者<br/>(審查 output.md)"]
@@ -39,17 +39,17 @@ graph TD
     TQ --> T1
     
     %% Worker 執行與微觀回饋
-    T1 -->|"③ 認領: case.py start"| CTRL
+    T1 -->|"③ 認領: status→IN_PROGRESS"| CTRL
     CTRL -->|"④ 產生 role/planning"| LA
     
     LA -.->|"★ ⑤ 微觀反饋 (create_subtask)<br/>發現前提缺口直接注入新任務"| TQ
     LA -->|"⑥ Prerequisite 缺失掛起 (ESCALATED)"| REVERT
     
-    LA -->|"⑤ 提交: case.py submit"| CTRL
-    CTRL -->|"⑥ 自動 Git Commit (REVIEW)"| CH
+    LA -->|"⑤ 提交: status→REVIEW"| CTRL
+    CTRL -->|"⑥ Git Commit (可選)"| CH
     
     %% Checker 與安全
-    CH -->|"⑦ 核實: case.py check"| SEC
+    CH -->|"⑦ 核實: 驗收 DoD"| SEC
     SEC -->|"有毒寫入 (修改唯讀目錄)"| REVERT
     SEC -->|"通過安全審查"| HOT
     
@@ -72,8 +72,8 @@ graph TD
 C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體檔案強制規範 AI 的工作路徑：
 1. **工作指引 (`recipe.md`)**：規定輸入輸出檔案、驗收 checklist，AI 僅能在限定檔案內讀寫。
 2. **角色設定 (`role.md`)**：提供特定的系統 Prompt 載入。
-3. **微觀復盤與版控**：認領任務後先作細部規劃（如 `planning.md`），隨後謹慎執行， Checker 驗收後由 Harness 自動進行 git commit & push。
-4. **運行控制座 (Harness)**：在執行期監控並壓縮 Context 以節省 VRAM/Token。在任務完成時檢查 `action_log.jsonl`，確保 AI 確實執行了儲存與測試指令，不准說謊。
+3. **微觀復盤與版控**：認領任務後先作細部規劃（如 `planning.md`），隨後謹慎執行， Checker 驗收後推薦進行 git commit 存檔（可手動、CI 或可選腳本執行）。
+4. **運行控制座 (Harness)**：若採用自建 Harness，可在執行期監控並壓縮 Context 以節省 VRAM/Token。在任務完成時檢查 `action_log.jsonl`，確保 AI 確實執行了儲存與測試指令，不准說謊。
 
 ---
 
@@ -87,15 +87,15 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 
 ### 2. 🛡️ 防毒害與防寫安全防線 (Git-Backed Write Defense)
 * **痛點**：純文字引導無法真正阻止 AI 發瘋或受到外部代碼 Prompt Injection 攻擊，惡意篡改憲法 (`00_Constitution/`) 或 Roadmap。
-* **解法**：引入 Git 保底機制。當執行 `case.py check` 核實任務時，腳本會自動檢測唯讀目錄。若發現被 Worker 篡改，會**自動觸發安全回滾 (`git restore`)**，將任務設為 `ESCALATED` 阻斷毒害擴散。
+* **解法**：推薦結合 Git 版控作為保底機制。在驗收階段（無論人工或自動化），透過 `git diff` 檢測唯讀目錄是否被篡改。若發現異常，可使用 `git restore` 回滾並將任務設為 `ESCALATED` 阻斷毒害擴散。此流程可由人工操作、CI/CD Pipeline、或可選的輔助腳本執行。
 
 ### 3. 📉 弱推理模型降級適應 (Weak Model Adaptation)
 * **痛點**：部分推理能力較弱的模型（如輕量化開源模型）對高密度的 I-Lang 壓縮語法（如 `[T]`, `[A]`, `[V]`）和箭頭運算子理解力不足，易卡在格式錯誤死循環中。
 * **解法**：放寬為**軟性降級規則**。弱模型若理解困難，可自動 fallback 使用結構化自然語言編寫 `planning.md`，在大模型與弱模型間取得最佳性價比。
 
-### 4. 🎛️ 零依賴微型控制座 (case.py CLI)
+### 4. 🎛️ 可選自動化輔助工具 (Optional CLI Helper)
 * **痛點**：市面上的 Agent Harness 系統需要複雜的依賴與軟體安裝，學習與維護成本高。
-* **解法**：提供單一、不到 300 行的 Python 腳本 `.case/case.py`，免除任何第三方庫。以最簡的指令（`start`、`submit`、`check`）自動化狀態切換、安全審計與自動 Git 存檔，完美貼合**「外掛式、不破壞原始碼」**的哲學。
+* **解法**：C.A.S.E. 的核心是**純文字宣言式協定**——只要遵循資料夾結構與 `status.txt` 狀態機規則，任何 AI、任何 Harness 都能直接運作。額外提供可選的 `.case/case.py`（Python）與 `.case/case.ps1`（PowerShell）作為**參考實作**，免除任何第三方庫，以簡單指令（`start`、`submit`、`check`）輔助自動化狀態切換。您可以使用它、改寫它、或完全忽略它。
 
 ---
 
@@ -109,33 +109,18 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 
 ---
 
-## 🚀 3 分鐘快速上手（將 C.A.S.E 規範一鍵植入任何 AI 專案）
+## 🚀 3 分鐘快速上手（將 C.A.S.E. 協定無痛植入任何專案）
 
-> 🔒 **隨插即用，安全無痛 (Non-Destructive Outer-Harness)**
-> C.A.S.E 採用外掛式架構。**不論是全新的專案，還是已經有大量代碼的現有舊專案，皆可隨時、無痛導入**。它只會在專案根目錄外掛獨立的管理資料夾，**絕對不會搬移或破壞您現有的原始碼目錄結構**。
+> 🔒 **隨插即用，無痛外掛 (Non-Destructive Outer-Harness)**
+> C.A.S.E. 是一套**純文字聲明式協定**。它只在專案目錄外掛獨立的管理資料夾，**絕對不會搬移或破壞您現有的任何原始碼**。您可以完全不執行任何腳本程式碼，僅靠文字檔案和 AI 協定約束來運行。
 
 ---
 
-### 💡 推薦：方式 A（一鍵 CLI 自動引導，最省心）
-直接在您想導入的專案根目錄下，開啟終端機執行以下一行指令。這會自動下載輕量控制腳本並引導初始化：
-*   **💻 Windows (PowerShell)**:
-    ```powershell
-    mkdir -p .case; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/.case/case.py" -OutFile ".case/case.py"; python .case/case.py init
-    ```
-*   **💻 Linux / macOS / Git Bash**:
-    ```bash
-    mkdir -p .case && curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/.case/case.py -o .case/case.py && python3 .case/case.py init
-    ```
-> 💡 *說明：本指令會自動在專案中建立 `.case/case.py`，建立物理目錄，並在您的 `.cursorrules` 中寫入 C.A.S.E 規則，完全免除手動配置負擔。*
+### 💡 推薦：方式 A（純文字聲明式配置，零代碼依賴，相容性最高）
+如果您所在的伺服器有嚴格的安全限制，不想在終端機執行任何外來腳本，或者有自己既有的專案 Control Harness，請使用此方式：
 
-### 🛡️ 方式 B（免執行代碼，純 AI 自動配置）
-如果您所在的伺服器有嚴格的安全限制，不想在終端機執行任何外來 Python 腳本：
-
-<details>
-<summary><b>💬 展開純 AI 引導步驟</b></summary>
-
-1. **一鍵下載 C.A.S.E. Agent 規則手冊 (CASE_framework_for_agents.md)**：
-   * **💻 Linux / macOS**:
+1. **一鍵下載 C.A.S.E. Agent 協定手冊 (CASE_framework_for_agents.md)**：
+   * **💻 Linux / macOS (cURL)**:
      ```bash
      curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md -o CASE_framework_for_agents.md
      ```
@@ -144,19 +129,28 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
      Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
      ```
 2. **給您的 AI Agent 貼上極簡引導 Prompt**：
-   > `請閱讀專案中的 CASE_framework_for_agents.md，並依此初始化本專案的 C.A.S.E 架構。`
-3. **確認 AI 的配置**：
-   AI Agent 將會自己動手完成目錄建立與長效記憶注入。
-</details>
+   > 「請閱讀專案中的 `CASE_framework_for_agents.md`。閱讀後，請在根目錄建立 C.A.S.E. 實體資料夾結構（`00_Constitution/`、`01_Roadmap/`、`02_Task_Queue/`），並將此協定規範寫入本機長效記憶配置中（如 `.cursorrules`、`CLAUDE.md` 或 `memory.md` 等對應位置）。設定前請先取得我的同意。」
+3. **完成配置**：
+   AI 讀取後將自行建立物理目錄並設定長效記憶，後續即可遵循 C.A.S.E. 規則進行「認領任務 $\rightarrow$ 撰寫規劃 $\rightarrow$ 修改測試 $\rightarrow$ Git版控 $\rightarrow$ 結案驗收」的純文本狀態機流轉。
 
 ---
 
-### 🛠️ 任務生命週期管理指令
+### 🛠️ 方式 B（可選：使用範例 CLI 輔助工具自動化管理）
+如果您想快速建立環境且不排斥使用輔助腳本，我們提供了一個簡單的 Python / PowerShell 控制腳本 `.case/case.py`，僅作為**「參考實現（Reference Implementation）」**輔助工具，您隨時可以使用自建的 Harness 系統替代它：
 
-初始化完成後，不論是您還是 AI Agent，都能使用 `.case/case.py` 旗下的指令，以極簡的交互來推動任務進度：
-*   **認領並開始任務**：`python .case/case.py start <task_id>`（自動將狀態改為執行中，並產生 `planning.md` 規劃模板）。
-*   **完成並提交審核**：`python .case/case.py submit <task_id> "<summary>"`（自動改為審核中，並產生 Git commit）。
-*   **Checker 審查與冷熱記憶維護**：`python .case/case.py check <task_id>`（Checker 自動執行：比對唯讀目錄防篡改、DoD 規範檢查、Hot/Cold 學習日誌超載轉移，通過後自動結案並 Git 存檔）。
+*   **一鍵下載並初始化**：
+    *   **💻 Windows (PowerShell)**:
+        ```powershell
+        mkdir -p .case; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/.case/case.py" -OutFile ".case/case.py"; python .case/case.py init
+        ```
+    *   **💻 Linux / macOS**:
+        ```bash
+        mkdir -p .case && curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/.case/case.py -o .case/case.py && python3 .case/case.py init
+        ```
+*   **輔助管理指令**：
+    *   **認領任務**：`python .case/case.py start <task_id>`（標記 `IN_PROGRESS`，自動產生 `planning.md` 模板）。
+    *   **提交審核**：`python .case/case.py submit <task_id> "<summary>"`（標記 `REVIEW`，自動執行本地狀態更新，可選執行 git commit）。
+    *   **審查驗收**：`python .case/case.py check <task_id>`（自動執行安全防毒審計、Hot/Cold 學習日誌冷熱整理、標記 `DONE`）。
 
 ---
 

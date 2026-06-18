@@ -109,7 +109,7 @@ Layer 3 agents MUST only use the following tools. No direct shell access or arbi
 |------|-----------|-------------------|
 | `read_file(filepath)` | `filepath: str` | Allowed: `00_Constitution/core.md`, `01_Roadmap/*.md`, current `Task_<NNN>/` only |
 | `list_directory(path)` | `path: str` | Same boundary as `read_file` |
-| `write_artifact(filepath, content)` | `filepath: str`, `content: str` | Current `Task_<NNN>/` only. Triggers automatic `git commit`. |
+| `write_artifact(filepath, content)` | `filepath: str`, `content: str` | Current `Task_<NNN>/` only. Recommended: follow with `git commit` (manually, via CI, or optional helper scripts). |
 | `change_status(task_id, status)` | `task_id: str`, `status: enum` | `status` MUST be one of the five allowed tokens. |
 | `submit_for_review(summary)` | `summary: str` | Sets status to `REVIEW`; notifies Checker role. |
 | `escalate_issue(reason)` | `reason: str` | Halts task; writes to `action_log.jsonl`; sets status to `ESCALATED`. |
@@ -211,25 +211,29 @@ A Worker agent that discovers a prerequisite gap during execution MUST use this 
 
 ---
 
-## 11. Git Integration Requirements
+## 11. Git Integration (Recommended Best Practice)
 
-The orchestrating system or local controller tool MUST:
-- Auto-commit after every `write_artifact`: `git commit -m "agent: <role> updated <filepath> in <task_id>"`.
-- Support `revert_task(task_id)` to restore last committed state of the task folder.
-- Never expose raw git commands to agents.
-- Upon Checker approval and transition to `DONE`, the system MUST auto-commit the finalized task folder (`git commit -m "task(Task_<NNN>): <slug> completed"`) and optionally trigger `git push` if configured to sync with the remote repository.
+Git integration is **strongly recommended** but not mandatory. It provides the integrity backbone for the Write Defense mechanism. When available, the recommended practices are:
+- Commit after significant `write_artifact` actions: `git commit -m "agent: <role> updated <filepath> in <task_id>"`.
+- Support task-level rollback via `git restore` to restore last committed state of the task folder.
+- Upon Checker approval and transition to `DONE`, commit the finalized task folder (`git commit -m "task(Task_<NNN>): <slug> completed"`).
+- Optionally trigger `git push` if configured to sync with a remote repository.
+
+> **Note**: These operations can be performed manually by the user, automated via CI/CD pipelines, or assisted by the optional helper scripts. The protocol does not require any specific automation mechanism.
 
 ---
 
-## 12. Lightweight Controller Tool — `case.py`
+## 12. Optional Helper Scripts — Reference Implementations
 
-To minimize human interaction and automate agent state changes without adding external toolchain dependencies, the environment provides `.case/case.py`. 
+> **⚠️ IMPORTANT**: These scripts are **optional reference implementations**, not mandatory components. The C.A.S.E. protocol is a **pure-text declarative specification**. Agents can (and should) operate by directly reading/writing the standard files (`status.txt`, `output.md`, `planning.md`, etc.) without any script dependency.
 
-Agents and humans should interact with the state engine using the following standard commands:
-- **Initialize**: `python .case/case.py init "[optional mission goal]"` -> Bootstraps folder structures and `.cursorrules`.
-- **Start Task**: `python .case/case.py start <task_id>` -> Transitions status to `IN_PROGRESS`, scaffolds `planning.md` template.
-- **Submit Task**: `python .case/case.py submit <task_id> "<one-line summary>"` -> Sets status to `REVIEW`, stages files, and automatically commits change log.
-- **Check Task**: `python .case/case.py check <task_id>` -> Performs Checker-level validation (DoD checks, read-only directory protection, learnings consolidation) and transitions task to `DONE`.
+For convenience, the repository provides `.case/case.py` (Python) and `.case/case.ps1` (PowerShell) as zero-dependency helpers:
+- **Initialize**: `python .case/case.py init "[optional mission goal]"` — Bootstraps folder structures.
+- **Start Task**: `python .case/case.py start <task_id>` — Transitions status to `IN_PROGRESS`, scaffolds `planning.md` template.
+- **Submit Task**: `python .case/case.py submit <task_id> "<one-line summary>"` — Sets status to `REVIEW`. Use `--commit` flag to optionally auto-commit.
+- **Check Task**: `python .case/case.py check <task_id>` — Performs Checker-level validation. Use `--commit` flag to optionally auto-commit.
+
+**Without scripts** (pure-text approach): Agents directly write `IN_PROGRESS` to `status.txt`, create `planning.md`, write `output.md`, then change status to `REVIEW` — all via standard file I/O.
 
 ---
 
@@ -239,11 +243,12 @@ To prevent rule poisoning and context window bloat, learnings are tiered into tw
 
 ### A. Hot Memory (`learnings.md`)
 - A highly condensed list of active anti-patterns and reusable patterns.
-- Read-only for Workers; writable only by Checkers or Humans during `check` validation.
-- Limited to **40 lines (approx. 15 distinct entries)**.
+- Read-only for Workers; writable only by Checkers or Humans during the review/check phase.
+- Recommended limit: **40 lines (approx. 15 distinct entries)** to maintain context window efficiency.
 
 ### B. Cold Memory Archive (`archive_learnings.md`)
-- When `learnings.md` exceeds the 40-line threshold, the oldest entries are automatically migrated to `archive_learnings.md` by `case.py check`.
+- When `learnings.md` exceeds the recommended threshold, the oldest entries should be migrated to `archive_learnings.md`.
+- This migration can be performed by: (a) a human reviewer, (b) the Checker agent itself as part of its review protocol, or (c) the optional helper scripts.
 - Used as background retrieval for macro re-planning.
 
 ---
@@ -251,10 +256,12 @@ To prevent rule poisoning and context window bloat, learnings are tiered into tw
 ## 14. Write Defense & Anti-Poisoning Enforcement
 
 If an executor agent attempts to modify any files in `00_Constitution/` or `01_Roadmap/` (other than sanctioned Checker writes):
-1. The checking controller (`case.py check`) will detect the unstaged changes in those directories via Git diff.
+1. During the verification phase, detect unauthorized changes in read-only directories via `git diff` (or manual inspection).
 2. The verification fails immediately.
-3. The controller automatically executes a Git rollback (`git restore`) on the poisoned directories.
+3. Roll back the poisoned directories using `git restore` (or equivalent version control operation).
 4. The task status transitions to `ESCALATED`, and feedback is written to `feedback.md` highlighting the security policy violation.
+
+> **Implementation options**: This defense can be enforced by (a) a human reviewer checking `git diff` before approving, (b) a CI/CD pipeline with automated checks, or (c) the optional helper scripts' `check` command.
 
 ---
 

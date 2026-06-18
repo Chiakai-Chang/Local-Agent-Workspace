@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-C.A.S.E. Framework Controller Tool (case.py)
-===========================================
-A portable, zero-dependency controller script for initialized C.A.S.E. environments.
-Supports:
-  - init: Setup directories & templates
-  - start: Pick a task, transition status, scaffold planning
-  - submit: Pre-validate output, transition status to REVIEW, git commit
-  - check: Verify read-only directories (Security Defense), parse DoD basics, transition to DONE/PENDING, perform learnings.md Hot/Cold compression.
+C.A.S.E. Framework Reference Controller Tool (case.py)
+======================================================
+[⚠️ NOTE: OPTIONAL REFERENCE IMPLEMENTATION]
+This script is a lightweight, zero-dependency reference tool provided to demonstrate
+how C.A.S.E. state transitions, Git version control, and security checks can be automated.
+It is completely OPTIONAL. Users are free to implement their own harness orchestration
+systems, use CI/CD pipelines, or perform these workflow tasks manually by editing
+the raw text/Markdown files, keeping C.A.S.E. entirely declarative and non-intrusive.
 """
 
 import os
@@ -281,7 +281,7 @@ def case_start(task_id):
         f.write(json.dumps(log_entry) + "\n")
     print(f"📝 Appended start log trace to: {log_path}")
 
-def case_submit(task_id, summary=""):
+def case_submit(task_id, summary="", commit=False):
     task_dir = os.path.join("02_Task_Queue", task_id)
     if not os.path.exists(task_dir):
         print(f"❌ Error: Task folder '{task_dir}' does not exist.")
@@ -320,16 +320,22 @@ def case_submit(task_id, summary=""):
         f.write(json.dumps(log_entry) + "\n")
 
     # Git Commit
-    git_status = run_git(["status", "--porcelain", task_dir])
-    if git_status:
-        run_git(["add", task_dir])
-        commit_msg = f"agent: worker submitted {task_id} - {summary}"
-        run_git(["commit", "-m", commit_msg])
-        print(f"💾 Automatically committed {task_id} changes to Git.")
+    if commit:
+        git_status = run_git(["status", "--porcelain", task_dir])
+        if git_status:
+            run_git(["add", task_dir])
+            commit_msg = f"agent: worker submitted {task_id} - {summary}"
+            run_git(["commit", "-m", commit_msg])
+            print(f"💾 Automatically committed {task_id} changes to Git.")
+        else:
+            print("ℹ️  No changes detected in task folder; Git commit skipped.")
     else:
-        print("ℹ️  No changes detected in task folder; Git commit skipped.")
+        print(f"ℹ️  Task status updated. Git commit skipped (run with --commit or -c to commit automatically).")
+        print(f"    You can manually commit changes using:")
+        print(f"    git add {task_dir}")
+        print(f"    git commit -m \"agent: worker submitted {task_id} - {summary}\"")
 
-def case_check(task_id, force_done=False):
+def case_check(task_id, force_done=False, commit=False):
     task_dir = os.path.join("02_Task_Queue", task_id)
     if not os.path.exists(task_dir):
         print(f"❌ Error: Task folder '{task_dir}' does not exist.")
@@ -480,8 +486,15 @@ def case_check(task_id, force_done=False):
     consolidate_learnings()
 
     # Git Commit finalized state
-    run_git(["add", task_dir, "00_Constitution"])
-    run_git(["commit", "-m", f"task({task_id}): checker approved and closed task"])
+    if commit:
+        run_git(["add", task_dir, "00_Constitution"])
+        run_git(["commit", "-m", f"task({task_id}): checker approved and closed task"])
+        print("💾 Automatically committed task approval to Git.")
+    else:
+        print(f"ℹ️  Task closed. Git commit skipped (run with --commit or -c to commit automatically).")
+        print(f"    You can manually commit changes using:")
+        print(f"    git add {task_dir} 00_Constitution")
+        print(f"    git commit -m \"task({task_id}): checker approved and closed task\"")
 
 def parse_markdown_blocks(section_lines):
     """Groups lines into markdown blocks based on list items starting with '-' or '*'."""
@@ -623,8 +636,8 @@ def show_help():
 Usage:
   python .case/case.py init [optional goal]          - Initialize directories, constitutions & .cursorrules
   python .case/case.py start <task_id>               - Transition task to IN_PROGRESS & create planning.md
-  python .case/case.py submit <task_id> "msg"        - Transition task to REVIEW & Git commit task changes
-  python .case/case.py check <task_id>               - Run Security and DoD Verification, close task as DONE.
+  python .case/case.py submit <task_id> [--commit] "msg" - Transition task to REVIEW (Optional: auto-commit changes)
+  python .case/case.py check <task_id> [--commit]     - Run Security & DoD Verification, close task (Optional: auto-commit)
   python .case/case.py create_subtask <slug> "<recipe>" - Dynamically inject a new subtask into the Queue.
 """)
 
@@ -645,13 +658,25 @@ if __name__ == "__main__":
         if len(sys.argv) < 3:
             print("❌ Error: Missing task_id. Example: python .case/case.py submit Task_001_InitialScan \"Done audit\"")
             sys.exit(1)
-        summary_msg = " ".join(sys.argv[3:]) if len(sys.argv) > 3 else "completed"
-        case_submit(sys.argv[2], summary_msg)
+        args = sys.argv[3:]
+        commit = False
+        if "--commit" in args:
+            commit = True
+            args.remove("--commit")
+        if "-c" in args:
+            commit = True
+            args.remove("-c")
+        summary_msg = " ".join(args) if args else "completed"
+        case_submit(sys.argv[2], summary_msg, commit=commit)
     elif cmd == "check":
         if len(sys.argv) < 3:
             print("❌ Error: Missing task_id. Example: python .case/case.py check Task_001_InitialScan")
             sys.exit(1)
-        case_check(sys.argv[2])
+        args = sys.argv[3:]
+        commit = False
+        if "--commit" in args or "-c" in args:
+            commit = True
+        case_check(sys.argv[2], commit=commit)
     elif cmd == "create_subtask":
         if len(sys.argv) < 3:
             print("❌ Error: Missing slug. Example: python .case/case.py create_subtask DownloadDeps \"Download external deps\"")

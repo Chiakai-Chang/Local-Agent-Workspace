@@ -1,7 +1,8 @@
-# C.A.S.E. Framework Controller Tool (case.ps1)
-# ============================================
+# C.A.S.E. Framework Reference Controller Tool (case.ps1)
+# ======================================================
+# [⚠️ NOTE: OPTIONAL REFERENCE IMPLEMENTATION]
 # PowerShell equivalent of case.py to ensure zero-dependency execution on Windows without Python installed.
-# Supports: init, start, submit, check.
+# It is completely OPTIONAL. Users can implement their own harness systems or edit raw files manually.
 
 $ErrorActionPreference = "Stop"
 
@@ -296,7 +297,7 @@ function Case-Start {
 }
 
 function Case-Submit {
-    param([string]$TaskId, [string]$Summary)
+    param([string]$TaskId, [string]$Summary, [switch]$Commit)
     $taskDir = Join-Path "02_Task_Queue" $TaskId
     if (-not (Test-Path $taskDir)) {
         Write-Error "Task folder '$taskDir' does not exist."
@@ -335,14 +336,21 @@ function Case-Submit {
     Add-Content -Path $logPath -Value $logEntry -Encoding UTF8
 
     # Git
-    $gitStatus = Run-Git @("status", "--porcelain", $taskDir)
-    if ($gitStatus) {
-        Run-Git @("add", $taskDir)
-        $commitMsg = "agent: worker submitted $TaskId - $Summary"
-        Run-Git @("commit", "-m", $commitMsg)
-        Write-Host "💾 Automatically committed $TaskId changes to Git."
+    if ($Commit) {
+        $gitStatus = Run-Git @("status", "--porcelain", $taskDir)
+        if ($gitStatus) {
+            Run-Git @("add", $taskDir)
+            $commitMsg = "agent: worker submitted $TaskId - $Summary"
+            Run-Git @("commit", "-m", $commitMsg)
+            Write-Host "💾 Automatically committed $TaskId changes to Git."
+        } else {
+            Write-Host "ℹ️  No changes detected; Git commit skipped."
+        }
     } else {
-        Write-Host "ℹ️  No changes detected; Git commit skipped."
+        Write-Host "ℹ️  Task status updated. Git commit skipped (run with --commit or -c to commit automatically)."
+        Write-Host "    You can manually commit changes using:"
+        Write-Host "    git add $taskDir"
+        Write-Host "    git commit -m `"agent: worker submitted $TaskId - $Summary`""
     }
 }
 
@@ -450,7 +458,7 @@ function Consolidate-Learnings {
 }
 
 function Case-Check {
-    param([string]$TaskId)
+    param([string]$TaskId, [switch]$Commit)
     $taskDir = Join-Path "02_Task_Queue" $TaskId
     if (-not (Test-Path $taskDir)) {
         Write-Error "Task folder '$taskDir' does not exist."
@@ -619,8 +627,16 @@ function Case-Check {
     Consolidate-Learnings
 
     # Commit finalized
-    Run-Git @("add", $taskDir, "00_Constitution") | Out-Null
-    Run-Git @("commit", "-m", "task($TaskId): checker approved and closed task") | Out-Null
+    if ($Commit) {
+        Run-Git @("add", $taskDir, "00_Constitution") | Out-Null
+        Run-Git @("commit", "-m", "task($TaskId): checker approved and closed task") | Out-Null
+        Write-Host "💾 Automatically committed task approval to Git." -ForegroundColor Green
+    } else {
+        Write-Host "ℹ️  Task closed. Git commit skipped (run with --commit or -c to commit automatically)."
+        Write-Host "    You can manually commit changes using:"
+        Write-Host "    git add $taskDir 00_Constitution"
+        Write-Host "    git commit -m `"task($TaskId): checker approved and closed task`""
+    }
 }
 
 function Case-CreateSubtask {
@@ -671,8 +687,8 @@ if ($args.Count -lt 1) {
     Write-Host "Usage:"
     Write-Host "  powershell -File .case/case.ps1 init [optional goal]"
     Write-Host "  powershell -File .case/case.ps1 start <task_id>"
-    Write-Host "  powershell -File .case/case.ps1 submit <task_id> `"summary`""
-    Write-Host "  powershell -File .case/case.ps1 check <task_id>"
+    Write-Host "  powershell -File .case/case.ps1 submit <task_id> [--commit] `"summary`""
+    Write-Host "  powershell -File .case/case.ps1 check <task_id> [--commit]"
     Write-Host "  powershell -File .case/case.ps1 create_subtask <slug> `"recipe`""
     exit 0
 }
@@ -686,11 +702,26 @@ if ($cmd -eq "init") {
     Case-Start -TaskId $args[1]
 } elseif ($cmd -eq "submit") {
     if ($args.Count -lt 2) { Write-Error "Missing task_id"; exit 1 }
-    $sum = if ($args.Count -gt 2) { $args[2] } else { "completed" }
-    Case-Submit -TaskId $args[1] -Summary $sum
+    $commit = $false
+    $remainingArgs = [System.Collections.Generic.List[string]]::new()
+    for ($i = 2; $i -lt $args.Count; $i++) {
+        if ($args[$i] -eq "--commit" -or $args[$i] -eq "-c") {
+            $commit = $true
+        } else {
+            $remainingArgs.Add($args[$i])
+        }
+    }
+    $sum = if ($remainingArgs.Count -gt 0) { $remainingArgs -join " " } else { "completed" }
+    Case-Submit -TaskId $args[1] -Summary $sum -Commit:$commit
 } elseif ($cmd -eq "check") {
     if ($args.Count -lt 2) { Write-Error "Missing task_id"; exit 1 }
-    Case-Check -TaskId $args[1]
+    $commit = $false
+    for ($i = 2; $i -lt $args.Count; $i++) {
+        if ($args[$i] -eq "--commit" -or $args[$i] -eq "-c") {
+            $commit = $true
+        }
+    }
+    Case-Check -TaskId $args[1] -Commit:$commit
 } elseif ($cmd -eq "create_subtask") {
     if ($args.Count -lt 2) { Write-Error "Missing slug"; exit 1 }
     $recipe = if ($args.Count -gt 2) { $args[2] } else { "No description specified." }

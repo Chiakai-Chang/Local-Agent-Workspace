@@ -54,12 +54,12 @@ C.A.S.E. uses a **file-driven, zero-command text-space learning process** with a
 
 1. **Memory Tiering (Hot & Cold Memory)**:
    - **Hot Memory (`00_Constitution/learnings.md`)**: Writable *only* by Checkers/Humans during the `check` validation. Keep it strictly below **40 lines (approx. 15 entries)**.
-   - **Cold Memory Archive (`00_Constitution/archive_learnings.md`)**: When Hot Memory exceeds 40 lines, older entries are automatically moved here by the controller.
+   - **Cold Memory Archive (`00_Constitution/archive_learnings.md`)**: When Hot Memory exceeds 40 lines, older entries should be migrated here by the Checker agent, human reviewer, or optional helper scripts.
    - **Read on Init**: At the start of a task, the Worker MUST read `learnings.md`.
 
 2. **Self-Correction & Write Defenses (Write Isolation)**:
    - **Worker Limitation**: The Worker Agent MUST NOT edit `00_Constitution/learnings.md` directly. Any unauthorized writes will fail verification and trigger an **automatic git rollback** on checking.
-   - **Checker Authority**: Only the Checker Agent (via `case.py check` execution) modifies the learnings.
+   - **Checker Authority**: Only the Checker Agent (during verification) or Humans may modify the learnings.
 
 ---
 
@@ -82,10 +82,12 @@ To optimize context window efficiency and minimize VRAM footprint on local devic
 
 ---
 
-## 5. Standard Controller CLI — `case.py`
+## 5. Optional CLI Helper — Reference Implementation
 
-To streamline execution and automate git version control, use the lightweight python helper:
-- **Start Task**: `python .case/case.py start <task_id>`
-- **Submit Task**: `python .case/case.py submit <task_id> "<summary>"`
-- **Check Task**: `python .case/case.py check <task_id>`
+> **Note**: These scripts are **optional**. Agents can operate the protocol by directly reading/writing `status.txt` and other standard files.
+
+For convenience, zero-dependency helper scripts are available:
+- **Start Task**: `python .case/case.py start <task_id>` (or directly write `IN_PROGRESS` to `status.txt`)
+- **Submit Task**: `python .case/case.py submit <task_id> "<summary>"` (or directly write `REVIEW` to `status.txt`)
+- **Check Task**: `python .case/case.py check <task_id>` (or manually verify DoD and write `DONE` to `status.txt`)
 

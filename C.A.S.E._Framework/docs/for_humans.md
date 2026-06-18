@@ -62,7 +62,7 @@ C.A.S.E. 不是複雜的軟體套件，而是一套**用實體檔案管束 AI �
 
 3. **微觀遇到障礙（掛起升級）**：
    - **協作時機**：本地執行遇到前提缺失，或發現環境嚴重卡關需要「修法」或「重擬大計畫」時。
-   - **做法**：本地模型呼叫 `case.py` / `case.ps1` 標記為 `ESCALATED` 懸掛任務。您可將此懸掛點的 Error 訊息或新發現，傳回給**雲端規劃大模型**重新修訂 Roadmap 與 Recipe，修復後再發配給本地繼續執行。
+   - **做法**：本地模型將 `status.txt` 寫入 `ESCALATED` 標記懸掛任務（可手動修改、透過輔助腳本、或由 AI 自行操作）。您可將此懸掛點的 Error 訊息或新發現，傳回給**雲端規劃大模型**重新修訂 Roadmap 與 Recipe，修復後再發配給本地繼續執行。
 
 4. **全局聚合期（結案驗收）**：
    - **協作時機**：所有本地任務均標記為 `DONE` 時。
@@ -95,27 +95,32 @@ C.A.S.E. 框架具有高度的**模組化設計**，宏觀規劃（Macro）與�
 
 ## 4. 如何在您現有的專案中快速使用？
 
-我們設計了可攜式套件（CASE-in-a-Box），只需簡單三步就能用在任何專案：
+C.A.S.E. 提供兩種引入方式，您可以根據您的安全限制與工作習慣自由選擇：
 
-### 第一步：複製工具夾
-將本專案的 `.case/` 資料夾直接複製到您的專案根目錄下。
+### 💡 推薦方式 A：純文字聲明式配置（零代碼依賴，無痛外掛，相容性最高）
+如果您不想在專案中執行任何外部腳本，或者希望完美相容您既有的 Harness 自動化系統：
 
-### 第二步：一鍵初始化
-在您的專案根目錄執行：
-```bash
-python .case/case.py init
-```
-這時會自動幫您做好幾件事：
-1. 自動分析您的專案程式語言。
-2. 問您這次要 AI 完成什麼大任務，並自動幫您建立第一個任務資料夾 `Task_001_InitialScan`。
-3. 在專案中寫入設定檔（`.cursorrules`），讓您的 Cursor 或 IDE 軟體一打開就自動遵循 C.A.S.E. 規則。
-4. 自動更新 `.gitignore`，隱藏 AI 產生的執行日誌，保持程式庫乾淨。
+1. **下載 Agent 規則手冊**：
+   將 [for_agents.md](for_agents.md) 下載並放置到您的專案根目錄，命名為 `CASE_framework_for_agents.md`（或者直接放置在您自定義的子目錄中）。
+2. **配置 IDE / AI Agent 指標**：
+   在您的 `.cursorrules`、`CLAUDE.md` 或 AI 控制工具的 system prompt 中，加入以下指引：
+   > 「請閱讀專案根目錄下的 `CASE_framework_for_agents.md`，並遵循該規範。在根目錄建立實體資料夾結構（`00_Constitution/`、`01_Roadmap/`、`02_Task_Queue/`）來管理開發任務與生命週期。」
+3. **開始運作**：
+   AI 讀取後將自行建立物理目錄與規劃。後續所有的任務狀態轉移均可由 AI 自行直接修改 `status.txt` 檔案來實現，不依賴任何外部代碼。
 
-### 第三步：開始使用與極簡命令輔助
-當 AI 或您要執行/核實任務時，可以使用以下極簡 Python 命令：
-- **認領並開始任務**：`python .case/case.py start Task_001_InitialScan`（自動將狀態標為執行中，並產生規劃範本）。
-- **完成並提交審核**：`python .case/case.py submit Task_001_InitialScan "完成首次掃描"`（自動改為審核中，並產生 Git commit）。
-- **審查驗收**：`python .case/case.py check Task_001_InitialScan`（Checker 自動執行：防篡改比對、DoD 基本檢查、Hot/Cold 學習記憶冷熱壓縮轉移，若通過則自動結案標為 DONE 並 Git 存檔）。
+---
+
+### 🛠️ 可選方式 B：使用輔助 CLI 控制工具自動化管理
+如果您不介意使用輔助腳本，並且希望對「認領、提交、驗收與 Git 提交」進行一鍵自動化管理，我們提供了一個不到 300 行的零依賴 Python/PowerShell 控制腳本作為**「參考實現（Reference Implementation）」**：
+
+1. **複製 `.case/` 目錄**：
+   將框架的 `.case/` 目錄（包含 `case.py` 與 `case.ps1`）複製到您的專案根目錄。
+2. **一鍵初始化**：
+   執行 `python .case/case.py init`，腳本會自動分析專案結構、引導您設定大目標，並生成 initial files。
+3. **任務管理指令（預設去侵入性，不強行干涉您的 Git）**：
+   * **認領並開始任務**：`python .case/case.py start <task_id>`（標記 `IN_PROGRESS` 並產生規劃範本）。
+   * **完成並提交審核**：`python .case/case.py submit <task_id> "msg"`（更新狀態至 `REVIEW`。加上 `--commit` / `-c` 參數可由腳本代勞 git commit，否則預設跳過 git commit 以尊重您的自建工作流）。
+   * **審查驗收**：`python .case/case.py check <task_id>`（Checker 自動執行：防寫防毒審計、DoD 檢查、Hot/Cold 學習日誌冷熱整理、標記 `DONE`。加上 `--commit` / `-c` 參數可自動執行 Git 結案存檔）。
 
 ---
 

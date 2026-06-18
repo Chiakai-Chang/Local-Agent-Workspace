@@ -56,7 +56,7 @@
 | **雙軌核實** | Dual-track Verification | 執行者做完，由獨立的驗收者審查，互不自我放水 | 核心公理之一；Worker MUST NOT 自行核准自己的成果 |
 | **資訊隔離原則** | Information Isolation Principle | 每個基層人員只能看自己的卷宗，不能偷看別人的 | Layer 3 只能讀取：`00_Constitution/core.md`、`01_Roadmap/*.md`（若 recipe 允許）、自己的 Task 資料夾 |
 | **重試熔斷** | Retry Decay / Escalation Threshold | 同一件事做錯三次，就停工求援，不再無謂重試；若是執行中發現缺口，則建立子任務後才升級 | Checker 追蹤 retry count；≥ 3 → escalate_issue → `ESCALATED`；Worker 發現先決缺口可先建立子任務再 escalate |
-| **時光機還原** | Git Rollback | 每次 AI 修改檔案都自動備份，壞了可以一鍵恢復 | 每次 `write_artifact` 觸發自動 `git commit`；`revert_task(task_id)` 還原整個 Task 資料夾 |
+| **時光機還原** | Git Rollback | 每次 AI 修改檔案都建議備份，壞了可以一鍵恢復 | 推薦在每次 `write_artifact` 後進行 `git commit`（可由人工、CI 或可選腳本執行）；`git restore` 可還原整個 Task 資料夾 |
 | **全局聚合** | Global Aggregation | 所有小任務都結案後，指揮所統一審視是否達到全案標準 | 所有 Task 狀態 = `DONE` 後觸發；Layer 2 核對 `global_dod.md` |
 | **微觀回饋** | Micro-Level Feedback (⑤) | 基層人員辦案中發現缺了一份前置資料，馬上補開一個新卷宗繼續辦——不用等總指揮開會 | Worker 在執行中發現先決缺口 → 呼叫 `create_subtask` 工具（由協調系統在 `02_Task_Queue/` 建立新卷宗）→ 自身 escalate 暫停等待子任務完成 |
 | **宏觀回饋** | Macro-Level Feedback (⑥) | 所有任務全部結案後，總指揮發現全案標準仍有缺漏，重新規劃下一階段 | Global Aggregation 核對 `global_dod.md` 未達標 → Layer 2 重規劃 → 新 Task Packages 進入 `02_Task_Queue/` |

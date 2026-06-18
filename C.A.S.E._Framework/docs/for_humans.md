@@ -102,15 +102,20 @@ C.A.S.E. 不是複雜的軟體套件，而是一套**用實體檔案管束 AI �
 ---
 
 ### 🔍 步驟三：自動化檢驗與人類極簡驗收 (AI Self-Review & Minimal Human Handoff)
+
 為了極大化減少人類的繁瑣操作，交接與驗收完全是**智慧化且由 AI 主動驅動**的：
 
-1. **AI 自動復盤與修復 (AI Self-Validation & Self-Healing)**：
+1. **AI 自動復盤與自癒上限 (AI Self-Validation & 3-Attempt Self-Healing Limit)**：
    * 在向人類回報前，地端/執行 AI 會主動對照 `recipe.md` 的 DoD 逐項自我復盤並執行本地測試。
-   * 若發現測試失敗或遺漏，AI 會**自動繼續修改代碼或生成修補子任務**，直至全部通過。中間出錯時，**完全不打擾人類**。
-2. **人類極簡驗收 (Natural Language Approval)**：
+   * 若發現測試失敗或遺漏，AI 會**自動繼續修改或生成修補子任務**，直至全部通過。
+   * **防止無限循環**：自主修復（Self-Healing）有著 **最大 3 次連續嘗試的硬性限制**。若嘗試 3 次後仍有失敗，AI 會立即暫停，將 `status.txt` 設為 `ESCALATED` 並寫入 `feedback.md` 報錯，絕不無休止地浪費 Token。
+2. **熱記憶容量分片遷移 (Hot Memory Sharding Trigger)**：
+   * 為防止長效記憶過多導致 AI 注意力衰退，熱記憶檔案 `00_Constitution/learnings.md` 設有 **40 行的硬性上限**。
+   * 當 AI 結案任務並將狀態設為 `DONE` 時，若發現行數超限，會自動將最舊的 5 條記錄移至 `00_Constitution/archive_learnings.md`（冷記憶庫），保持熱記憶的極致輕量。
+3. **人類極簡驗收 (Natural Language Gate)**：
    * 當 AI 自我檢驗 100% 通過後，才會在對話中向人類回報成果。人類只需以大白話與 AI 對話，**不需要手動修改任何 `status.txt` 檔案或逐項勾選**：
-     * **若通過**：人類直接對 AI 說：「沒問題，通過」或「OK，收工」。AI 接收後會**自動**將 `status.txt` 改為 `DONE` 並完成 git commit / push。
-     * **若需修改**：人類直接對 AI 說：「這裡字型大小幫我調整一下」。AI 接收後會**自動**將狀態設回 `IN_PROGRESS` 進行修復，直到完成後再次請人類看。
+     * **若通過**：人類直接對 AI 說：「沒問題，通過」或「OK，收工」。AI 接收後會**自動**將 `status.txt` 改為 `DONE`，觸發記憶遷移（若需要），並自動完成 git commit / push。
+     * **若需修改**：人類直接對 AI 說：「這裡字型大小幫我調整一下」。AI 接收後會**自動**寫入 `feedback.md` 並將狀態設回 `IN_PROGRESS` 進行修復，直到完成後再次請人類看。
 
 ---
 

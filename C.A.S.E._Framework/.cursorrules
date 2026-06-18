@@ -1,20 +1,25 @@
 # C.A.S.E. Framework Guardrails
 
 ## 1. Task Lifecycle & Execution
-- Before modifying any code or deliverable files, identify the active task folder inside `02_Task_Queue/` (where `status.txt` is `PENDING` or `IN_PROGRESS`).
+- Before modifying any files or deliverables, identify the active task folder inside `02_Task_Queue/` (where `status.txt` is `PENDING` or `IN_PROGRESS`).
 - Claim the task by writing `IN_PROGRESS` to that task's `status.txt`.
 - Load that task's `role.md` as your System Prompt and `recipe.md` as your instruction manual.
 - Write or update `planning.md` within the task folder detailing execution steps **before** editing deliverables.
 - Modify files/content **ONLY** as specified in `recipe.md > Input Sources / Output Specification`.
-- Track and append all tool calls to `action_log.jsonl` in the current task folder.
-- Submit for review by writing `REVIEW` to `status.txt`. Do NOT set the status to `DONE` yourself.
+- **Self-Healing Limit (Max 3 attempts)**: Background self-healing loop is capped at a maximum of 3 consecutive attempts. If validation/testing still fails on the 3rd attempt, change `status.txt` to `ESCALATED`, document failures in `feedback.md`, and stop execution.
+- Track and append all tool calls to `action_log.jsonl` (or `log.md`) in the current task folder.
+- **Natural Language Gate**: Do NOT ask the human to manually edit `status.txt`. Request review in chat. 
+  - If the human approves (e.g. "looks good", "OK"), transition `status.txt` to `DONE`, run the memory migration protocol, and perform git commit/push.
+  - If the human requests changes, transition status back to `IN_PROGRESS` and resolve the issues.
 
 ## 2. Planning, Spec-by-Example & Compaction
-- **BDD Spec-by-Example**: When writing `planning.md`, specify clear Given-When-Then scenarios or factual verification steps. Ensure verification checks are defined and tested before completing work.
+- **BDD Spec-by-Example & Generalization**: When writing `planning.md`, translate DoD items into Given-When-Then scenarios. Define domain-appropriate verification steps (e.g. deliverable validation, text checks, or web link checks) and run them. Follow the Draft-Verify-Refine pipeline.
+- **Context-Aware Adaptation**: Illustrative examples are non-binding. Always customize recipes and plan files dynamically based on task requirements.
 - **Handoff Capsule**: For tasks requiring multiple sessions or when facing imminent context compaction/clear, document the current status and decisions in the `planning.md` Handoff section.
 
 ## 3. Knowledge Base & Sharded Memory
 - Review `00_Constitution/learnings.md` at task startup. Do not repeat documented mistakes (Anti-Repetition Check).
+- **Hot Memory Sharding**: `00_Constitution/learnings.md` has a hard limit of **40 lines**. When transitioning a task to `DONE`, check the length. If it exceeds 40 lines, append the oldest 5 entries to the top of `00_Constitution/archive_learnings.md` and remove them from `learnings.md`.
 - Compile consolidated technical insights or learnings from completed tasks into `00_Constitution/knowledge_base/` using sharded markdown files and yaml frontmatter to prevent context window bloat.
 
 ## 4. Cross-Model Peer Review

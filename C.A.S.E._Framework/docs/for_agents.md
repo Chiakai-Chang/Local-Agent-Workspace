@@ -131,11 +131,13 @@ Upon receiving a task (status = `PENDING`):
 3. **Read recipe**: Parse all sections of `recipe.md`. If any required section is missing, call `escalate_issue("recipe.md missing required section: <section_name>")`.
 4. **Draft Micro-Plan**: Write a `planning.md` file within the task folder describing the specific steps, targeted files, and testing strategy. Double check constraints to ensure alignment.
 5. **Read inputs**: Process only files listed in `recipe.md > Input Sources`.
-6. **Execute Cautiously**: Make modifications step-by-step. Keep edits atomic. Run unit tests frequently to confirm behavior and check trace integrity.
-7. **AI Self-Review & Self-Healing**: Before presenting the work, perform a thorough review of your modifications against `recipe.md` and run all verification tests. If any test fails or code gaps are found, you MUST continue working to fix them (or create subtasks).
+6. **Execute Cautiously**: Make modifications step-by-step. Keep edits atomic. Run validation/testing checks frequently to confirm behavior.
+7. **AI Self-Review & Self-Healing (Max 3 attempts)**: Before presenting your work to the human, perform a thorough review of your modifications against `recipe.md` and run all verification checks. If any check fails, you MUST attempt to heal it locally in the background. This self-healing loop is capped at a **maximum of 3 consecutive attempts**. If checks still fail on the 3rd attempt, you MUST immediately cease work, change status to `ESCALATED`, document the details in `feedback.md` (or `output.md`), and halt to await human intervention.
 8. **Write output**: Use `write_artifact("output.md", <content>)`.
 9. **Submit**: Call `submit_for_review(<clean summary of what was produced>)` to set status to `REVIEW`.
-10. **Acknowledge Natural Language Feedback**: Wait for natural language feedback. If the user (or Checker) approves (e.g., "Pass", "Looks good"), automatically set status to `DONE` and perform git commit/push. If changes are requested, set status back to `IN_PROGRESS` and fix the issues.
+10. **Natural Language Gate & Automated Lifecycle**: Do NOT expect the human to manually edit `status.txt` or run git commands. Wait for natural language feedback in chat:
+    - If the human responds with approval (e.g., "Pass", "Looks good", "Approved", "OK"), the AI Agent MUST automatically change `status.txt` to `DONE`, run the hot memory migration protocol if necessary (see Section 13), and perform the git commit/push sequence.
+    - If the human requests modifications, the AI Agent MUST automatically record the feedback in `feedback.md`, transition `status.txt` back to `IN_PROGRESS` (or `PENDING`), and begin the next self-healing/development cycle.
 
 **On error or uncertainty:**
 - Insufficient inputs where a prerequisite task can be defined → call `create_subtask(...)` first, then `escalate_issue(...)` (see Section 10a). Do NOT skip directly to `escalate_issue`.
@@ -147,18 +149,20 @@ Upon receiving a task (status = `PENDING`):
 
 ## 7. Checker Agent & Human Review Protocol
 
-Upon detecting status = `REVIEW` (or when a human begins reviewing):
+Upon detecting status = `REVIEW` (or when a human reviews the output):
 
 1. **Read** `recipe.md > Local Definition of Done` — this is the authoritative checklist.
 2. **Read** `output.md` — evaluate against every DoD item.
-3. **Natural Language Gating**:
-   - **APPROVE** (all DoD items satisfied, or human says "looks good" / "pass"):
-     - Transition task status to `DONE` (e.g., via `change_status(task_id, "DONE")`).
-   - **REJECT** (DoD items not satisfied, or human requests changes):
-     - Write specific feedback to `feedback.md` or communicate via chat.
-     - Increment retry counter (tracked in `action_log.jsonl`).
-     - Retry count < 3 → transition status to `PENDING` (or let Worker set to `IN_PROGRESS` directly to fix).
-     - Retry count >= 3 → transition status to `ESCALATED`.
+3. **Natural Language Gating & Action Routing**:
+   - Checkers and Humans communicate approval or rejection via natural language in the chat session. The AI Agent is responsible for translating these statements to state changes:
+   - **APPROVE** (Human responds with approval phrases like "pass", "looks good", "approved", "OK"):
+     - Checker/AI automatically transitions `status.txt` to `DONE`.
+     - Trigger the hot-memory migration protocol if `learnings.md` exceeds its limit (see Section 13).
+   - **REJECT** (Human requests changes or points out unmet DoD items):
+     - Checker/AI writes the specific feedback to `feedback.md`.
+     - Increment the external review retry counter (tracked in `action_log.jsonl`).
+     - If Review Retry Count < 3: Transition status to `PENDING` (or let Worker set to `IN_PROGRESS` to start fixing).
+     - If Review Retry Count >= 3: Transition status to `ESCALATED` to indicate a blocker requiring macro re-planning.
 
 ---
 
@@ -235,11 +239,13 @@ To prevent rule poisoning and context window bloat, learnings are tiered into tw
 ### A. Hot Memory (`learnings.md`)
 - A highly condensed list of active anti-patterns and reusable patterns.
 - Read-only for Workers; writable only by Checkers or Humans during the review/check phase.
-- Recommended limit: **40 lines (approx. 15 distinct entries)** to maintain context window efficiency.
+- **Hard Capacity Limit**: Must NOT exceed **40 lines (approx. 15 distinct entries)** to maintain context window efficiency and prevent model attention decay.
 
 ### B. Cold Memory Archive (`archive_learnings.md`)
-- When `learnings.md` exceeds the recommended threshold, the oldest entries should be migrated to `archive_learnings.md`.
-- This migration can be performed by: (a) a human reviewer, (b) the Checker agent itself as part of its review protocol, or (c) the optional helper scripts.
+- **Migration Protocol**: When `learnings.md` exceeds the 40-line hard ceiling, during the transition of a task to `DONE` (結案), the executing Checker/AI Agent MUST automatically migrate the oldest 5 entries by:
+  1. Cutting the oldest 5 entries from `00_Constitution/learnings.md`.
+  2. Appending them to the top of `00_Constitution/archive_learnings.md`.
+  3. Saving both files.
 - Used as background retrieval for macro re-planning.
 
 ---
@@ -373,6 +379,12 @@ Identify active illegal gambling platforms targeting the region and compile a st
 - [ ] Format findings into a clean markdown table.
 ```
 
+
+## 20. Pointer Prompt for Bootstrapping (引導 Pointer Prompt)
+
+When starting a new session or introducing a new agent to the workspace, paste this single-line pointer prompt:
+
+> "Please read and follow the C.A.S.E. framework system protocol in `CASE_framework_for_agents.md` for all subsequent development, task initialization, and workflow management."
 
 ---
 

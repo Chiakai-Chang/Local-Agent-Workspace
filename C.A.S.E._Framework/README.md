@@ -68,7 +68,10 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 
 ## 🚀 3 分鐘快速上手（將 C.A.S.E 規範一鍵植入任何 AI 專案）
 
-我們提供兩種極簡的導入方式。不論您想使用「一鍵 CLI 自動化」還是「純文字檔引導」，體感皆能達到最佳狀態：
+> 🔒 **隨插即用，安全無痛 (Non-Destructive Outer-Harness)**
+> C.A.S.E 採用外掛式架構。**不論是全新的專案，還是已經有大量代碼的現有舊專案，皆可隨時、無痛導入**。它只會在專案根目錄外掛獨立的管理資料夾，**絕對不會搬移或破壞您現有的原始碼目錄結構**。
+
+---
 
 ### 💡 推薦：方式 A（一鍵 CLI 自動引導，最省心）
 直接在您想導入的專案根目錄下，開啟終端機執行以下一行指令。這會自動下載輕量控制腳本並引導初始化：
@@ -97,8 +100,8 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
      ```powershell
      Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
      ```
-2. **給您的 AI Agent 貼上引導 Prompt**：
-   > 「請閱讀我專案中的 [CASE_framework_for_agents.md](CASE_framework_for_agents.md) 文件。閱讀後，請分析我目前的專案結構，規劃如何以最合適的方式為本專案建立 C.A.S.E 物理目錄結構（包含 Constitution、Roadmap、Task_Queue 任務資料夾），並將此執行期規則妥善整合寫入您的長效記憶配置中（例如 `CLAUDE.md`、`.cursorrules` 等對應位置）。在建立目錄與寫入配置前，請先向我報告您的規劃並取得我的同意。」
+2. **給您的 AI Agent 貼上極簡引導 Prompt**：
+   > `請閱讀專案中的 CASE_framework_for_agents.md，並依此初始化本專案的 C.A.S.E 架構。`
 3. **確認 AI 的配置**：
    AI Agent 將會自己動手完成目錄建立與長效記憶注入。
 </details>

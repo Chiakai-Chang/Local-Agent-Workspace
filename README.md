@@ -428,21 +428,34 @@ pause
 <details>
 <summary><b>2️⃣ 第二步：給 AI Agent 貼上引導 Prompt</b></summary>
 
-啟動 AI 輔助軟體（如 `Claude Code`、`Codex`、`Antigravity CLI`、`Pi`，或是 `Cursor` 等，若是 Cursor 則可使用 `@` 參照下載的檔案），貼上以下 Prompt：
+啟動 AI 輔助軟體（如 `Claude Code`、`Codex`、`Antigravity CLI`、`Pi`，或是 `Cursor` 等，若是 Cursor 則可使用 `@` 參照下載的檔案），貼上以下極簡引導 Prompt：
 
-> 「請閱讀專案中的 [CASE_framework_for_agents.md](CASE_framework_for_agents.md) 文件。閱讀後，請分析目前專案結構，規劃如何以最合適的方式為本專案建立 C.A.S.E 物理目錄結構（包含 Constitution、Roadmap、Task_Queue 任務資料夾），並將此執行期規則妥善整合寫入長效記憶配置中（例如 `CLAUDE.md`、`.cursorrules`、`gemini.md` 或 `memory.md` 等對應位置）。在建立目錄與寫入配置前，請先報告規劃並取得同意。」
+> 「本專案採用 C.A.S.E. 框架，請閱讀並遵循專案中的 `CASE_framework_for_agents.md` 進行開發與任務管理。」
 </details>
 
 <details>
 <summary><b>3️⃣ 第三步：檢閱並同意 AI 的自動配置</b></summary>
 
-AI Agent 讀取 Prompt 後，將會**自己動手**完成：
-1. 分析目前的程式語言與專案結構。
-2. 自動建立 `00_Constitution/`、`01_Roadmap/` 與 `02_Task_Queue/` 等實體目錄。
-3. 自動將 C.A.S.E. 執行期規則妥善整合寫入到本機長效記憶配置中。
-
-確認同意後，AI 就會自動設定妥當！完全不需要手動搬移任何檔案，安全、乾淨且優雅！
+AI Agent 讀取 Prompt 後，將會依據手冊指南自動建立實體目錄（`00_Constitution/`、`01_Roadmap/`、`02_Task_Queue/`），並開始依循 C.A.S.E. 的規矩執行開發工作。
 </details>
+
+### 🤝 雲地協同實例：如何具體啟動、執行與交接？
+
+1. **雲端規劃大腦 (Cloud Strategic Planning)**：
+   * 在雲端 AI（如 Claude Code 雲端、ChatGPT 等）貼上指令：
+     > 「本專案採用 C.A.S.E. 框架。請閱讀專案目標，在 `01_Roadmap/roadmap.md` 中規劃開發階段，並在 `02_Task_Queue/Task_001_xxx/` 下建立任務，填寫 `recipe.md`、`role.md`。完成後將 `status.txt` 設為 `PENDING`。」
+   * 雲端 AI 快速產出 Roadmap 與任務卷宗。
+
+2. **地端手腳執行 (Local Tactical Execution)**：
+   * 在本機 AI（如 `Pi Code Agent` 或 Cursor 本地模型）貼上指令：
+     > 「請認領 `02_Task_Queue/Task_001_xxx/` 任務。將其 `status.txt` 改為 `IN_PROGRESS`，並依據 `recipe.md` 規範與 `role.md` 的角色開始執行開發。」
+   * 本地 AI 將狀態改為 `IN_PROGRESS`，在本地修改代碼並反覆測試，不消耗任何雲端 Token。完成後將狀態改為 `REVIEW`。
+
+3. **結案與驗收 (Validation & Handoff)**：
+   * **人工作法**：人類直接審查 git diff 與 `output.md`，手動改 `status.txt` 為 `DONE`。
+   * **對抗審查**：啟動全新乾淨的雲端對話，由雲端大腦驗收：
+     > 「請審查 `02_Task_Queue/Task_001_xxx/`。比對 `recipe.md` 的 DoD，檢驗 `output.md` 的結果。若通過請將 `status.txt` 改為 `DONE`；若未通過，請在 `feedback.md` 寫入退回理由並將 `status.txt` 改為 `PENDING`。」
+
 
 
 ### 🌟 銜接自動化 Agent (Pi Coding Agent + Harness)

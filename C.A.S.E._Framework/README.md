@@ -111,8 +111,8 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 
 ---
 
-### 💡 推薦：方式 A（純文字聲明式配置，零代碼依賴，相容性最高）
-如果您所在的伺服器有嚴格的安全限制，不想在終端機執行任何外來腳本，或者有自己既有的專案 Control Harness，請使用此方式：
+### 💡 快速引入方式（純文字聲明式配置，零代碼依賴，相容性最高）
+本專案為純文字聲明式協定，無須在終端機執行任何外來腳本：
 
 1. **一鍵下載 C.A.S.E. Agent 協定手冊 (CASE_framework_for_agents.md)**：
    * **💻 Linux / macOS (cURL)**:
@@ -124,9 +124,28 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
      Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
      ```
 2. **給您的 AI Agent 貼上極簡引導 Prompt**：
-   > 「請閱讀專案中的 `CASE_framework_for_agents.md`。閱讀後，請在根目錄建立 C.A.S.E. 實體資料夾結構（`00_Constitution/`、`01_Roadmap/`、`02_Task_Queue/`），並將此協定規範寫入本機長效記憶配置中（如 `.cursorrules`、`CLAUDE.md` 或 `memory.md` 等對應位置）。設定前請先取得我的同意。」
+   > 「本專案採用 C.A.S.E. 框架，請閱讀並遵循專案中的 `CASE_framework_for_agents.md` 進行開發與任務管理。」
 3. **完成配置**：
-   AI 讀取後將自行建立物理目錄並設定長效記憶，後續即可遵循 C.A.S.E. 規則進行「認領任務 $\rightarrow$ 撰寫規劃 $\rightarrow$ 修改測試 $\rightarrow$ Git版控 $\rightarrow$ 結案驗收」的純文本狀態機流轉。
+   AI 讀取後將自行建立物理目錄結構，後續即可遵循 C.A.S.E. 規則進行「認領任務 $\rightarrow$ 撰寫規劃 $\rightarrow$ 修改測試 $\rightarrow$ Git 版控 $\rightarrow$ 結案驗收」的純文本狀態機流轉。
+
+---
+
+### 🤝 雲地協同實例：如何具體啟動、執行與交接？
+
+1. **雲端規劃大腦 (Cloud Strategic Planning)**：
+   * 使用雲端 AI（如網頁版 ChatGPT/Claude Pro 或 Claude Code 雲端連線），給予極簡指令：
+     > 「本專案採用 C.A.S.E. 框架。請閱讀專案目標，在 `01_Roadmap/roadmap.md` 中規劃開發階段，並在 `02_Task_Queue/Task_001_xxx/` 下建立任務，填寫 `recipe.md`、`role.md`。完成後將 `status.txt` 設為 `PENDING`。」
+   * 雲端 AI 將會拆解好任務並在本地生成資料夾，設定 `status.txt` 為 `PENDING`。
+
+2. **地端手腳執行 (Local Tactical Execution)**：
+   * 使用本機運行的 AI Agent（如連接本機 Ollama 模型的 `Antigravity CLI` 或 `Pi Code Agent`），給予指令：
+     > 「請認領 `02_Task_Queue/Task_001_xxx/` 任務。將其 `status.txt` 改為 `IN_PROGRESS`，並依據 `recipe.md` 規範與 `role.md` 的角色開始執行開發。」
+   * 本地 AI 會自動將狀態改為 `IN_PROGRESS`，在本機修改代碼、運行單元測試，通過後將狀態改為 `REVIEW`。
+
+3. **結案與驗收 (Validation & Handoff)**：
+   * **人工作法**：人類直接檢閱 git diff 與 `output.md`，手動將 `status.txt` 改為 `DONE` 並進行 git commit。
+   * **對抗審查**：開啟全新乾淨的雲端對話，交由雲端大腦核實：
+     > 「請審查 `02_Task_Queue/Task_001_xxx/`。比對 `recipe.md` 的 DoD，檢驗 `output.md` 的結果。若通過請將 `status.txt` 改為 `DONE`；若未通過，請在 `feedback.md` 寫入具體退回理由並將 `status.txt` 改為 `PENDING`。」
 
 ---
 

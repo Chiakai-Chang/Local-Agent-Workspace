@@ -71,6 +71,46 @@ C.A.S.E. 不是複雜的軟體套件，而是一套**用實體檔案管束 AI �
 
 ---
 
+## 2.6. 雲地協同實例：如何具體啟動、執行與交接？
+
+為了讓您更清楚「雲端規劃」與「地端執行」具體如何分工、下什麼指令，以及如何透過檔案系統完成交接，以下提供一個標準的實戰演練流程：
+
+### 🎬 步驟一：雲端大腦啟動規劃 (Cloud Strategic Planning)
+* **工具/角色**：使用雲端 AI 助手 (如 `Claude Code`、`Windsurf` 連線雲端、或網頁版 ChatGPT/Claude Pro)。
+* **人類下的指令 (極簡 Prompt)**：
+  > 「本專案採用 C.A.S.E. 框架。請閱讀專案目標，並在 `01_Roadmap/roadmap.md` 中規劃開發階段，接著在 `02_Task_Queue/Task_001_initial_scaffold/` 下建立任務卷宗，填寫 `recipe.md` 與 `role.md`。完成後將 `status.txt` 設為 `PENDING`。」
+* **雲端 AI 的動作**：
+  1. 讀取並理解整個專案的脈絡與憲法目標。
+  2. 設計全局 Roadmap。
+  3. 建立 `Task_001` 資料夾，寫入任務的執行限制、Definition of Done (DoD) 以及該任務所需的角色定義。
+  4. 寫入 `status.txt` 內容為 `PENDING`。
+
+---
+
+### 🔨 步驟二：地端手腳認領執行 (Local Tactical Execution)
+* **工具/角色**：使用本機運行的 AI Agent (如連接本地 Ollama/Llama.cpp Gemma 27B 的 `Antigravity CLI`、`Pi Code Agent` 或本地 IDE 插件)。
+* **人類下的指令 (極簡 Prompt)**：
+  > 「請認領 `02_Task_Queue/Task_001_initial_scaffold/` 任務。將其 `status.txt` 改為 `IN_PROGRESS`，並依據 `recipe.md` 規範與 `role.md` 的角色開始執行開發。」
+* **地端 AI 的動作**：
+  1. 修改 `status.txt` 為 `IN_PROGRESS`。
+  2. 閱讀 `recipe.md` 與 `role.md` 載入系統 prompt。
+  3. 在 `planning.md` 中撰寫細部實作計畫與測試案例。
+  4. 在本地開始編修程式碼、編譯並反覆執行單元測試（不消耗雲端 Token，代碼完全留在本地）。
+  5. 將每次的操作記錄在 `action_log.jsonl`（或 fallback 的 `log.md`）中。
+  6. 開發完成且本地測試通過後，將 `status.txt` 改為 `REVIEW`（或調用 `submit_for_review`）。
+
+---
+
+### 🔍 步驟三：結案與驗收 (Validation & Handoff)
+* **做法 A（人類手動驗收）**：人類開發者直接檢閱 git diff 與地端 AI 產出的 `output.md`，若通過則手動將 `status.txt` 改為 `DONE` 並進行 git commit。
+* **做法 B（雲端對抗審查，高規格驗收）**：
+  * 使用雲端 AI 啟動全新乾淨的對話 thread，下指令：
+    > 「請審查 `02_Task_Queue/Task_001_initial_scaffold/`。比對 `recipe.md` 的 DoD，檢驗 `output.md` 的結果與測試證明。若完全通過，請將 `status.txt` 改為 `DONE`；若未通過，請在 `feedback.md` 寫入具體退回理由並將 `status.txt` 改為 `PENDING`。」
+  * 通過後，即可由雲端大腦繼續拆解下一個 `Task_002`，重複此循環。
+
+---
+
+
 ## 2.8. 進階演進：基於業界最佳實踐的 C.A.S.E. 優化
 
 為使 C.A.S.E. 更具備工業級的抗干擾性、記憶可擴展性與驗收真實性，我們融合了多個開源 Agent 框架（如 Andrej Karpathy 的 LLM Wiki 模式、BDD 規格驅動開發等）的核心精髓，升級了以下四大機制：
@@ -191,18 +231,16 @@ fi
 
 ## 4. 如何在您現有的專案中快速使用？
 
-C.A.S.E. 提供兩種引入方式，您可以根據您的安全限制與工作習慣自由選擇：
-
-### 💡 推薦方式 A：純文字聲明式配置（零代碼依賴，無痛外掛，相容性最高）
-如果您不想在專案中執行任何外部腳本，或者希望完美相容您既有的 Harness 自動化系統：
+C.A.S.E. 採用純文字聲明式配置，無須執行任何代碼腳本即可無痛引入：
 
 1. **下載 Agent 規則手冊**：
-   將 [for_agents.md](for_agents.md) 下載並放置到您的專案根目錄，命名為 `CASE_framework_for_agents.md`（或者直接放置在您自定義的子目錄中）。
-2. **配置 IDE / AI Agent 指標**：
-   在您的 `.cursorrules`、`CLAUDE.md` 或 AI 控制工具的 system prompt 中，加入以下指引：
-   > 「請閱讀專案根目錄下的 `CASE_framework_for_agents.md`，並遵循該規範。在根目錄建立實體資料夾結構（`00_Constitution/`、`01_Roadmap/`、`02_Task_Queue/`）來管理開發任務與生命週期。」
+   將 [for_agents.md](for_agents.md) 下載並放置到您的專案根目錄，命名為 `CASE_framework_for_agents.md`。
+2. **配置 IDE / AI Agent 引導 Prompt（極簡）**：
+   在您的 `.cursorrules`、`CLAUDE.md`、`memory.md` 或直接在與 AI Agent（如 Cursor/Claude Code/Gemini CLI 等）對話時，貼上以下極簡引導指令：
+   > 「本專案採用 C.A.S.E. 框架，請閱讀並遵循專案中的 `CASE_framework_for_agents.md` 進行開發與任務管理。」
+   *(提示：如果是使用 Cursor，可以在對話中使用 `@CASE_framework_for_agents.md` 來關聯此檔案。)*
 3. **開始運作**：
-   AI 讀取後將自行建立物理目錄與規劃。後續所有的任務狀態轉移均可由 AI 自行直接修改 `status.txt` 檔案來實現，不依賴任何外部代碼。
+   AI 讀取手冊後將自動建立物理目錄結構（`00_Constitution/`、`01_Roadmap/`、`02_Task_Queue/`）並依據 C.A.S.E. 規則自主進行「認領任務 $\rightarrow$ 撰寫規劃 $\rightarrow$ 修改測試 $\rightarrow$ Git 版控 $\rightarrow$ 結案驗收」的狀態機流轉。
 
 ---
 

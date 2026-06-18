@@ -9,13 +9,16 @@
 
 ## 1. Core Axioms (Non-Negotiable)
 
-These three axioms are the foundation of C.A.S.E. Violating any axiom is a critical error.
+These axioms are the foundation of C.A.S.E. Violating any axiom is a critical error.
 
 | Axiom | Rule |
 |-------|------|
 | **Tiered Intelligence** | Executor agents MUST NOT attempt macro-level planning or change the Roadmap. Only interpret and execute the assigned Atomic Task Package. |
 | **File as State** | All memory, progress, and context MUST be materialized as files. Never rely on conversational context as the sole source of truth. |
 | **Dual-track Verification** | Worker (Executor) and Checker (Verifier) roles MUST be separate. A Worker MUST NOT self-approve its own output as final. |
+| **Weak Model Resilience** | Pre-defined I-Lang soft-hybrid syntax is optional. If local/weak models (e.g., 8B parameters) struggle with shorthand (`[T]`, `[A]`, `[V]`), they MUST fall back to structured natural language. |
+| **Git-Backed Integrity** | Any unauthorized write attempts to read-only directories (`00_Constitution/`, `01_Roadmap/`) will trigger an automatic security rollback by the controller. |
+
 
 ---
 
@@ -210,7 +213,7 @@ A Worker agent that discovers a prerequisite gap during execution MUST use this 
 
 ## 11. Git Integration Requirements
 
-The orchestrating system MUST:
+The orchestrating system or local controller tool MUST:
 - Auto-commit after every `write_artifact`: `git commit -m "agent: <role> updated <filepath> in <task_id>"`.
 - Support `revert_task(task_id)` to restore last committed state of the task folder.
 - Never expose raw git commands to agents.
@@ -218,6 +221,44 @@ The orchestrating system MUST:
 
 ---
 
+## 12. Lightweight Controller Tool — `case.py`
+
+To minimize human interaction and automate agent state changes without adding external toolchain dependencies, the environment provides `.case/case.py`. 
+
+Agents and humans should interact with the state engine using the following standard commands:
+- **Initialize**: `python .case/case.py init "[optional mission goal]"` -> Bootstraps folder structures and `.cursorrules`.
+- **Start Task**: `python .case/case.py start <task_id>` -> Transitions status to `IN_PROGRESS`, scaffolds `planning.md` template.
+- **Submit Task**: `python .case/case.py submit <task_id> "<one-line summary>"` -> Sets status to `REVIEW`, stages files, and automatically commits change log.
+- **Check Task**: `python .case/case.py check <task_id>` -> Performs Checker-level validation (DoD checks, read-only directory protection, learnings consolidation) and transitions task to `DONE`.
+
+---
+
+## 13. Self-Optimizing Learning Loop (SkillOpt) & Memory Tiering
+
+To prevent rule poisoning and context window bloat, learnings are tiered into two physical files inside `00_Constitution/`:
+
+### A. Hot Memory (`learnings.md`)
+- A highly condensed list of active anti-patterns and reusable patterns.
+- Read-only for Workers; writable only by Checkers or Humans during `check` validation.
+- Limited to **40 lines (approx. 15 distinct entries)**.
+
+### B. Cold Memory Archive (`archive_learnings.md`)
+- When `learnings.md` exceeds the 40-line threshold, the oldest entries are automatically migrated to `archive_learnings.md` by `case.py check`.
+- Used as background retrieval for macro re-planning.
+
+---
+
+## 14. Write Defense & Anti-Poisoning Enforcement
+
+If an executor agent attempts to modify any files in `00_Constitution/` or `01_Roadmap/` (other than sanctioned Checker writes):
+1. The checking controller (`case.py check`) will detect the unstaged changes in those directories via Git diff.
+2. The verification fails immediately.
+3. The controller automatically executes a Git rollback (`git restore`) on the poisoned directories.
+4. The task status transitions to `ESCALATED`, and feedback is written to `feedback.md` highlighting the security policy violation.
+
+---
+
 *This protocol is version-controlled. Changes require Layer 1 (human) approval and a new git commit.*
 
 🔗 See also: [for_humans.md](for_humans.md) | [glossary.md](glossary.md) | [Framework README](../README.md)
+

@@ -77,16 +77,19 @@ C.A.S.E. 框架具有高度的**模組化設計**，宏觀規劃（Macro）與�
 ### 第二步：一鍵初始化
 在您的專案根目錄執行：
 ```bash
-python .case/init.py
+python .case/case.py init
 ```
 這時會自動幫您做好幾件事：
-1. 自動分析您的程式語言。
-2. 問您這次要 AI 完成什麼大任務，並自動幫您建立第一個任務資料夾。
-3. 在專案中寫入設定檔（如 `.cursorrules`），讓您的 Cursor 或 IDE 軟體一打開就自動遵循 C.A.S.E. 規則。
-4. 問您要不要把 AI 產生的暫存 log 自動加入 `.gitignore`，保持程式庫乾淨。
+1. 自動分析您的專案程式語言。
+2. 問您這次要 AI 完成什麼大任務，並自動幫您建立第一個任務資料夾 `Task_001_InitialScan`。
+3. 在專案中寫入設定檔（`.cursorrules`），讓您的 Cursor 或 IDE 軟體一打開就自動遵循 C.A.S.E. 規則。
+4. 自動更新 `.gitignore`，隱藏 AI 產生的執行日誌，保持程式庫乾淨。
 
-### 第三步：開始使用
-打開您的 Cursor 或 terminal AI。AI 會自動讀取專案底下的規則，自己去 `02_Task_Queue/` 資料夾領取第一個任務，自動分析、編寫、驗證。您只需要在最後看產出結果即可。
+### 第三步：開始使用與極簡命令輔助
+當 AI 或您要執行/核實任務時，可以使用以下極簡 Python 命令：
+- **認領並開始任務**：`python .case/case.py start Task_001_InitialScan`（自動將狀態標為執行中，並產生規劃範本）。
+- **完成並提交審核**：`python .case/case.py submit Task_001_InitialScan "完成首次掃描"`（自動改為審核中，並產生 Git commit）。
+- **審查驗收**：`python .case/case.py check Task_001_InitialScan`（Checker 自動執行：防篡改比對、DoD 基本檢查、Hot/Cold 學習記憶冷熱壓縮轉移，若通過則自動結案標為 DONE 並 Git 存檔）。
 
 ---
 
@@ -94,3 +97,4 @@ python .case/init.py
 - [AI 專屬執行協定 (System Protocol)](for_agents.md)
 - [Harness 控制座優化設計](harness_engineering.md)
 - [C.A.S.E. 名詞釋義字典](glossary.md)
+

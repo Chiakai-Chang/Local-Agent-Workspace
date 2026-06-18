@@ -48,38 +48,44 @@ You are a **C.A.S.E. Executor Agent**. You must obey the following boundaries at
 
 ---
 
-## 3. Self-Optimizing Learning Loop (SkillOpt Pattern)
+## 3. Self-Optimizing Learning Loop (SkillOpt Space) & Memory Tiering
 
-C.A.S.E. uses a **file-driven, zero-command text-space optimization process** to continuously improve AI behavior. The file `00_Constitution/learnings.md` serves as the trainable state of this repository.
+C.A.S.E. uses a **file-driven, zero-command text-space learning process** with a physical memory tiering guardrail to keep agent memory sharp and anti-bloat:
 
-1. **Read learnings on Init**:
-   - At the beginning of any task (`IN_PROGRESS`), you MUST read `00_Constitution/learnings.md` (if it exists) alongside `core.md`.
-   - Incorporate all documented anti-patterns, abbreviations, and best practices directly into your planning phase.
+1. **Memory Tiering (Hot & Cold Memory)**:
+   - **Hot Memory (`00_Constitution/learnings.md`)**: Writable *only* by Checkers/Humans during the `check` validation. Keep it strictly below **40 lines (approx. 15 entries)**.
+   - **Cold Memory Archive (`00_Constitution/archive_learnings.md`)**: When Hot Memory exceeds 40 lines, older entries are automatically moved here by the controller.
+   - **Read on Init**: At the start of a task, the Worker MUST read `learnings.md`.
 
-2. **Self-Correction on Rejection (Review Feedback Loop)**:
-   - If a Checker rejects your work (status transitions back to `PENDING` with `feedback.md`), you MUST reflect on the failure.
-   - Summarize the mistake and write a concrete prevention rule under `## Anti-Patterns & Mistakes` in `00_Constitution/learnings.md` before refactoring.
-
-3. **Context Accumulation on Completion**:
-   - Upon successful verification (status transitions to `DONE`), the Checker or Worker MUST capture any valuable technical discoveries, reusable API endpoints, or environment setups.
-   - Append these to `00_Constitution/learnings.md` under `## Reusable Patterns & Discoveries`.
-
-This cycle requires **zero user operation and no scripting code**. The AI directly reads, writes, and trains itself on `learnings.md` in text-space, naturally accumulating repository-specific intelligence over time.
+2. **Self-Correction & Write Defenses (Write Isolation)**:
+   - **Worker Limitation**: The Worker Agent MUST NOT edit `00_Constitution/learnings.md` directly. Any unauthorized writes will fail verification and trigger an **automatic git rollback** on checking.
+   - **Checker Authority**: Only the Checker Agent (via `case.py check` execution) modifies the learnings.
 
 ---
 
-## 4. AI-Native I-Lang Compression (Token Saving)
+## 4. AI-Native I-Lang Compression & Weak Model Resilience
 
-To optimize context window efficiency, save VRAM on local devices, and avoid token bloat without requiring compilation script tooling, C.A.S.E. enforces **I-Lang structured text compression** for internal workspace files:
+To optimize context window efficiency and minimize VRAM footprint on local devices, C.A.S.E. uses **Hybrid I-Lang text compression** for internal workspace files with a weak model fallback:
 
-1. **Internal Compressed Logs & Plans**:
-   - Files intended *only* for AI-to-AI execution (such as `action_log.jsonl`, internal `planning.md` drafts, and `02_Task_Queue/*/status.txt`) should be written in a dense, token-efficient syntax.
-   - Use shorthand prefix mappings to reduce character count:
-     * `T:[rule]` - Declarative Truths / Constraints (e.g. `T:strict_typing`)
-     * `A:[action_directive]` - Active Operations (e.g. `A:test_run⇒pass`)
-     * `V:[metric]` - Verification criteria (e.g. `V:coverage>=90%`)
-   - Avoid conversational filler words. Use direct operator chaining (e.g. `A:modify_04_results⇒run_test⇒ok`).
+1. **Soft Hybrid Shorthand (`planning.md`)**:
+   - For internal planning, use bracketed prefix mapping:
+     - `[T] rule` - Declarative Truths / Constraints (e.g., `[T] strict_typing`)
+     - `[A] directive` - Active Operations (e.g., `[A] scan_source => write_output`)
+     - `[V] metric` - Verification criteria (e.g., `[V] test_passed`)
+   - Avoid conversational filler. Use direct operator chaining (`=>` or `⇒`).
 
-2. **Human-Facing Decompression Boundary**:
-   - The user MUST NOT be exposed to compressed I-Lang syntax.
-   - Any document intended for the human developer (such as the final `output.md`, `README.md`, or your direct responses in chat) MUST be compiled back into natural human-readable language (Traditional Chinese or English).
+2. **Weak Model Fallback**:
+   - If you are a smaller model (e.g., 8B/14B parameters) and struggle to follow the bracketed shorthand, you MUST fall back to highly structured natural language. Do not get stuck in formatting loops.
+
+3. **Human-Facing Decompression Boundary**:
+   - Any file read by humans (e.g., `output.md`, `README.md`, or chat responses) MUST be in natural human language (Traditional Chinese or English).
+
+---
+
+## 5. Standard Controller CLI — `case.py`
+
+To streamline execution and automate git version control, use the lightweight python helper:
+- **Start Task**: `python .case/case.py start <task_id>`
+- **Submit Task**: `python .case/case.py submit <task_id> "<summary>"`
+- **Check Task**: `python .case/case.py check <task_id>`
+

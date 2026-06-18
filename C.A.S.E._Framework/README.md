@@ -95,13 +95,21 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 
 <details>
 <summary><b>3️⃣ 第三步：檢閱並同意 AI 的自動配置</b></summary>
-
 AI Agent 讀取 Prompt 後，將會**自己動手**完成：
 1. 分析您目前的程式語言與專案結構。
 2. 自動建立 `00_Constitution/`、`01_Roadmap/` 與 `02_Task_Queue/` 等實體目錄。
-3. 自動將 C.A.S.E. 執行期規則妥善整合寫入到您的本機長效記憶配置中。
+3. 自動將 C.A.S.E. 執行期規則妥善整合寫入到您的本機長效記憶配置中（如 `.cursorrules`）。
 
 您只需確認同意，AI 就能幫您全部設定妥當！完全不需要您手動搬移任何檔案，安全、乾淨且優雅！
+</details>
+
+<details>
+<summary><b>🛠️ 選擇性進階：使用微型控制工具 (.case/case.py) 進行流程自動化</b></summary>
+
+為提升開發體驗，本專案提供零依賴的微型控制腳本 `.case/case.py`，協助您與 AI 進行狀態流轉、自動提交與安全稽核：
+* **認領任務**：`python .case/case.py start Task_001_InitialScan` -> 自動將狀態設為執行中，並產生 `planning.md` 模板。
+* **提交任務**：`python .case/case.py submit Task_001_InitialScan "完成掃描"` -> 自動設為審核中，並產生 Git commit。
+* ** Checker 核實**：`python .case/case.py check Task_001_InitialScan` -> Checker 自動執行：比對唯讀目錄防篡改（安全攔截）、DoD 規範檢查、Hot/Cold 學習日誌超載轉移，通過後自動結案並 Git 存檔。
 </details>
 
 ---

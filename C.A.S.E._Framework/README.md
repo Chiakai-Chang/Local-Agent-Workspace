@@ -176,6 +176,7 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 | 您是誰 | 請前往 |
 |--------|--------|
 | 👤 **人類（開發者 / 長官 / 協作者）** | [📖 框架理念與設計哲學](docs/for_humans.md) |
+| 🌐 **想了解雲與地如何高效協作？** | [🤝 雲地雙軌協作實踐指南](docs/for_humans.md#25-雲地協同最佳實踐如何以高-cp-值進行雙軌合作) |
 | 🤖 **AI Agent（Coding Agent / 自動化工具）** | [⚙️ System Protocols & I/O Rules](docs/for_agents.md) |
 | 🛡️ **系統開發者 / 協調器設計師** | [⚙️ Harness Engineering 規範與優化設計](docs/harness_engineering.md) |
 | 📦 **一般 AI 專案使用者 / 快速套件** | [⚙️ Portable C.A.S.E. 攜帶式套件與自動化設計](docs/portable_case_harness.md) |

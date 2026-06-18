@@ -232,6 +232,11 @@ Analyze current directory structures and draft an implementation plan for: "$Goa
     Write-Host "🎉 C.A.S.E. Framework has been successfully initialized!" -ForegroundColor Green
     Write-Host "👉 Run: powershell -File .case/case.ps1 start Task_001_InitialScan" -ForegroundColor Green
     Write-Host "==========================================================" -ForegroundColor Green
+    Write-Host "`n💡 [拓撲協同最佳實踐 / Topology Setup Tip]:" -ForegroundColor Cyan
+    Write-Host "   雖然 C.A.S.E. 支援「單一本地模型」跑完全流程，但若能「雙軌協同」效果更佳：" -ForegroundColor Cyan
+    Write-Host "   1. 宏觀規劃層：交由雲端高推理模型 (如 Claude/Gemini) 進行 Roadmap 拆解與 Recipe 生成（不需提供代碼，僅供目錄樹結構）。" -ForegroundColor Cyan
+    Write-Host "   2. 微觀執行層：交由本地模型 (如本機 27B) 專注在 Task 沙箱內做代碼修改與單元測試，保障敏感代碼絕不外流並節省費用。" -ForegroundColor Cyan
+    Write-Host "   詳細分工與時機，請參閱：docs/for_humans.md Section 2.5`n" -ForegroundColor Cyan
 }
 
 function Case-Start {

@@ -223,6 +223,11 @@ Analyze current directory structures and draft an implementation plan for: "{use
     print("🤖 Your AI Agent will now respect the physical directory boundaries.")
     print("👉 Run: python .case/case.py start Task_001_InitialScan")
     print("==========================================================")
+    print("\n💡 [拓撲協同最佳實踐 / Topology Setup Tip]:")
+    print("   雖然 C.A.S.E. 支援「單一本地模型」跑完全流程，但若能「雙軌協同」效果更佳：")
+    print("   1. 宏觀規劃層：交由雲端高推理模型 (如 Claude/Gemini) 進行 Roadmap 拆解與 Recipe 生成（不需提供代碼，僅供目錄樹結構）。")
+    print("   2. 微觀執行層：交由本地模型 (如本機 27B) 專注在 Task 沙箱內做代碼修改與單元測試，保障敏感代碼絕不外流並節省費用。")
+    print("   詳細分工與時機，請參閱：docs/for_humans.md Section 2.5")
 
 def case_start(task_id):
     task_dir = os.path.join("02_Task_Queue", task_id)

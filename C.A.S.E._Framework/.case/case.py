@@ -236,8 +236,9 @@ def case_start(task_id):
         with open(status_file, "r", encoding="utf-8") as f:
             current_status = f.read().strip()
 
-    if current_status not in ["PENDING", "IN_PROGRESS", "REVIEW"]:
-        print(f"⚠️  Task is currently '{current_status}'. Proceed with caution.")
+    if current_status in ["DONE", "REVIEW"]:
+        print(f"❌ Error: Cannot start task. Task {task_id} is already in status '{current_status}'.")
+        sys.exit(1)
 
     with open(status_file, "w", encoding="utf-8") as f:
         f.write("IN_PROGRESS")
@@ -281,13 +282,22 @@ def case_submit(task_id, summary=""):
         print(f"❌ Error: Task folder '{task_dir}' does not exist.")
         sys.exit(1)
 
+    status_file = os.path.join(task_dir, "status.txt")
+    current_status = "PENDING"
+    if os.path.exists(status_file):
+        with open(status_file, "r", encoding="utf-8") as f:
+            current_status = f.read().strip()
+
+    if current_status != "IN_PROGRESS":
+        print(f"❌ Error: Task status is '{current_status}'. Only 'IN_PROGRESS' tasks can be submitted.")
+        sys.exit(1)
+
     # Pre-validation
     output_path = os.path.join(task_dir, "output.md")
     if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
         print(f"❌ Error: 'output.md' is missing or empty. Cannot submit.")
         sys.exit(1)
 
-    status_file = os.path.join(task_dir, "status.txt")
     with open(status_file, "w", encoding="utf-8") as f:
         f.write("REVIEW")
     print(f"🔄 Task {task_id} status updated to: REVIEW")
@@ -332,29 +342,49 @@ def case_check(task_id, force_done=False):
         print(f"⚠️  Task status is '{status}'. Only tasks in 'REVIEW' status can be checked.")
         sys.exit(1)
 
-    # 1. SECURITY AUDIT: Check if Constitution or Roadmap was modified (Guard against toxic edits)
-    modified_readonly = run_git(["diff", "--name-only", "HEAD"])
+    # 1. SECURITY AUDIT: Check if Constitution or Roadmap was modified or if untracked files were added
+    status_output = run_git(["status", "--porcelain", "00_Constitution", "01_Roadmap"])
     toxic_files = []
-    if modified_readonly:
-        for filepath in modified_readonly.split("\n"):
-            filepath = filepath.strip()
-            if filepath.startswith("00_Constitution/") or filepath.startswith("01_Roadmap/"):
-                toxic_files.append(filepath)
+    git_root = run_git(["rev-parse", "--show-toplevel"])
+    
+    if status_output:
+        for line in status_output.split("\n"):
+            line = line.strip()
+            if not line or len(line) < 3:
+                continue
+            # Extract the file path after the git status prefix (e.g. "M ", "?? ")
+            filepath = line[3:].strip()
+            # Resolve to absolute path relative to git root
+            if git_root:
+                abs_filepath = os.path.join(git_root, filepath)
+            else:
+                abs_filepath = os.path.abspath(filepath)
+            toxic_files.append(abs_filepath)
 
     if toxic_files:
         print("🚨 SECURITY VIOLATION: Read-only directories modified by Worker!")
         for tf in toxic_files:
             print(f"   ↳ Toxic modification: {tf}")
         
-        print("🛡️  Activating Security Defense: Reverting toxic files...")
+        print("🛡️  Activating Security Defense: Reverting toxic files and removing untracked files...")
         run_git(["restore", "--staged"] + toxic_files)
         run_git(["restore"] + toxic_files)
+        
+        # Clean any untracked files or folders in protected directories
+        for tf in toxic_files:
+            if os.path.exists(tf):
+                if os.path.isdir(tf):
+                    import shutil
+                    shutil.rmtree(tf)
+                else:
+                    os.remove(tf)
         
         with open(status_file, "w", encoding="utf-8") as f:
             f.write("ESCALATED")
         
+        relative_toxic_names = [os.path.basename(tf) for tf in toxic_files]
         with open(os.path.join(task_dir, "feedback.md"), "w", encoding="utf-8") as f:
-            f.write(f"### Security Rejection\n- Task halted due to unauthorized modification of read-only files: {', '.join(toxic_files)}. Files have been reverted.")
+            f.write(f"### Security Rejection\n- Task halted due to unauthorized modification of read-only files: {', '.join(relative_toxic_names)}. Files have been reverted.")
         
         log_path = os.path.join(task_dir, "action_log.jsonl")
         log_entry = {
@@ -379,7 +409,51 @@ def case_check(task_id, force_done=False):
         print("❌ Verification Failed: action_log.jsonl is missing or empty (No traces).")
         sys.exit(1)
 
-    print("✅ Basic file specifications validated.")
+    # ANTI-LYING CHECK: If recipe requires testing, verify structured command runs in action_log.jsonl
+    recipe_path = os.path.join(task_dir, "recipe.md")
+    needs_test = False
+    if os.path.exists(recipe_path):
+        with open(recipe_path, "r", encoding="utf-8") as rf:
+            recipe_content = rf.read().lower()
+            if "test" in recipe_content or "testing" in recipe_content:
+                needs_test = True
+
+    if needs_test:
+        has_test_trace = False
+        with open(log_path, "r", encoding="utf-8") as lf:
+            for line in lf:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    entry = json.loads(line)
+                    tool = entry.get("tool", "")
+                    if tool in ["run_command", "execute", "execute_command", "run_shell_command", "shell_command"]:
+                        args = entry.get("args", {})
+                        cmd_line = ""
+                        if isinstance(args, dict):
+                            cmd_line = args.get("CommandLine", "") or args.get("command", "") or ""
+                        else:
+                            cmd_line = str(args)
+                        if any(kw in cmd_line.lower() for kw in ["test", "pytest", "npm run test", "cargo test", "go test", "check"]):
+                            has_test_trace = True
+                            break
+                except Exception:
+                    # Fallback for plain lines (excluding case command lines themselves to avoid task ID matches)
+                    if "case_start" not in line and "case_submit" not in line:
+                        if any(kw in line.lower() for kw in ["test", "execute", "run_command"]):
+                            has_test_trace = True
+                            break
+        if not has_test_trace:
+            print("🚨 VERIFICATION FAILED (Anti-Lying Guard): Lying detected!")
+            print("   ↳ The recipe specifies 'test' or 'testing' requirements, but no test or command execution traces were found in action_log.jsonl.")
+            with open(status_file, "w", encoding="utf-8") as f:
+                f.write("PENDING")
+            with open(os.path.join(task_dir, "feedback.md"), "w", encoding="utf-8") as f:
+                f.write("### Verification Rejected (Anti-Lying)\n- The task checklist specifies testing, but action_log.jsonl contains no execution traces of tests or runtime scripts. Do not claim done without running tests.")
+            sys.exit(1)
+
+    print("✅ Basic file specifications & Anti-Lying traces validated.")
 
     # 3. Transition to DONE
     with open(status_file, "w", encoding="utf-8") as f:
@@ -404,6 +478,22 @@ def case_check(task_id, force_done=False):
     run_git(["add", task_dir, "00_Constitution"])
     run_git(["commit", "-m", f"task({task_id}): checker approved and closed task"])
 
+def parse_markdown_blocks(section_lines):
+    """Groups lines into markdown blocks based on list items starting with '-' or '*'."""
+    blocks = []
+    current_block = []
+    for line in section_lines:
+        # A new block starts when a line starts with a dash or asterisk (optionally indented by spaces)
+        stripped = line.lstrip()
+        if stripped.startswith("- ") or stripped.startswith("* "):
+            if current_block:
+                blocks.append("".join(current_block))
+                current_block = []
+        current_block.append(line)
+    if current_block:
+        blocks.append("".join(current_block))
+    return blocks
+
 def consolidate_learnings():
     """Manages the 40-line threshold for learnings.md by moving older entries to archive_learnings.md"""
     learnings_path = os.path.join("00_Constitution", "learnings.md")
@@ -421,8 +511,8 @@ def consolidate_learnings():
     print("🧠 Consolidation Threshold Exceeded (learnings.md > 40 lines). Activating SkillOpt Consolidation...")
     
     header_section = []
-    antipatterns = []
-    discoveries = []
+    antipattern_lines = []
+    discovery_lines = []
     
     current_sec = None
     for line in lines:
@@ -432,22 +522,23 @@ def consolidate_learnings():
             current_sec = "anti"
         elif "## Reusable Patterns" in line or "## ## Reusable Patterns" in line:
             current_sec = "pattern"
-        elif line.strip() == "":
-            continue
         else:
             if current_sec == "anti":
-                antipatterns.append(line)
+                antipattern_lines.append(line)
             elif current_sec == "pattern":
-                discoveries.append(line)
+                discovery_lines.append(line)
             else:
                 header_section.append(line)
 
+    antipattern_blocks = parse_markdown_blocks(antipattern_lines)
+    discovery_blocks = parse_markdown_blocks(discovery_lines)
+
     keep_count = 5
-    archive_anti = antipatterns[:-keep_count] if len(antipatterns) > keep_count else []
-    keep_anti = antipatterns[-keep_count:] if len(antipatterns) > keep_count else antipatterns
+    archive_anti = antipattern_blocks[:-keep_count] if len(antipattern_blocks) > keep_count else []
+    keep_anti = antipattern_blocks[-keep_count:] if len(antipattern_blocks) > keep_count else antipattern_blocks
     
-    archive_pat = discoveries[:-keep_count] if len(discoveries) > keep_count else []
-    keep_pat = discoveries[-keep_count:] if len(discoveries) > keep_count else discoveries
+    archive_pat = discovery_blocks[:-keep_count] if len(discovery_blocks) > keep_count else []
+    keep_pat = discovery_blocks[-keep_count:] if len(discovery_blocks) > keep_count else discovery_blocks
 
     if archive_anti or archive_pat:
         with open(archive_path, "a", encoding="utf-8") as af:
@@ -476,13 +567,60 @@ def consolidate_learnings():
             
     print("🧹 learnings.md successfully compacted and updated.")
 
+def case_create_subtask(slug, recipe_content):
+    queue_dir = "02_Task_Queue"
+    if not os.path.exists(queue_dir):
+        print(f"❌ Error: Task queue directory '{queue_dir}' does not exist. Please run init first.")
+        sys.exit(1)
+
+    # Scan for existing Task_NNN folders to find the next index
+    existing_tasks = [d for d in os.listdir(queue_dir) if os.path.isdir(os.path.join(queue_dir, d)) and d.startswith("Task_")]
+    max_idx = 0
+    for task in existing_tasks:
+        parts = task.split("_")
+        if len(parts) > 1:
+            try:
+                idx = int(parts[1])
+                if idx > max_idx:
+                    max_idx = idx
+            except ValueError:
+                pass
+
+    next_idx = max_idx + 1
+    new_task_id = f"Task_{next_idx:03d}_{slug}"
+    new_task_dir = os.path.join(queue_dir, new_task_id)
+
+    os.makedirs(new_task_dir)
+
+    # Write status.txt
+    with open(os.path.join(new_task_dir, "status.txt"), "w", encoding="utf-8") as f:
+        f.write("PENDING")
+
+    # Write role.md
+    with open(os.path.join(new_task_dir, "role.md"), "w", encoding="utf-8") as f:
+        f.write(f"You are a specialized agent tasked with executing: {slug}.")
+
+    # Write recipe.md
+    with open(os.path.join(new_task_dir, "recipe.md"), "w", encoding="utf-8") as f:
+        f.write(recipe_content)
+
+    # Update Roadmap
+    roadmap_path = os.path.join("01_Roadmap", "roadmap.md")
+    if os.path.exists(roadmap_path):
+        with open(roadmap_path, "a", encoding="utf-8") as rf:
+            rf.write(f"\n- [ ] {new_task_id}: {slug} (Created dynamically)\n")
+        print(f"🗺️  Updated roadmap: Added {new_task_id}")
+
+    print(f"🎉 Sub-task '{new_task_id}' successfully created in queue.")
+
 def show_help():
     print("""C.A.S.E. Controller CLI Helper Tools
 Usage:
-  python .case/case.py init [optional goal]   - Initialize directories, constitutions & .cursorrules
-  python .case/case.py start <task_id>        - Transition task to IN_PROGRESS & create planning.md
-  python .case/case.py submit <task_id> "msg" - Transition task to REVIEW & Git commit task changes
-  python .case/case.py check <task_id>        - Run Security and DoD Verification, close task as DONE.
+  python .case/case.py init [optional goal]          - Initialize directories, constitutions & .cursorrules
+  python .case/case.py start <task_id>               - Transition task to IN_PROGRESS & create planning.md
+  python .case/case.py submit <task_id> "msg"        - Transition task to REVIEW & Git commit task changes
+  python .case/case.py check <task_id>               - Run Security and DoD Verification, close task as DONE.
+  python .case/case.py create_subtask <slug> "<recipe>" - Dynamically inject a new subtask into the Queue.
 """)
 
 if __name__ == "__main__":
@@ -509,5 +647,11 @@ if __name__ == "__main__":
             print("❌ Error: Missing task_id. Example: python .case/case.py check Task_001_InitialScan")
             sys.exit(1)
         case_check(sys.argv[2])
+    elif cmd == "create_subtask":
+        if len(sys.argv) < 3:
+            print("❌ Error: Missing slug. Example: python .case/case.py create_subtask DownloadDeps \"Download external deps\"")
+            sys.exit(1)
+        recipe = sys.argv[3] if len(sys.argv) > 3 else "No description specified."
+        case_create_subtask(sys.argv[2], recipe)
     else:
         show_help()

@@ -248,8 +248,9 @@ function Case-Start {
         $currentStatus = (Get-Content $statusFile).Trim()
     }
 
-    if ($currentStatus -ne "PENDING" -and $currentStatus -ne "IN_PROGRESS" -and $currentStatus -ne "REVIEW") {
-        Write-Host "⚠️  Task is currently '$currentStatus'. Proceed with caution." -ForegroundColor Yellow
+    if ($currentStatus -eq "DONE" -or $currentStatus -eq "REVIEW") {
+        Write-Error "Cannot start task. Task $TaskId is already in status '$currentStatus'."
+        exit 1
     }
 
     Set-Content -Path $statusFile -Value "IN_PROGRESS" -Encoding UTF8
@@ -297,13 +298,23 @@ function Case-Submit {
         exit 1
     }
 
+    $statusFile = Join-Path $taskDir "status.txt"
+    $currentStatus = "PENDING"
+    if (Test-Path $statusFile) {
+        $currentStatus = (Get-Content $statusFile).Trim()
+    }
+
+    if ($currentStatus -ne "IN_PROGRESS") {
+        Write-Error "Task status is '$currentStatus'. Only 'IN_PROGRESS' tasks can be submitted."
+        exit 1
+    }
+
     $outputPath = Join-Path $taskDir "output.md"
     if (-not (Test-Path $outputPath) -or (Get-Item $outputPath).Length -eq 0) {
         Write-Error "'output.md' is missing or empty. Cannot submit."
         exit 1
     }
 
-    $statusFile = Join-Path $taskDir "status.txt"
     Set-Content -Path $statusFile -Value "REVIEW" -Encoding UTF8
     Write-Host "🔄 Task $TaskId status updated to: REVIEW"
 
@@ -330,6 +341,26 @@ function Case-Submit {
     }
 }
 
+function Parse-MarkdownBlocks {
+    param([string[]]$SectionLines)
+    $blocks = [System.Collections.Generic.List[string]]::new()
+    $currentBlock = [System.Collections.Generic.List[string]]::new()
+    foreach ($line in $SectionLines) {
+        $trimmed = $line.TrimStart()
+        if ($trimmed.StartsWith("- ") -or $trimmed.StartsWith("* ")) {
+            if ($currentBlock.Count -gt 0) {
+                $blocks.Add(($currentBlock -join "`r`n") + "`r`n")
+                $currentBlock.Clear()
+            }
+        }
+        $currentBlock.Add($line)
+    }
+    if ($currentBlock.Count -gt 0) {
+        $blocks.Add(($currentBlock -join "`r`n") + "`r`n")
+    }
+    return $blocks
+}
+
 function Consolidate-Learnings {
     $learningsPath = Join-Path "00_Constitution" "learnings.md"
     $archivePath = Join-Path "00_Constitution" "archive_learnings.md"
@@ -342,32 +373,33 @@ function Consolidate-Learnings {
     Write-Host "🧠 Consolidation Threshold Exceeded (learnings.md > 40 lines). Activating SkillOpt Consolidation..." -ForegroundColor Cyan
 
     $headerSection = [System.Collections.Generic.List[string]]::new()
-    $antipatterns = [System.Collections.Generic.List[string]]::new()
-    $discoveries = [System.Collections.Generic.List[string]]::new()
+    $antipatternLines = [System.Collections.Generic.List[string]]::new()
+    $discoveryLines = [System.Collections.Generic.List[string]]::new()
 
     $currentSec = $null
     foreach ($line in $lines) {
         if ($line.StartsWith("# ") -or $line -like "*This document*") {
-            $headerSection.Add($line)
+            $headerSection.Add($line) | Out-Null
         } elseif ($line -like "*## Anti-Patterns*" -or $line -like "*## ## Anti-Patterns*") {
             $currentSec = "anti"
         } elseif ($line -like "*## Reusable Patterns*" -or $line -like "*## ## Reusable Patterns*") {
             $currentSec = "pattern"
-        } elseif ([string]::IsNullOrWhiteSpace($line)) {
-            continue
         } else {
-            if ($currentSec -eq "anti") { $antipatterns.Add($line) }
-            elseif ($currentSec -eq "pattern") { $discoveries.Add($line) }
-            else { $headerSection.Add($line) }
+            if ($currentSec -eq "anti") { $antipatternLines.Add($line) | Out-Null }
+            elseif ($currentSec -eq "pattern") { $discoveryLines.Add($line) | Out-Null }
+            else { $headerSection.Add($line) | Out-Null }
         }
     }
 
-    $keepCount = 5
-    $archiveAnti = if ($antipatterns.Count -gt $keepCount) { $antipatterns.GetRange(0, $antipatterns.Count - $keepCount) } else { @() }
-    $keepAnti = if ($antipatterns.Count -gt $keepCount) { $antipatterns.GetRange($antipatterns.Count - $keepCount, $keepCount) } else { $antipatterns }
+    $antipatternBlocks = Parse-MarkdownBlocks -SectionLines $antipatternLines.ToArray()
+    $discoveryBlocks = Parse-MarkdownBlocks -SectionLines $discoveryLines.ToArray()
 
-    $archivePat = if ($discoveries.Count -gt $keepCount) { $discoveries.GetRange(0, $discoveries.Count - $keepCount) } else { @() }
-    $keepPat = if ($discoveries.Count -gt $keepCount) { $discoveries.GetRange($discoveries.Count - $keepCount, $keepCount) } else { $discoveries }
+    $keepCount = 5
+    $archiveAnti = if ($antipatternBlocks.Count -gt $keepCount) { $antipatternBlocks.GetRange(0, $antipatternBlocks.Count - $keepCount) } else { @() }
+    $keepAnti = if ($antipatternBlocks.Count -gt $keepCount) { $antipatternBlocks.GetRange($antipatternBlocks.Count - $keepCount, $keepCount) } else { $antipatternBlocks }
+
+    $archivePat = if ($discoveryBlocks.Count -gt $keepCount) { $discoveryBlocks.GetRange(0, $discoveryBlocks.Count - $keepCount) } else { @() }
+    $keepPat = if ($discoveryBlocks.Count -gt $keepCount) { $discoveryBlocks.GetRange($discoveryBlocks.Count - $keepCount, $keepCount) } else { $discoveryBlocks }
 
     if ($archiveAnti.Count -gt 0 -or $archivePat.Count -gt 0) {
         $iso = Get-IsoTime
@@ -375,11 +407,11 @@ function Consolidate-Learnings {
         Add-Content -Path $archivePath -Value $archiveHeading -Encoding UTF8
         if ($archiveAnti.Count -gt 0) {
             Add-Content -Path $archivePath -Value "#### Archived Anti-Patterns:" -Encoding UTF8
-            Add-Content -Path $archivePath -Value ($archiveAnti -join "`n") -Encoding UTF8
+            Add-Content -Path $archivePath -Value ($archiveAnti -join "") -Encoding UTF8
         }
         if ($archivePat.Count -gt 0) {
             Add-Content -Path $archivePath -Value "#### Archived Reusable Patterns:" -Encoding UTF8
-            Add-Content -Path $archivePath -Value ($archivePat -join "`n") -Encoding UTF8
+            Add-Content -Path $archivePath -Value ($archivePat -join "") -Encoding UTF8
         }
         Write-Host "🗄️  Archived cold memories to archive_learnings.md."
     }
@@ -389,13 +421,21 @@ function Consolidate-Learnings {
     foreach ($line in $headerSection) { $newContent.Add($line) | Out-Null }
     $newContent.Add("`n## ## Anti-Patterns & Mistakes") | Out-Null
     if ($keepAnti.Count -gt 0) {
-        foreach ($line in $keepAnti) { $newContent.Add($line) | Out-Null }
+        foreach ($block in $keepAnti) {
+            foreach ($line in ($block -split "`r`n")) {
+                if ($line) { $newContent.Add($line) | Out-Null }
+            }
+        }
     } else {
         $newContent.Add("*(AI Checker will auto-populate this section when mistakes are identified or tasks are rejected)*") | Out-Null
     }
     $newContent.Add("`n## ## Reusable Patterns & Discoveries") | Out-Null
     if ($keepPat.Count -gt 0) {
-        foreach ($line in $keepPat) { $newContent.Add($line) | Out-Null }
+        foreach ($block in $keepPat) {
+            foreach ($line in ($block -split "`r`n")) {
+                if ($line) { $newContent.Add($line) | Out-Null }
+            }
+        }
     } else {
         $newContent.Add("*(AI Checker will auto-populate this section when new patterns or configurations are completed)*") | Out-Null
     }
@@ -420,18 +460,29 @@ function Case-Check {
 
     $status = (Get-Content $statusFile).Trim()
     if ($status -ne "REVIEW") {
-        Write-Host "⚠️  Task status is '$status'. Checking REVIEW status."
+        Write-Error "Task status is '$status'. Only tasks in 'REVIEW' status can be checked."
+        exit 1
     }
 
-    # 1. SECURITY AUDIT
-    $modifiedFiles = Run-Git @("diff", "--name-only", "HEAD")
+    # 1. SECURITY AUDIT: Check if Constitution or Roadmap was modified or if untracked files were added
+    $statusOutput = Run-Git @("status", "--porcelain", "00_Constitution", "01_Roadmap")
+    $gitRoot = Run-Git @("rev-parse", "--show-toplevel")
+    if ($gitRoot) { $gitRoot = $gitRoot.Trim() }
+
     $toxicFiles = @()
-    if ($modifiedFiles) {
-        foreach ($file in ($modifiedFiles -split "`n")) {
-            $file = $file.Trim()
-            if ($file.StartsWith("00_Constitution/") -or $file.StartsWith("01_Roadmap/")) {
-                $toxicFiles += $file
+    if ($statusOutput) {
+        foreach ($line in ($statusOutput -split "`n")) {
+            $trimmed = $line.Trim()
+            if (-not $trimmed -or $trimmed.Length -lt 3) { continue }
+            $file = $trimmed.Substring(2).Trim()
+            
+            # Resolve to absolute path
+            if ($gitRoot) {
+                $absPath = Join-Path $gitRoot $file
+            } else {
+                $absPath = Resolve-Path $file
             }
+            $toxicFiles += $absPath
         }
     }
 
@@ -439,12 +490,28 @@ function Case-Check {
         Write-Host "🚨 SECURITY VIOLATION: Read-only directories modified by Worker!" -ForegroundColor Red
         foreach ($tf in $toxicFiles) { Write-Host "   ↳ Toxic: $tf" -ForegroundColor Red }
         
-        Write-Host "🛡️  Activating Security Defense: Reverting toxic files..." -ForegroundColor Yellow
+        Write-Host "🛡️  Activating Security Defense: Reverting toxic files and removing untracked files..." -ForegroundColor Yellow
         Run-Git @("restore", "--staged") | Out-Null
         Run-Git (@("restore") + $toxicFiles) | Out-Null
+        
+        foreach ($tf in $toxicFiles) {
+            if (Test-Path $tf) {
+                if (Test-Path -Path $tf -PathType Container) {
+                    Remove-Item -Path $tf -Recurse -Force | Out-Null
+                } else {
+                    Remove-Item -Path $tf -Force | Out-Null
+                }
+            }
+        }
 
         Set-Content -Path $statusFile -Value "ESCALATED" -Encoding UTF8
-        Set-Content -Path (Join-Path $taskDir "feedback.md") -Value "### Security Rejection`n- Task halted due to unauthorized modification of read-only files: $($toxicFiles -join ', '). Reverted." -Encoding UTF8
+        
+        # Format toxic names with just their basenames
+        $toxicNames = @()
+        foreach ($tf in $toxicFiles) {
+            $toxicNames += Split-Path $tf -Leaf
+        }
+        Set-Content -Path (Join-Path $taskDir "feedback.md") -Value "### Security Rejection`n- Task halted due to unauthorized modification of read-only files: $($toxicNames -join ', '). Reverted." -Encoding UTF8
 
         $logPath = Join-Path $taskDir "action_log.jsonl"
         $logEntry = @{
@@ -471,7 +538,63 @@ function Case-Check {
         exit 1
     }
 
-    Write-Host "✅ Basic file specifications validated." -ForegroundColor Green
+    # ANTI-LYING CHECK: If recipe requires testing, verify structured command runs in action_log.jsonl
+    $recipePath = Join-Path $taskDir "recipe.md"
+    $needsTest = $false
+    if (Test-Path $recipePath) {
+        $recipeContent = (Get-Content $recipePath -Raw).ToLower()
+        if ($recipeContent.Contains("test") -or $recipeContent.Contains("testing")) {
+            $needsTest = $true
+        }
+    }
+
+    if ($needsTest) {
+        $hasTestTrace = $false
+        if (Test-Path $logPath) {
+            $logLines = Get-Content $logPath
+            foreach ($line in $logLines) {
+                $trimmedLine = $line.Trim()
+                if (-not $trimmedLine) { continue }
+                try {
+                    $entry = $trimmedLine | ConvertFrom-Json
+                    $tool = $entry.tool
+                    if ($tool -in @("run_command", "execute", "execute_command", "run_shell_command", "shell_command")) {
+                        $args = $entry.args
+                        $cmdLine = ""
+                        if ($args -is [PSCustomObject] -or $args -is [Hashtable]) {
+                            $cmdLine = if ($args.CommandLine) { $args.CommandLine } else { $args.command }
+                        } else {
+                            $cmdLine = $args.ToString()
+                        }
+                        if ($cmdLine) {
+                            $lowerCmd = $cmdLine.ToLower()
+                            if ($lowerCmd.Contains("test") -or $lowerCmd.Contains("pytest") -or $lowerCmd.Contains("npm run test") -or $lowerCmd.Contains("cargo test") -or $lowerCmd.Contains("go test") -or $lowerCmd.Contains("check")) {
+                                $hasTestTrace = $true
+                                break
+                            }
+                        }
+                    }
+                } catch {
+                    if ($trimmedLine -notlike "*case_start*" -and $trimmedLine -notlike "*case_submit*") {
+                        $lowerLine = $trimmedLine.ToLower()
+                        if ($lowerLine.Contains("test") -or $lowerLine.Contains("execute") -or $lowerLine.Contains("run_command")) {
+                            $hasTestTrace = $true
+                            break
+                        }
+                    }
+                }
+            }
+        }
+        if (-not $hasTestTrace) {
+            Write-Host "🚨 VERIFICATION FAILED (Anti-Lying Guard): Lying detected!" -ForegroundColor Red
+            Write-Host "   ↳ The recipe specifies 'test' or 'testing' requirements, but no test or command execution traces were found in action_log.jsonl." -ForegroundColor Red
+            Set-Content -Path $statusFile -Value "PENDING" -Encoding UTF8
+            Set-Content -Path (Join-Path $taskDir "feedback.md") -Value "### Verification Rejected (Anti-Lying)`n- The task checklist specifies testing, but action_log.jsonl contains no execution traces of tests or runtime scripts. Do not claim done without running tests." -Encoding UTF8
+            exit 1
+        }
+    }
+
+    Write-Host "✅ Basic file specifications & Anti-Lying traces validated." -ForegroundColor Green
 
     # 3. Mark DONE
     Set-Content -Path $statusFile -Value "DONE" -Encoding UTF8
@@ -495,6 +618,48 @@ function Case-Check {
     Run-Git @("commit", "-m", "task($TaskId): checker approved and closed task") | Out-Null
 }
 
+function Case-CreateSubtask {
+    param([string]$Slug, [string]$RecipeContent)
+    $queueDir = "02_Task_Queue"
+    if (-not (Test-Path $queueDir)) {
+        Write-Error "Task queue directory '$queueDir' does not exist. Please run init first."
+        exit 1
+    }
+
+    $existingTasks = Get-ChildItem -Path $queueDir -Directory -Filter "Task_*"
+    $maxIdx = 0
+    foreach ($task in $existingTasks) {
+        $parts = $task.Name.Split("_")
+        if ($parts.Count -gt 1) {
+            $idx = 0
+            if ([int]::TryParse($parts[1], [ref]$idx)) {
+                if ($idx -gt $maxIdx) {
+                    $maxIdx = $idx
+                }
+            }
+        }
+    }
+
+    $nextIdx = $maxIdx + 1
+    $newTaskId = "Task_{0:D3}_{1}" -f $nextIdx, $Slug
+    $newTaskDir = Join-Path $queueDir $newTaskId
+
+    New-Item -ItemType Directory -Path $newTaskDir | Out-Null
+
+    Set-Content -Path (Join-Path $newTaskDir "status.txt") -Value "PENDING" -Encoding UTF8
+    Set-Content -Path (Join-Path $newTaskDir "role.md") -Value "You are a specialized agent tasked with executing: $Slug." -Encoding UTF8
+    Set-Content -Path (Join-Path $newTaskDir "recipe.md") -Value $RecipeContent -Encoding UTF8
+
+    # Update Roadmap
+    $roadmapPath = Join-Path "01_Roadmap" "roadmap.md"
+    if (Test-Path $roadmapPath) {
+        Add-Content -Path $roadmapPath -Value "`n- [ ] ${newTaskId}: $Slug (Created dynamically)" -Encoding UTF8
+        Write-Host "🗺️  Updated roadmap: Added $newTaskId"
+    }
+
+    Write-Host "🎉 Sub-task '$newTaskId' successfully created in queue." -ForegroundColor Green
+}
+
 # CLI Router
 if ($args.Count -lt 1) {
     Write-Host "C.A.S.E. Controller PowerShell Helper Tools"
@@ -503,6 +668,7 @@ if ($args.Count -lt 1) {
     Write-Host "  powershell -File .case/case.ps1 start <task_id>"
     Write-Host "  powershell -File .case/case.ps1 submit <task_id> `"summary`""
     Write-Host "  powershell -File .case/case.ps1 check <task_id>"
+    Write-Host "  powershell -File .case/case.ps1 create_subtask <slug> `"recipe`""
     exit 0
 }
 
@@ -520,6 +686,10 @@ if ($cmd -eq "init") {
 } elseif ($cmd -eq "check") {
     if ($args.Count -lt 2) { Write-Error "Missing task_id"; exit 1 }
     Case-Check -TaskId $args[1]
+} elseif ($cmd -eq "create_subtask") {
+    if ($args.Count -lt 2) { Write-Error "Missing slug"; exit 1 }
+    $recipe = if ($args.Count -gt 2) { $args[2] } else { "No description specified." }
+    Case-CreateSubtask -Slug $args[1] -RecipeContent $recipe
 } else {
     Write-Host "Unknown command. Use no parameters for help."
 }

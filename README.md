@@ -451,10 +451,10 @@ AI Agent 讀取 Prompt 後，將會依據手冊指南自動建立實體目錄（
      > 「請認領 `02_Task_Queue/Task_001_xxx/` 任務。將其 `status.txt` 改為 `IN_PROGRESS`，並依據 `recipe.md` 規範與 `role.md` 的角色開始執行開發。」
    * 本地 AI 將狀態改為 `IN_PROGRESS`，在本地修改代碼並反覆測試，不消耗任何雲端 Token。完成後將狀態改為 `REVIEW`。
 
-3. **結案與驗收 (Validation & Handoff)**：
-   * **人工作法**：人類直接審查 git diff 與 `output.md`，手動改 `status.txt` 為 `DONE`。
-   * **對抗審查**：啟動全新乾淨的雲端對話，由雲端大腦驗收：
-     > 「請審查 `02_Task_Queue/Task_001_xxx/`。比對 `recipe.md` 的 DoD，檢驗 `output.md` 的結果。若通過請將 `status.txt` 改為 `DONE`；若未通過，請在 `feedback.md` 寫入退回理由並將 `status.txt` 改為 `PENDING`。」
+3. **自動化檢驗與人類極簡驗收 (AI Self-Review & Minimal Human Handoff)**：
+   * **AI 自動復盤與修復**：AI 在回報人類前，會先自動對照 `recipe.md` 的 DoD 進行自我檢驗與本地測試。若有任何問題，AI 會在後台默默修復（或產生關聯子任務修正），完全不打擾人類。
+   * **人類自然語言審查**：當 AI 宣告 100% 完成後，人類只需檢閱結果，直接在大白話對話中向 AI 表達「通過」或「修改此處」。AI 接收後會**自動**變更 `status.txt` 並 commit/push 或轉回開發狀態，人類無須手動編輯狀態檔。
+
 
 
 

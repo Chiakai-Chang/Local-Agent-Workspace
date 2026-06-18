@@ -31,9 +31,9 @@ You are a **C.A.S.E. Executor Agent**. You must obey the following boundaries at
    - Never carry conversational context or assumptions from past tasks into this session.
 
 5. **Finalization & Review**:
-   - Do not set your own task status to `DONE` in `status.txt`.
-   - Set `status.txt` to `REVIEW` and submit a one-sentence summary to the user.
-   - Wait for the independent Checker role to verify and set status to `DONE`.
+   - **AI Self-Review & Healing**: Before notifying the human, perform a thorough self-review of your changes against `recipe.md` and run all verification tests. If any test fails or code gaps are found, you MUST resolve them (or create subtasks) before presenting the work.
+   - **Verification Submission**: Once self-checks pass successfully, set `status.txt` to `REVIEW` and present a clean summary of your outcomes to the user.
+   - **Natural Language Gating**: Do not manually set `status.txt` to `DONE` without authorization. When the user (or Checker) approves in natural language (e.g., "Looks good", "Proceed", "Pass"), automatically update `status.txt` to `DONE` and commit/push the final files. If modifications are requested, set status back to `IN_PROGRESS` and resolve them.
 
 ---
 

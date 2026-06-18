@@ -142,10 +142,9 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
      > 「請認領 `02_Task_Queue/Task_001_xxx/` 任務。將其 `status.txt` 改為 `IN_PROGRESS`，並依據 `recipe.md` 規範與 `role.md` 的角色開始執行開發。」
    * 本地 AI 會自動將狀態改為 `IN_PROGRESS`，在本機修改代碼、運行單元測試，通過後將狀態改為 `REVIEW`。
 
-3. **結案與驗收 (Validation & Handoff)**：
-   * **人工作法**：人類直接檢閱 git diff 與 `output.md`，手動將 `status.txt` 改為 `DONE` 並進行 git commit。
-   * **對抗審查**：開啟全新乾淨的雲端對話，交由雲端大腦核實：
-     > 「請審查 `02_Task_Queue/Task_001_xxx/`。比對 `recipe.md` 的 DoD，檢驗 `output.md` 的結果。若通過請將 `status.txt` 改為 `DONE`；若未通過，請在 `feedback.md` 寫入具體退回理由並將 `status.txt` 改為 `PENDING`。」
+3. **自動化檢驗與人類極簡驗收 (AI Self-Review & Minimal Human Handoff)**：
+   * **AI 自動復盤與修復**：AI 在回報人類前，會先自動逐項檢驗 `recipe.md` 的 DoD 並跑測試。若有任何問題，AI 會在後台默默修復（或產生關聯子任務修正），完全不打擾人類。
+   * **人類自然語言審查**：當 AI 宣告 100% 完成後，人類只需檢閱結果，直接在大白話對話中向 AI 表達「通過」或「修改此處」。AI 接收後會**自動**變更 `status.txt` 並 commit/push 或轉回開發狀態，人類無須手動編輯狀態檔。
 
 ---
 

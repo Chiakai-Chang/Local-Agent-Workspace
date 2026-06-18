@@ -132,8 +132,10 @@ Upon receiving a task (status = `PENDING`):
 4. **Draft Micro-Plan**: Write a `planning.md` file within the task folder describing the specific steps, targeted files, and testing strategy. Double check constraints to ensure alignment.
 5. **Read inputs**: Process only files listed in `recipe.md > Input Sources`.
 6. **Execute Cautiously**: Make modifications step-by-step. Keep edits atomic. Run unit tests frequently to confirm behavior and check trace integrity.
-7. **Write output**: Use `write_artifact("output.md", <content>)`.
-8. **Submit**: Call `submit_for_review(<one-sentence summary of what was produced>)`.
+7. **AI Self-Review & Self-Healing**: Before presenting the work, perform a thorough review of your modifications against `recipe.md` and run all verification tests. If any test fails or code gaps are found, you MUST continue working to fix them (or create subtasks).
+8. **Write output**: Use `write_artifact("output.md", <content>)`.
+9. **Submit**: Call `submit_for_review(<clean summary of what was produced>)` to set status to `REVIEW`.
+10. **Acknowledge Natural Language Feedback**: Wait for natural language feedback. If the user (or Checker) approves (e.g., "Pass", "Looks good"), automatically set status to `DONE` and perform git commit/push. If changes are requested, set status back to `IN_PROGRESS` and fix the issues.
 
 **On error or uncertainty:**
 - Insufficient inputs where a prerequisite task can be defined → call `create_subtask(...)` first, then `escalate_issue(...)` (see Section 10a). Do NOT skip directly to `escalate_issue`.
@@ -143,19 +145,20 @@ Upon receiving a task (status = `PENDING`):
 
 ---
 
-## 7. Checker Agent Protocol
+## 7. Checker Agent & Human Review Protocol
 
-Upon detecting status = `REVIEW`:
+Upon detecting status = `REVIEW` (or when a human begins reviewing):
 
 1. **Read** `recipe.md > Local Definition of Done` — this is the authoritative checklist.
 2. **Read** `output.md` — evaluate against every DoD item.
-3. **APPROVE** (all DoD items satisfied):
-   - Call `change_status(task_id, "DONE")`.
-4. **REJECT** (one or more DoD items not satisfied):
-   - Write specific, actionable feedback to `feedback.md` using `write_artifact`.
-   - Increment retry counter (tracked in `action_log.jsonl`).
-   - Retry count < 3 → `change_status(task_id, "PENDING")`.
-   - Retry count >= 3 → `escalate_issue("Max retries reached. Last failure: <reason>")`.
+3. **Natural Language Gating**:
+   - **APPROVE** (all DoD items satisfied, or human says "looks good" / "pass"):
+     - Transition task status to `DONE` (e.g., via `change_status(task_id, "DONE")`).
+   - **REJECT** (DoD items not satisfied, or human requests changes):
+     - Write specific feedback to `feedback.md` or communicate via chat.
+     - Increment retry counter (tracked in `action_log.jsonl`).
+     - Retry count < 3 → transition status to `PENDING` (or let Worker set to `IN_PROGRESS` directly to fix).
+     - Retry count >= 3 → transition status to `ESCALATED`.
 
 ---
 

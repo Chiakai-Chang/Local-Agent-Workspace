@@ -101,12 +101,16 @@ C.A.S.E. 不是複雜的軟體套件，而是一套**用實體檔案管束 AI �
 
 ---
 
-### 🔍 步驟三：結案與驗收 (Validation & Handoff)
-* **做法 A（人類手動驗收）**：人類開發者直接檢閱 git diff 與地端 AI 產出的 `output.md`，若通過則手動將 `status.txt` 改為 `DONE` 並進行 git commit。
-* **做法 B（雲端對抗審查，高規格驗收）**：
-  * 使用雲端 AI 啟動全新乾淨的對話 thread，下指令：
-    > 「請審查 `02_Task_Queue/Task_001_initial_scaffold/`。比對 `recipe.md` 的 DoD，檢驗 `output.md` 的結果與測試證明。若完全通過，請將 `status.txt` 改為 `DONE`；若未通過，請在 `feedback.md` 寫入具體退回理由並將 `status.txt` 改為 `PENDING`。」
-  * 通過後，即可由雲端大腦繼續拆解下一個 `Task_002`，重複此循環。
+### 🔍 步驟三：自動化檢驗與人類極簡驗收 (AI Self-Review & Minimal Human Handoff)
+為了極大化減少人類的繁瑣操作，交接與驗收完全是**智慧化且由 AI 主動驅動**的：
+
+1. **AI 自動復盤與修復 (AI Self-Validation & Self-Healing)**：
+   * 在向人類回報前，地端/執行 AI 會主動對照 `recipe.md` 的 DoD 逐項自我復盤並執行本地測試。
+   * 若發現測試失敗或遺漏，AI 會**自動繼續修改代碼或生成修補子任務**，直至全部通過。中間出錯時，**完全不打擾人類**。
+2. **人類極簡驗收 (Natural Language Approval)**：
+   * 當 AI 自我檢驗 100% 通過後，才會在對話中向人類回報成果。人類只需以大白話與 AI 對話，**不需要手動修改任何 `status.txt` 檔案或逐項勾選**：
+     * **若通過**：人類直接對 AI 說：「沒問題，通過」或「OK，收工」。AI 接收後會**自動**將 `status.txt` 改為 `DONE` 並完成 git commit / push。
+     * **若需修改**：人類直接對 AI 說：「這裡字型大小幫我調整一下」。AI 接收後會**自動**將狀態設回 `IN_PROGRESS` 進行修復，直到完成後再次請人類看。
 
 ---
 

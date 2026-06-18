@@ -65,3 +65,21 @@ C.A.S.E. uses a **file-driven, zero-command text-space optimization process** to
    - Append these to `00_Constitution/learnings.md` under `## Reusable Patterns & Discoveries`.
 
 This cycle requires **zero user operation and no scripting code**. The AI directly reads, writes, and trains itself on `learnings.md` in text-space, naturally accumulating repository-specific intelligence over time.
+
+---
+
+## 4. AI-Native I-Lang Compression (Token Saving)
+
+To optimize context window efficiency, save VRAM on local devices, and avoid token bloat without requiring compilation script tooling, C.A.S.E. enforces **I-Lang structured text compression** for internal workspace files:
+
+1. **Internal Compressed Logs & Plans**:
+   - Files intended *only* for AI-to-AI execution (such as `action_log.jsonl`, internal `planning.md` drafts, and `02_Task_Queue/*/status.txt`) should be written in a dense, token-efficient syntax.
+   - Use shorthand prefix mappings to reduce character count:
+     * `T:[rule]` - Declarative Truths / Constraints (e.g. `T:strict_typing`)
+     * `A:[action_directive]` - Active Operations (e.g. `A:test_run⇒pass`)
+     * `V:[metric]` - Verification criteria (e.g. `V:coverage>=90%`)
+   - Avoid conversational filler words. Use direct operator chaining (e.g. `A:modify_04_results⇒run_test⇒ok`).
+
+2. **Human-Facing Decompression Boundary**:
+   - The user MUST NOT be exposed to compressed I-Lang syntax.
+   - Any document intended for the human developer (such as the final `output.md`, `README.md`, or your direct responses in chat) MUST be compiled back into natural human-readable language (Traditional Chinese or English).

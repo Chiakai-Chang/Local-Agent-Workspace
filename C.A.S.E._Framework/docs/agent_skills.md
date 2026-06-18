@@ -85,7 +85,12 @@ To optimize context window efficiency and minimize VRAM footprint on local devic
 
 ## 5. C.A.S.E. Pure-Text Scaffolding Blueprint
 
-When asked to initialize a new task folder (e.g., `02_Task_Queue/Task_<NNN>_<slug>/`), you MUST create the following four files verbatim:
+When asked to initialize a new task folder (e.g., `02_Task_Queue/Task_<NNN>_<slug>/`), you MUST create the following four files.
+
+> [!IMPORTANT]
+> **💡 Important Guideline: Context-Aware Adaptation (情境適應與靈活剪裁原則)**
+> The templates below (especially `recipe.md` and `planning.md`) are standard baseline structures. The illustrative examples (Section E & F) are provided solely to show how C.A.S.E. adapts to different domains (software vs non-software).
+> Do NOT copy the example content blindly. You MUST dynamically customize the objective, constraints, input/output paths, and Definition of Done (DoD) checks to perfectly fit the unique context, resources, and requirements of the current task.
 
 ### A. File: `status.txt`
 ```text
@@ -147,8 +152,8 @@ pending_blockers: []
 - [V] Confirm all checkboxes in recipe.md DoD are completed.
 ```
 
-### E. Example: OSINT Web Patrol Task Recipe (Non-Code Workload)
-To demonstrate non-code usage, here is how a patrol task `recipe.md` is structured:
+### E. Illustrative Example: OSINT Web Patrol Recipe (Non-Code Workload)
+To illustrate non-code usage, here is how a patrol task `recipe.md` can be customized:
 ```markdown
 # Task Recipe: Illegal Gambling Patrol and Information Report
 
@@ -169,7 +174,7 @@ Identify active illegal gambling platforms targeting the region and compile a st
 - [ ] Format findings into a clean markdown table.
 ```
 
-### F. Example: General Purpose (GP) Task Recipe
+### F. Illustrative Example: Software Engineering Recipe (Code Workload)
 ```markdown
 # Task Recipe: [Internal Refactoring / Feature Implementation]
 

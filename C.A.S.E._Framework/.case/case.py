@@ -255,18 +255,30 @@ def case_start(task_id):
         with open(plan_path, "w", encoding="utf-8") as f:
             f.write(f"""# 📝 Task Micro-Plan: {task_id}
 
-[T] Constraints/Truths
-- No modifications outside recipe constraints.
+## [T] Constraints & Truths (Context & Anti-Repetition)
+- No modifications outside recipe boundaries.
 - Read learnings.md before executing.
+- Anti-Repetition Check: Review learnings.md to avoid repeating known mistakes.
 
-[A] Planned Actions
-- [A] Scan code directories => draft suggestions
-- [A] Create output.md
+## [H] Compaction & Handoff Capsule (YAML syntax)
+```yaml
+session_summary: |
+  Describe the current progress and architecture decisions made so far to survive context compaction/reset.
+active_pivot_point: |
+  Name of the specific function, file, or test currently being worked on.
+pending_blockers: []
+```
 
-[V] Verification Criteria
-- [V] output.md matches recipe DoD items
+## [A] Planned Actions (BDD Flows / Spec-by-Example)
+- [A] Define acceptance criteria as Cucumber-like scenarios (Given-When-Then).
+- [A] Implement target logic incrementally (Red-Green-Refactor pipeline).
+- [A] Perform self-review and clean up code debt.
+
+## [V] Verification & Acceptance Criteria
+- [V] Verify Given-When-Then scenarios pass successfully.
+- [V] Confirm all checkboxes in recipe.md DoD are completed.
 """)
-        print(f"📄 Scaffolded planning layout: {plan_path}")
+        print(f"📄 Scaffolded planning layout with BDD and Handoff capsules: {plan_path}")
 
     # Append to action_log.jsonl
     log_path = os.path.join(task_dir, "action_log.jsonl")

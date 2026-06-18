@@ -265,6 +265,35 @@ If an executor agent attempts to modify any files in `00_Constitution/` or `01_R
 
 ---
 
+---
+
+## 15. BDD Spec-by-Example & Acceptance Gating
+
+To eliminate guesswork during implementation:
+- **Given-When-Then Formulation**: Workers should translate local DoD conditions into explicit Cucumber-like examples in `planning.md` prior to any code edits.
+- **Red-Green-Refactor Gating**: Workers MUST observe a failing state (RED) of their tests or assertions before making changes to product files, and refactor (REFACTOR) only under green coverage.
+
+## 16. Context Compaction & Handoff Capsules
+
+When context window limits force a compaction or clear:
+- **Handoff Capsule**: Write a YAML block in `planning.md` summarizing the active state, active pivot points, and pending decisions.
+- **Resiliency**: The orchestrator or agent reads the handoff capsule post-clear to resume execution seamlessly without losing historical context.
+
+## 17. Cross-Model Adversarial Protocol
+
+To guarantee verification honesty:
+- **Separate Model Families**: Worker (executor) and Checker (verifier) roles SHOULD be operated by models from different families (e.g. Gemini for execution, Claude for checking) or independent context instances.
+- **Thread Freshness**: Checker reviews the file outcomes directly in a fresh context session, ensuring they are not biased by the Worker's conversational history.
+
+## 18. Sharded Knowledge Base Standard
+
+To scale project memory beyond simple logs:
+- **Directory**: `00_Constitution/knowledge_base/`
+- **Format**: Atomic markdown files with YAML frontmatter tags (`type`, `tags`, `updated`).
+- **Indexing**: Keep a top-level `index.md` directory mapping shards once files exceed 150 pages.
+
+---
+
 *This protocol is version-controlled. Changes require Layer 1 (human) approval and a new git commit.*
 
 🔗 See also: [for_humans.md](for_humans.md) | [glossary.md](glossary.md) | [Framework README](../README.md)

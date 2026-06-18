@@ -68,6 +68,29 @@ C.A.S.E. 不是複雜的軟體套件，而是一套**用實體檔案管束 AI �
    - **協作時機**：所有本地任務均標記為 `DONE` 時。
    - **做法**：收集本地所有任務的 `output.md` 報告摘要，提供給雲端規劃大模型，由其審核是否完全滿足 `global_dod.md` 的全案最終結案標準。
 
+
+---
+
+## 2.8. 進階演進：基於業界最佳實踐的 C.A.S.E. 優化
+
+為使 C.A.S.E. 更具備工業級的抗干擾性、記憶可擴展性與驗收真實性，我們融合了多個開源 Agent 框架（如 Andrej Karpathy 的 LLM Wiki 模式、BDD 規格驅動開發等）的核心精髓，升級了以下四大機制：
+
+1. **BDD 規格先導驗收 (Spec-by-Example)**：
+   - 傳統 AI 容易「盲目寫代碼，然後猜測是否正確」。
+   - 優化後，AI 在 `planning.md` 規劃期必須先將 DoD 拆解為 Given-When-Then 驗收測試案例。在開始改動代碼前，必須觀察到測試失敗（RED），最後程式碼完成後必須驗證測試通過（GREEN）。
+
+2. **上下文壓縮交接艙 (Handoff Capsule)**：
+   - AI 面臨 context 爆滿需清除對話（`/clear`）或進行 Compaction 時，微觀規劃檔案會自動維護一個 YAML 格式的 `session_summary` 與 `active_pivot_point`（交接艙）。
+   - 當 context 被清除後，下一個 session 的 AI 能讀取交接艙，實現無縫連續開發。
+
+3. **分片知識庫標準 (Sharded Knowledge Base)**：
+   - 隨專案歷史拉長，`learnings.md` 與任務歷史容易過度膨脹，堵塞 AI 脈絡。
+   - 引入 `00_Constitution/knowledge_base/` 標準分片目錄。將大型 learnings 和專案領域知識進行 YAML Frontmatter 標籤化與分片索引（Sharded Index），讓 AI 只在需要時載入對應分片，實現海量記憶的高效檢索。
+
+4. **跨模型雙軌對抗審查 (Cross-Model Adversarial Audit)**：
+   - 「自己改代碼，自己寫測試並宣稱通過」是 AI 的常見盲點。
+   - 優化協議建議 Worker（執行者，如本地開源模型）與 Checker（驗收者，如雲端商用模型）使用**不同家族的模型**，並強制 Checker 在全新、乾淨的 Thread 中以冷啟動方式審查結果，杜絕自我放水。
+
 ---
 
 ## 3. C.A.S.E. 對您的專案有什麼好處？

@@ -268,19 +268,31 @@ function Case-Start {
         $planContent = @"
 # 📝 Task Micro-Plan: $TaskId
 
-[T] Constraints/Truths
-- No modifications outside recipe constraints.
+## [T] Constraints & Truths (Context & Anti-Repetition)
+- No modifications outside recipe boundaries.
 - Read learnings.md before executing.
+- Anti-Repetition Check: Review learnings.md to avoid repeating known mistakes.
 
-[A] Planned Actions
-- [A] Scan directories => draft suggestions
-- [A] Create output.md
+## [H] Compaction & Handoff Capsule (YAML syntax)
+```yaml
+session_summary: |
+  Describe the current progress and architecture decisions made so far to survive context compaction/reset.
+active_pivot_point: |
+  Name of the specific function, file, or test currently being worked on.
+pending_blockers: []
+```
 
-[V] Verification Criteria
-- [V] output.md matches recipe DoD items
+## [A] Planned Actions (BDD Flows / Spec-by-Example)
+- [A] Define acceptance criteria as Cucumber-like scenarios (Given-When-Then).
+- [A] Implement target logic incrementally (Red-Green-Refactor pipeline).
+- [A] Perform self-review and clean up code debt.
+
+## [V] Verification & Acceptance Criteria
+- [V] Verify Given-When-Then scenarios pass successfully.
+- [V] Confirm all checkboxes in recipe.md DoD are completed.
 "@
         Set-Content -Path $planPath -Value $planContent -Encoding UTF8
-        Write-Host "📄 Scaffolded planning layout: $planPath"
+        Write-Host "📄 Scaffolded planning layout with BDD and Handoff capsules: $planPath"
     }
 
     # action_log.jsonl

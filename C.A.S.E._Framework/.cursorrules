@@ -1,8 +1,21 @@
 # C.A.S.E. Framework Guardrails
-- Before modifying any code, identify the active task folder inside 02_Task_Queue/ (where status.txt is PENDING or IN_PROGRESS).
-- Write `IN_PROGRESS` to that task's status.txt to claim the task (or use the optional helper: `powershell -File .case/case.ps1 start <task_id>`).
-- Load that task's role.md as your System Prompt and recipe.md as your instruction manual.
-- Write a planning.md file within the task folder detailing execution steps before editing production code.
-- Modify files ONLY as specified in recipe.md > Input Sources / Output Specification.
-- Track and append all tool calls to action_log.jsonl in the current task folder.
-- Do NOT modify task status to DONE yourself. Write `REVIEW` to status.txt to submit for review (or use the optional helper: `powershell -File .case/case.ps1 submit <task_id> "<summary>"`).
+
+## 1. Task Lifecycle & Execution
+- Before modifying any code, identify the active task folder inside `02_Task_Queue/` (where `status.txt` is `PENDING` or `IN_PROGRESS`).
+- Claim the task by writing `IN_PROGRESS` to that task's `status.txt` (or run the optional helper: `python .case/case.py start <task_id>`).
+- Load that task's `role.md` as your System Prompt and `recipe.md` as your instruction manual.
+- Write or update `planning.md` within the task folder detailing execution steps **before** modifying production code.
+- Modify files **ONLY** as specified in `recipe.md > Input Sources / Output Specification`.
+- Track and append all tool calls to `action_log.jsonl` in the current task folder.
+- Submit for review by writing `REVIEW` to `status.txt` (or run the optional helper: `python .case/case.py submit <task_id> "<summary>"`). Do NOT set the status to `DONE` yourself.
+
+## 2. Planning, Spec-by-Example & Compaction
+- **BDD Spec-by-Example**: When writing `planning.md`, specify clear Given-When-Then scenarios. Ensure failing tests (RED) are observed and documented before implementing code (GREEN).
+- **Handoff Capsule**: For tasks requiring multiple sessions or when facing imminent context compaction/clear, document the current status and decisions in the `planning.md` Handoff section.
+
+## 3. Knowledge Base & Sharded Memory
+- Review `00_Constitution/learnings.md` at task startup. Do not repeat documented mistakes (Anti-Repetition Check).
+- Compile consolidated technical insights or learnings from completed tasks into `00_Constitution/knowledge_base/` using sharded markdown files and yaml frontmatter to prevent context window bloat.
+
+## 4. Cross-Model Peer Review
+- For checker-level verification, recommend routing review tasks to a different model family (e.g. Claude executor, Gemini checker) in a fresh context thread to avoid same-model self-verification bias.

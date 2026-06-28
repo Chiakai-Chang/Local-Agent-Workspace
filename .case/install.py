@@ -4,24 +4,22 @@
 # =============================================================================
 # Usage:  python install.py
 # Effect: Installs C.A.S.E. globally for all Agent CLI projects or bootstraps 
-#         it locally for a specific repository.
+#         it locally for a specific repository. Handles both offline execution
+#         and online downloading of the full framework files from GitHub.
 # =============================================================================
 
 import os
 import sys
 import shutil
 import platform
+import zipfile
+import tempfile
+import urllib.request
 
 def get_global_config_dir():
     """Resolves the global Gemini/Agent configuration directory."""
     home = os.path.expanduser("~")
-    # Check OS
-    if platform.system() == "Windows":
-        # Windows standard path: C:\Users\USER\.gemini\config
-        return os.path.join(home, ".gemini", "config")
-    else:
-        # macOS/Linux standard path: ~/.gemini/config
-        return os.path.join(home, ".gemini", "config")
+    return os.path.join(home, ".gemini", "config")
 
 def copy_directory(src, dest):
     """Copies directory contents recursively, overwriting existing files."""
@@ -35,16 +33,72 @@ def copy_directory(src, dest):
         else:
             shutil.copy2(s, d)
 
+def download_and_extract_case_folder():
+    """Downloads the repo zip from GitHub and extracts the .case directory."""
+    zip_url = "https://github.com/Chiakai-Chang/Local-Agent-Workspace/archive/refs/heads/main.zip"
+    print("🌐 Downloading C.A.S.E. Framework from GitHub...")
+    
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, "repo.zip")
+    try:
+        # Download the zip file
+        urllib.request.urlretrieve(zip_url, zip_path)
+        
+        # Extract .case folder
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            # Find all files under the .case directory in the zip
+            case_files = [f for f in zip_ref.namelist() if "/.case/" in f]
+            
+            extract_dest = os.path.join(temp_dir, "extracted_case")
+            os.makedirs(extract_dest, exist_ok=True)
+            
+            for file_info in case_files:
+                parts = file_info.split("/.case/", 1)
+                if len(parts) == 2 and parts[1]:
+                    target_rel_path = parts[1]
+                    target_file_path = os.path.join(extract_dest, target_rel_path)
+                    
+                    os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
+                    
+                    with zip_ref.open(file_info) as source, open(target_file_path, "wb") as target:
+                        target.write(source.read())
+                        
+        print("✓ Framework files downloaded and extracted successfully.")
+        return extract_dest, temp_dir
+    except Exception as e:
+        print(f"[ERROR] Failed to download or extract zip from GitHub: {e}")
+        # Clean up temp folder on failure
+        try:
+            shutil.rmtree(temp_dir)
+        except:
+            pass
+        return None, None
+
 def run_installer():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    # The source skill path is either sibling to this script or in parent
-    source_skill = os.path.abspath(os.path.join(script_dir, "..", "skills", "case-framework"))
-    if not os.path.isdir(source_skill):
-        # Sibling check (if run from inside the skill's scripts directory)
+    
+    # Try resolving source skill locally (Offline Mode)
+    source_skill = None
+    
+    # Case 1: Running from cloned repo inside .case/ directory
+    if os.path.isfile(os.path.join(script_dir, "SKILL.md")):
+        source_skill = script_dir
+    # Case 2: Running from within .agents/skills/case-framework/scripts/
+    elif os.path.isfile(os.path.join(script_dir, "..", "SKILL.md")):
         source_skill = os.path.abspath(os.path.join(script_dir, ".."))
-        if not os.path.isfile(os.path.join(source_skill, "SKILL.md")):
-            # Fallback to root workspace skill source
-            source_skill = os.path.abspath(os.path.join(script_dir, ".agents", "skills", "case-framework"))
+        
+    temp_dir_to_clean = None
+    
+    # If not found locally, we enter Online Mode (downloading from GitHub)
+    if not source_skill:
+        print("💡 Local source files not found. Running in ONLINE mode.")
+        download_result = download_and_extract_case_folder()
+        if download_result[0]:
+            source_skill = download_result[0]
+            temp_dir_to_clean = download_result[1]
+        else:
+            print("\n❌ Installation aborted: Could not fetch files from GitHub.")
+            sys.exit(1)
 
     print("========================================================")
     print(" 🚀 C.A.S.E. Framework — Skill Installer & Updater")
@@ -58,22 +112,23 @@ def run_installer():
     
     choice = input("\nEnter choice (1/2/3/4/q): ").strip().lower()
     
-    if choice == '1':
-        global_install(source_skill)
-    elif choice == '2':
-        local_skill_install(source_skill)
-    elif choice == '3':
-        scaffold_install()
-    elif choice == '4':
-        update_install(source_skill)
-    else:
-        print("Exit installer.")
+    try:
+        if choice == '1':
+            global_install(source_skill)
+        elif choice == '2':
+            local_skill_install(source_skill)
+        elif choice == '3':
+            scaffold_install(source_skill)
+        elif choice == '4':
+            update_install(source_skill)
+        else:
+            print("Exit installer.")
+    finally:
+        # Clean up downloaded temp directory if it exists
+        if temp_dir_to_clean and os.path.exists(temp_dir_to_clean):
+            shutil.rmtree(temp_dir_to_clean)
 
 def global_install(source_skill):
-    if not os.path.isdir(source_skill):
-        print(f"[ERROR] Source skill directory not found: {source_skill}")
-        return
-        
     global_dir = get_global_config_dir()
     dest_skill = os.path.join(global_dir, "skills", "case-framework")
     
@@ -86,10 +141,6 @@ def global_install(source_skill):
         print(f"[ERROR] Failed to write to global directory: {e}")
 
 def local_skill_install(source_skill):
-    if not os.path.isdir(source_skill):
-        print(f"[ERROR] Source skill directory not found: {source_skill}")
-        return
-        
     target_project = input("\nEnter target project directory path (. for current): ").strip()
     if not target_project:
         target_project = "."
@@ -100,29 +151,36 @@ def local_skill_install(source_skill):
     
     try:
         copy_directory(source_skill, dest_skill)
+        # Also copy skills.json to load it dynamically
+        agents_dir = os.path.join(target_project, ".agents")
+        os.makedirs(agents_dir, exist_ok=True)
+        skills_json_path = os.path.join(agents_dir, "skills.json")
+        with open(skills_json_path, 'w', encoding='utf-8') as f:
+            f.write('{\n  "entries": [\n    { "path": "skills/case-framework" }\n  ]\n}\n')
         print("\n✅ Local Workspace Skill Installation Complete!")
     except Exception as e:
         print(f"[ERROR] Failed to install locally: {e}")
 
-def scaffold_install():
+def scaffold_install(source_skill):
     target_project = input("\nEnter target project directory path (. for current): ").strip()
     if not target_project:
         target_project = "."
     target_project = os.path.abspath(target_project)
     
-    # Locate bootstrap.py
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    bootstrapper = os.path.join(script_dir, "bootstrap.py")
-    if not os.path.isfile(bootstrapper):
-        bootstrapper = os.path.join(script_dir, "scripts", "bootstrap.py")
-        if not os.path.isfile(bootstrapper):
-            bootstrapper = os.path.abspath(os.path.join(script_dir, "..", "bootstrap.py"))
-            
+    # If online, we need to extract bootstrap.py first to run it
+    bootstrapper = os.path.join(source_skill, "bootstrap.py")
     if os.path.isfile(bootstrapper):
+        # We also need to copy the entire .case directory to the target project first
+        target_case = os.path.join(target_project, ".case")
+        print(f"Deploying C.A.S.E. harness source to {target_case}...")
+        copy_directory(source_skill, target_case)
+        
+        # Run bootstrapper
+        local_bootstrapper = os.path.join(target_case, "bootstrap.py")
         print(f"\nRunning C.A.S.E. Bootstrapper on {target_project}...")
-        os.system(f'python "{bootstrapper}" "{target_project}"')
+        os.system(f'python "{local_bootstrapper}" "{target_project}"')
     else:
-        print("[ERROR] bootstrap.py script not found.")
+        print("[ERROR] bootstrap.py script not found in source.")
 
 def update_install(source_skill):
     print("\nUpdating existing installations...")

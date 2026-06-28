@@ -1,6 +1,6 @@
 ---
 name: case-framework
-description: Enforce or bootstrap the Context-Aware Scaffold Engine (C.A.S.E.) protocol, a file-as-state dual-track agent workflow.
+description: Enforce or bootstrap the Context-Aware Scaffold Engine (C.A.S.E.) protocol, a file-as-state dual-track agent workflow. Make sure to use this skill whenever the user mentions code quality, task pipelines, roadmaps, step-by-step planning, state tracking, worker-checker verification, or wants to structure their project workflow, even if they don't explicitly name 'C.A.S.E.'
 ---
 
 # 🤖 C.A.S.E. Framework — Agent Skill Instructions
@@ -105,9 +105,9 @@ Since C.A.S.E. is a declarative protocol, you (the AI Agent) are the primary exe
 ---
 
 ## 📚 Reference Documentation
-For deep-dives, read these sub-files (located in D:/Myproject/Local-Agent-Workspace/C.A.S.E._Framework/docs/):
-* [System Protocols for Agents](file:///D:/Myproject/Local-Agent-Workspace/C.A.S.E._Framework/docs/for_agents.md)
-* [Instruction Guide for Humans](file:///D:/Myproject/Local-Agent-Workspace/C.A.S.E._Framework/docs/for_humans.md)
-* [Harness & Runtime Engineering Specs](file:///D:/Myproject/Local-Agent-Workspace/C.A.S.E._Framework/docs/harness_engineering.md)
-* [Zero-Code Portable Integration](file:///D:/Myproject/Local-Agent-Workspace/C.A.S.E._Framework/docs/portable_case_harness.md)
-* [Glossary of C.A.S.E. Terms](file:///D:/Myproject/Local-Agent-Workspace/C.A.S.E._Framework/docs/glossary.md)
+For deep-dives, read these sub-files (located in the `references/` folder):
+* [System Protocols for Agents](file:///D:/Myproject/Local-Agent-Workspace/references/for_agents.md) (Relative: [for_agents.md](references/for_agents.md))
+* [Instruction Guide for Humans](file:///D:/Myproject/Local-Agent-Workspace/references/for_humans.md) (Relative: [for_humans.md](references/for_humans.md))
+* [Harness & Runtime Engineering Specs](file:///D:/Myproject/Local-Agent-Workspace/references/harness_engineering.md) (Relative: [harness_engineering.md](references/harness_engineering.md))
+* [Zero-Code Portable Integration](file:///D:/Myproject/Local-Agent-Workspace/references/portable_case_harness.md) (Relative: [portable_case_harness.md](references/portable_case_harness.md))
+* [Glossary of C.A.S.E. Terms](file:///D:/Myproject/Local-Agent-Workspace/references/glossary.md) (Relative: [glossary.md](references/glossary.md))

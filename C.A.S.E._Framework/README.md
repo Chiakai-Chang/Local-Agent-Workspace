@@ -162,11 +162,11 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 1. **一鍵下載 C.A.S.E. Agent 協定手冊 (CASE_framework_for_agents.md)**：
    * **💻 Linux / macOS (cURL)**:
      ```bash
-     curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md -o CASE_framework_for_agents.md
+     curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/references/for_agents.md -o CASE_framework_for_agents.md
      ```
    * **💻 Windows (PowerShell)**:
      ```powershell
-     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
+     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/references/for_agents.md" -OutFile "CASE_framework_for_agents.md"
      ```
 2. **給您的 AI Agent 貼上極簡引導 Prompt**：
    > 「本專案採用 C.A.S.E. 框架，請閱讀並遵循專案中的 `CASE_framework_for_agents.md` 進行開發與任務管理。」
@@ -214,12 +214,12 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 
 | 您是誰 | 請前往 |
 |--------|--------|
-| 👤 **人類（開發者 / 長官 / 協作者）** | [📖 框架理念與設計哲學](docs/for_humans.md) |
-| 🌐 **想了解雲與地如何高效協作？** | [🤝 雲地雙軌協作實踐指南](docs/for_humans.md#25-雲地協同最佳實踐如何以高-cp-值進行雙軌合作) |
-| 🤖 **AI Agent（Coding Agent / 自動化工具）** | [⚙️ System Protocols & I/O Rules](docs/for_agents.md) |
-| 🛡️ **系統開發者 / 協調器設計師** | [⚙️ Harness Engineering 規範與優化設計](docs/harness_engineering.md) |
-| 📦 **一般 AI 專案使用者 / 快速套件** | [⚙️ Portable C.A.S.E. 攜帶式套件與自動化設計](docs/portable_case_harness.md) |
-| ❓ **名詞看不懂？** | [📚 C.A.S.E. 名詞解釋字典](docs/glossary.md) |
+| 👤 **人類（開發者 / 長官 / 協作者）** | [📖 框架理念與設計哲學](../references/for_humans.md) |
+| 🌐 **想了解雲與地如何高效協作？** | [🤝 雲地雙軌協作實踐指南](../references/for_humans.md#25-雲地協同最佳實踐如何以高-cp-值進行雙軌合作) |
+| 🤖 **AI Agent（Coding Agent / 自動化工具）** | [⚙️ System Protocols & I/O Rules](../references/for_agents.md) |
+| 🛡️ **系統開發者 / 協調器設計師** | [⚙️ Harness Engineering 規範與優化設計](../references/harness_engineering.md) |
+| 📦 **一般 AI 專案使用者 / 快速套件** | [⚙️ Portable C.A.S.E. 攜帶式套件與自動化設計](../references/portable_case_harness.md) |
+| ❓ **名詞看不懂？** | [📚 C.A.S.E. 名詞解釋字典](../references/glossary.md) |
 
 ---
 
@@ -258,7 +258,7 @@ C.A.S.E. 框架是「為什麼要這樣建構本地 AI」的**哲學基礎**，�
 
 | 文件 | 說明 |
 |------|------|
-| [📋 會議記錄（精煉版）](docs/context/2026-05-21-meeting-minutes.md) | 八輪討論的重點摘要，可讀性高 |
-| [📄 原始對話記錄](docs/context/2026-05-21-雲地混合開發架構理念討論.md) | 完整 Gemini 對話原文（含 UI 噪音） |
+| [📋 會議記錄（精煉版）](../references/context/2026-05-21-meeting-minutes.md) | 八輪討論的重點摘要，可讀性高 |
+| [📄 原始對話記錄](../references/context/2026-05-21-雲地混合開發架構理念討論.md) | 完整 Gemini 對話原文（含 UI 噪音） |
 
 回到主專案：[← Local-Agent-Workspace](../README.md)

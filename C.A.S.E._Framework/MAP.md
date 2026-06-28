@@ -73,11 +73,11 @@ Click the links below to navigate to specific sections of the C.A.S.E. framework
 ---
 
 ### ⚙️ 2. Core Protocol Documents
-* [for_agents.md](file:///D:/Myproject/Local-Agent-Workspace/C.A.S.E._Framework/docs/for_agents.md) — **System Protocols & Agent Instructions**. Explains how AI agents interact with the status machine, log tools to `action_log.jsonl`, run self-healing scripts, and execute BDD spec-by-example.
-* [for_humans.md](file:///D:/Myproject/Local-Agent-Workspace/C.A.S.E._Framework/docs/for_humans.md) — **Manual for Humans**. Explains how human operators setup the C.A.S.E. architecture, handle approvals in natural language, and manage Hybrid Cloud-Local (雲地協同) topologies.
-* [harness_engineering.md](file:///D:/Myproject/Local-Agent-Workspace/C.A.S.E._Framework/docs/harness_engineering.md) — **Harness & Controller Engineering**. Technical specifications for building automated C.A.S.E. runtimes, context compaction sliding windows, tool interceptors, and multi-agent consensus checking.
-* [portable_case_harness.md](file:///D:/Myproject/Local-Agent-Workspace/C.A.S.E._Framework/docs/portable_case_harness.md) — **Zero-Code Portable Integration (`CASE.md`)**. Guide on how to package and import C.A.S.E. into *any* existing repository using Cursor's `.cursorrules` or Claude Code's system prompts.
-* [glossary.md](file:///D:/Myproject/Local-Agent-Workspace/C.A.S.E._Framework/docs/glossary.md) — **Glossary of Terms**. Definitions of C.A.S.E. terms (e.g. DoD, Escalated, Hot/Cold Memory, I-Lang, Self-Healing).
+* [for_agents.md](file:///D:/Myproject/Local-Agent-Workspace/references/for_agents.md) — **System Protocols & Agent Instructions**. Explains how AI agents interact with the status machine, log tools to `action_log.jsonl`, run self-healing scripts, and execute BDD spec-by-example.
+* [for_humans.md](file:///D:/Myproject/Local-Agent-Workspace/references/for_humans.md) — **Manual for Humans**. Explains how human operators setup the C.A.S.E. architecture, handle approvals in natural language, and manage Hybrid Cloud-Local (雲地協同) topologies.
+* [harness_engineering.md](file:///D:/Myproject/Local-Agent-Workspace/references/harness_engineering.md) — **Harness & Controller Engineering**. Technical specifications for building automated C.A.S.E. runtimes, context compaction sliding windows, tool interceptors, and multi-agent consensus checking.
+* [portable_case_harness.md](file:///D:/Myproject/Local-Agent-Workspace/references/portable_case_harness.md) — **Zero-Code Portable Integration (`CASE.md`)**. Guide on how to package and import C.A.S.E. into *any* existing repository using Cursor's `.cursorrules` or Claude Code's system prompts.
+* [glossary.md](file:///D:/Myproject/Local-Agent-Workspace/references/glossary.md) — **Glossary of Terms**. Definitions of C.A.S.E. terms (e.g. DoD, Escalated, Hot/Cold Memory, I-Lang, Self-Healing).
 
 ---
 
@@ -98,7 +98,7 @@ Click the links below to navigate to specific sections of the C.A.S.E. framework
 ## 🛠️ Operating Quick Reference
 
 ### For AI Agents (Micro-Task Execution)
-1. **Initialize**: Read this `MAP.md` and load [for_agents.md](file:///D:/Myproject/Local-Agent-Workspace/C.A.S.E._Framework/docs/for_agents.md) into your system prompt.
+1. **Initialize**: Read this `MAP.md` and load [for_agents.md](file:///D:/Myproject/Local-Agent-Workspace/references/for_agents.md) into your system prompt.
 2. **Locate task**: Find the folder in `02_Task_Queue/` where `status.txt` is `PENDING`.
 3. **Transition**: Set `status.txt` to `IN_PROGRESS` and write your execution plan in `planning.md`.
 4. **Develop & Verify**: Run changes, log actions in `action_log.jsonl`, run self-healing tests, and set `status.txt` to `REVIEW`.

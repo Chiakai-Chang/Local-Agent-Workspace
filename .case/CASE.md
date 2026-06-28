@@ -48,9 +48,13 @@ Before accepting a task as DONE:
 4. Confirm `action_log.jsonl` has valid entries
 
 ## For Humans
-To deploy the full agent protocol into this project:
+To initialize, manage, or update C.A.S.E. in this project:
 ```bash
-sh .case/bootstrap.sh
+python .case/install.py
+```
+Or run the bootstrapper directly:
+```bash
+python .case/bootstrap.py .
 ```
 Then instruct your AI agent:
 > "This project uses C.A.S.E. framework. Read CASE.md and MAP.md."

@@ -117,37 +117,43 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 
 ### 💡 快速引入與安裝步驟
 
-#### 📦 方法 A：一鍵聯網安裝與自訂 Skill 整合（最推薦，無需事先 Clone）
-C.A.S.E. 配備了智慧型聯網安裝器，您可以在您的任何 AI 專案目錄下，直接透過單行指令**下載並運行安裝**：
+#### 📦 方法 A：作為 AI 代理全域/本機自訂 Skill 載入（最推薦，標準 Git 安裝與自動更新）
+由於 C.A.S.E. 原生支援 Agent Customizations，您可以直接透過主流的 Git 機制來安裝與更新：
 
-* **💻 Linux / macOS (cURL + Python)**:
+* **🌐 全域安裝 (Global Install - 適用於本機所有專案)**:
+  將本倉庫 clone 到您的全域自訂技能目錄：
   ```bash
-  curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/.case/install.py -o case_install.py && python case_install.py && rm case_install.py
+  git clone https://github.com/Chiakai-Chang/Local-Agent-Workspace.git ~/.gemini/config/skills/case-framework
   ```
-* **💻 Windows (PowerShell + Python)**:
-  ```powershell
-  Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/.case/install.py" -OutFile "case_install.py"; python case_install.py; Remove-Item "case_install.py"
+* **📂 本機專案安裝 (Workspace Skill - 適用於單一專案分發)**:
+  將本倉庫 clone 或加入為 Git 子模組（Git Submodule）到您的目標專案：
+  ```bash
+  # 直接 clone 到本機專案技能目錄
+  git clone https://github.com/Chiakai-Chang/Local-Agent-Workspace.git .agents/skills/case-framework
+  ```
+* **🔄 如何自動更新**:
+  因為直接使用 Git 管理，要更新 C.A.S.E. 核心 Skill，您或您的 Agent 無需執行任何奇特腳本，只需在該目錄下直接執行 `git pull` 即可，完全與主流開源套件一致：
+  ```bash
+  # 全域更新
+  git -C ~/.gemini/config/skills/case-framework pull
+
+  # 本機專案更新
+  git -C .agents/skills/case-framework pull
   ```
 
-該互動式安裝程式將引導您執行：
-1. **全域安裝 (Global Install)**：將 C.A.S.E. 註冊為本機 AI 代理的全域自訂技能（將 Skill 下載至 `~/.gemini/config/skills/case-framework`），此後您在電腦上任何資料夾中啟動 Agent，皆會自動載入 C.A.S.E 規範。
-2. **本機自訂 Skill 安裝**：在指定目標專案中生成 `.agents/skills/case-framework/`。
-3. **專案初始化 (Scaffolding)**：在專案根目錄下快速部署 `00_Constitution/`、`01_Roadmap/`、`02_Task_Queue/`，並自動配置 `MAP.md`、`CASE.md` 規則檔案。
-4. **自動更新 (Update)**：隨時重新執行此單行指令，即可將本機或全域 C.A.S.E. 升級至最新版本，並完整保留您的自訂憲法與 Roadmap。
-
-#### 🐚 方法 B：本地腳本初始化（已手動 Clone 或已下載 `.case/` 目錄）
-如果您已經手動 Clone 本專案，或下載了 `.case/` 資料夾至您的目標專案中，可以在目標專案根目錄下直接執行本地腳本：
+#### 🐚 方法 B：本地腳本初始化（直接下載或 Clone 檔案後部署）
+如果您已下載或 Clone 檔案，要在目標專案中生成 `00_Constitution/`、`01_Roadmap/`、`02_Task_Queue/` 等專案目錄：
 * **💻 跨平台通用 (Python 3.x - 推薦)**:
   ```bash
-  python .case/bootstrap.py .
+  python scripts/bootstrap.py .
   ```
 * **💻 Windows (PowerShell)**:
   ```powershell
-  .\.case\bootstrap.ps1 .
+  .\scripts\bootstrap.ps1 .
   ```
 * **💻 Linux / macOS (Bash)**:
   ```bash
-  sh .case/bootstrap.sh .
+  sh scripts/bootstrap.sh .
   ```
 
 #### 📝 方法 C：純文字聲明式配置（相容性最高，零代碼執行）

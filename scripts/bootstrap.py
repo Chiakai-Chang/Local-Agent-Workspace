@@ -22,16 +22,17 @@ def main():
     print("========================================================")
     print(" C.A.S.E. Framework — Portable Python Bootstrap")
     print(f" Target: {target_dir}")
-    print(f" Source: {os.path.dirname(os.path.abspath(__file__))}")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    framework_root = os.path.dirname(script_dir)
+
+    print(f" Source: {framework_root}")
     print("========================================================")
 
     if not os.path.isdir(target_dir):
         print(f"[ERROR] Target directory does not exist: {target_dir}")
         sys.exit(1)
 
-    case_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # 1. Create three-layer architecture
+    # 1. Create three-layer directory structure
     print("\n[1/5] Creating three-layer directory structure...")
     layers = ["00_Constitution", "01_Roadmap", "02_Task_Queue"]
     for layer in layers:
@@ -44,7 +45,7 @@ def main():
 
     # 2. Copy starter templates
     print("\n[2/5] Copying starter templates...")
-    templates_src = os.path.join(case_dir, "templates")
+    templates_src = os.path.join(framework_root, "templates")
     
     mapping = {
         "core.md": "00_Constitution/core.md",

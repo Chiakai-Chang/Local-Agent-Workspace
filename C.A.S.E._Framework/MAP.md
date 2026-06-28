@@ -81,19 +81,17 @@ Click the links below to navigate to specific sections of the C.A.S.E. framework
 
 ---
 
-### 📦 3. Extension & Scripts (The `.case/` Folder)
-* [.case/](file:///D:/Myproject/Local-Agent-Workspace/.case/) — The core portable harness code and templates.
-  * [CASE.md](file:///D:/Myproject/Local-Agent-Workspace/.case/CASE.md) — Root ruleset injected into target repos.
-  * [SKILL.md](file:///D:/Myproject/Local-Agent-Workspace/.case/SKILL.md) — Declarative skill metadata for AI agent harnesses.
-  * [install.py](file:///D:/Myproject/Local-Agent-Workspace/.case/install.py) — Interactive global/local skill installer & updater.
-  * [bootstrap.py](file:///D:/Myproject/Local-Agent-Workspace/.case/bootstrap.py) — Cross-platform Python bootstrapper.
-  * [bootstrap.ps1](file:///D:/Myproject/Local-Agent-Workspace/.case/bootstrap.ps1) — Windows PowerShell bootstrapper.
-  * [bootstrap.sh](file:///D:/Myproject/Local-Agent-Workspace/.case/bootstrap.sh) — POSIX shell bootstrapper.
-  * [templates/](file:///D:/Myproject/Local-Agent-Workspace/.case/templates/) — Folder containing starter templates for recipes, planning, roles, status, and constitutions.
-  * [verifiers/](file:///D:/Myproject/Local-Agent-Workspace/.case/verifiers/) — Pre-built verification engines to inspect task compliance.
-    * [verify.py](file:///D:/Myproject/Local-Agent-Workspace/.case/verifiers/verify.py) — Python task verifier.
-    * [verify.js](file:///D:/Myproject/Local-Agent-Workspace/.case/verifiers/verify.js) — Node.js task verifier.
-    * [memory_tiering.py](file:///D:/Myproject/Local-Agent-Workspace/.case/verifiers/memory_tiering.py) — Learning diary line limits & archive tiering.
+### 📦 3. Skill & Scripts Layout
+* [SKILL.md](file:///D:/Myproject/Local-Agent-Workspace/SKILL.md) — Declarative skill metadata for AI agent harnesses.
+* [scripts/](file:///D:/Myproject/Local-Agent-Workspace/scripts/) — Folder containing bootstrap deployment scripts.
+  * [bootstrap.py](file:///D:/Myproject/Local-Agent-Workspace/scripts/bootstrap.py) — Cross-platform Python bootstrapper.
+  * [bootstrap.ps1](file:///D:/Myproject/Local-Agent-Workspace/scripts/bootstrap.ps1) — Windows PowerShell bootstrapper.
+  * [bootstrap.sh](file:///D:/Myproject/Local-Agent-Workspace/scripts/bootstrap.sh) — POSIX shell bootstrapper.
+* [templates/](file:///D:/Myproject/Local-Agent-Workspace/templates/) — Folder containing starter templates for recipes, planning, roles, status, and constitutions.
+* [verifiers/](file:///D:/Myproject/Local-Agent-Workspace/verifiers/) — Pre-built verification engines to inspect task compliance.
+  * [verify.py](file:///D:/Myproject/Local-Agent-Workspace/verifiers/verify.py) — Python task verifier.
+  * [verify.js](file:///D:/Myproject/Local-Agent-Workspace/verifiers/verify.js) — Node.js task verifier.
+  * [memory_tiering.py](file:///D:/Myproject/Local-Agent-Workspace/verifiers/memory_tiering.py) — Learning diary line limits & archive tiering.
 
 ---
 
@@ -107,5 +105,5 @@ Click the links below to navigate to specific sections of the C.A.S.E. framework
 5. **Approve**: When approved by Checker or human, transition to `DONE` and perform Git commit.
 
 ### For Human Coordinators (Verification & Gating)
-* Validate deliverables using [verify.js](file:///D:/Myproject/Local-Agent-Workspace/.case/verifiers/verify.js) via `node .case/verifiers/verify.js 02_Task_Queue/Task_<NNN>`.
+* Validate deliverables using [verify.js](file:///D:/Myproject/Local-Agent-Workspace/verifiers/verify.js) via `node verifiers/verify.js 02_Task_Queue/Task_<NNN>`.
 * Approve or request changes in natural language. The AI agent will auto-update state files based on your chat feedback.

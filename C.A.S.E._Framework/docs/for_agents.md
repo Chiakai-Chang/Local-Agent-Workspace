@@ -407,20 +407,20 @@ C.A.S.E. is a declarative protocol. The primary execution environment is the **A
   - Detect Active Shell (PowerShell, Cmd, Bash, Zsh).
 - Command adaptation examples:
   - **Node.js verifier**:
-    - *Windows (PowerShell/Cmd)*: `node .case/verifiers/verify.js <path>`
-    - *Unix/WSL/Git Bash*: `node .case/verifiers/verify.js <path>`
+    - *Windows (PowerShell/Cmd)*: `node .agents/skills/case-framework/verifiers/verify.js <path>`
+    - *Unix/WSL/Git Bash*: `node .agents/skills/case-framework/verifiers/verify.js <path>`
   - **Python verifier**:
-    - *Windows (PowerShell/Cmd)*: `python .case/verifiers/verify.py <path>`
-    - *Unix/WSL/Git Bash*: `python3 .case/verifiers/verify.py <path>`
+    - *Windows (PowerShell/Cmd)*: `python .agents/skills/case-framework/verifiers/verify.py <path>`
+    - *Unix/WSL/Git Bash*: `python3 .agents/skills/case-framework/verifiers/verify.py <path>`
   - **Test runner executions**:
     - PowerShell handles paths and arguments differently than Bash. Standardize path formats using forward slashes (`/`) for cross-platform Node/Python/Ruby tools, as Windows file APIs natively support forward slashes.
 
 ### D. Agnostic Script Execution (無障礙腳本啟動)
-- The C.A.S.E. harness provides three independent bootstrapping files:
-  - `bootstrap.py` (Python 3.x) — **Cross-platform, shell-agnostic (Recommended)**. Runs natively anywhere with `python bootstrap.py`.
+- The C.A.S.E. harness provides three independent bootstrapping files located under the `scripts/` directory (or `.agents/skills/case-framework/scripts/`):
+  - `bootstrap.py` (Python 3.x) — **Cross-platform, shell-agnostic (Recommended)**. Runs natively anywhere.
   - `bootstrap.ps1` (PowerShell) — Native Windows/PowerShell bootstrapper.
   - `bootstrap.sh` (POSIX Shell) — Native macOS/Linux/WSL bootstrapper.
-- The verification scripts `verify.js` (Node) and `verify.py` (Python) read files using standard library APIs rather than shell integrations, ensuring 100% platform independence.
+- The verification scripts `verify.js` (Node) and `verify.py` (Python) (located under `verifiers/` or `.agents/skills/case-framework/verifiers/`) read files using standard library APIs rather than shell integrations, ensuring 100% platform independence.
 
 ---
 

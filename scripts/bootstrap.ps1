@@ -14,7 +14,7 @@ $ErrorActionPreference = "Stop"
 
 # --- Configuration -----------------------------------------------------------
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$CaseDir = $ScriptDir
+$CaseDir = Split-Path -Parent $ScriptDir
 
 # Resolve target directory to absolute path
 $ResolvedTarget = Resolve-Path $TargetDir
@@ -32,7 +32,7 @@ if (-not (Test-Path -Path $TargetAbsPath -PathType Container)) {
 }
 
 if (-not (Test-Path -Path $CaseDir -PathType Container)) {
-    Write-Error ".case/ directory not found at: $CaseDir"
+    Write-Error "C.A.S.E. root directory not found at: $CaseDir"
 }
 
 # --- Create three-layer architecture -----------------------------------------
@@ -131,20 +131,20 @@ $MapTemplate = @"
 ## File Map
 
 ### 📜 Constitution (Read-Only)
-- \`00_Constitution/core.md\` — Mission, constraints, domain rules
-- \`00_Constitution/learnings.md\` — Trainable patterns & anti-patterns (auto-managed)
+- [00_Constitution/core.md](00_Constitution/core.md) — Mission, constraints, domain rules
+- [00_Constitution/learnings.md](00_Constitution/learnings.md) — Trainable patterns & anti-patterns (auto-managed)
 
 ### 🗺️ Roadmap (Read-Only for Executors)
-- \`01_Roadmap/roadmap.md\` — Phase breakdown & milestones
-- \`01_Roadmap/global_dod.md\` — Global Definition of Done
+- [01_Roadmap/roadmap.md](01_Roadmap/roadmap.md) — Phase breakdown & milestones
+- [01_Roadmap/global_dod.md](01_Roadmap/global_dod.md) — Global Definition of Done
 
 ### 📋 Task Queue (Agent Workspace)
-- \`02_Task_Queue/\` — Active task folders
+- [02_Task_Queue/](02_Task_Queue/) — Active task folders
   - Each task folder: \`Task_<NNN>_<slug>/\`
   - Contains: role.md, recipe.md, status.txt, inputs/, output.md, feedback.md, action_log.jsonl
 
 ### 📖 Documentation
-- \`CASE_framework_for_agents.md\` — Full agent protocol (if deployed)
+- [CASE_framework_for_agents.md](CASE_framework_for_agents.md) — Full agent protocol (if deployed)
 - \`docs/\` — Additional documentation
 
 ## Quick Reference
@@ -208,13 +208,13 @@ $CaseTemplate = @"
 
 ## For Humans
 To deploy the full agent protocol, run:
-\`\`\`powershell
-.\\.case\\bootstrap.ps1
-\`\`\`
+```powershell
+.\scripts\bootstrap.ps1 .
+```
 Or for POSIX:
-\`\`\`bash
-sh .\\.case\\bootstrap.sh
-\`\`\`
+```bash
+sh scripts/bootstrap.sh .
+```
 Then instruct your AI agent: "This project uses C.A.S.E. framework. Read CASE.md."
 "@
 

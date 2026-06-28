@@ -47,21 +47,29 @@ Every task folder in `02_Task_Queue/` must contain:
 ## 🔧 Action Instructions for the Agent
 
 ### 0. How to Install or Update C.A.S.E. Skill
-If the user asks to "install" or "update" the C.A.S.E. skill, run the interactive installer script:
-```bash
-python .case/install.py
-```
-This script guides the user through installing the skill globally (making it available to all their projects), installing it locally inside another project's `.agents/` folder, bootstrapping directories, or upgrading existing versions.
+To install C.A.S.E. as a standard skill:
+* **Global Install** (make it available to all local projects):
+  ```bash
+  git clone https://github.com/Chiakai-Chang/Local-Agent-Workspace.git ~/.gemini/config/skills/case-framework
+  ```
+* **Local Project Install** (Workspace Skill):
+  ```bash
+  git clone https://github.com/Chiakai-Chang/Local-Agent-Workspace.git .agents/skills/case-framework
+  ```
+* **To Update**: Navigate to the installed folder and run standard git pull:
+  ```bash
+  git pull
+  ```
 
 ### 1. How to Bootstrap C.A.S.E. inside a project
 If the user asks to "bootstrap", "deploy", or "initialize" C.A.S.E. scaffolding, run the cross-platform Python bootstrap script:
 ```bash
 # Recommended (cross-platform and shell-agnostic):
-python .case/bootstrap.py .
+python scripts/bootstrap.py .
 
 # Alternatively (POSIX/Windows specific shells):
-bash .case/bootstrap.sh .
-powershell .case/bootstrap.ps1 .
+bash scripts/bootstrap.sh .
+powershell scripts/bootstrap.ps1 .
 ```
 This script will automatically generate the folders, templates, `MAP.md`, `CASE.md`, and configure gitignore.
 
@@ -78,10 +86,10 @@ If acting as a **Checker**:
 1. Run the Node.js or Python verifier (whichever runtime is available) to check the task package integrity:
    ```bash
    # Node.js option:
-   node .case/verifiers/verify.js 02_Task_Queue/Task_<NNN>_<slug>
+   node verifiers/verify.js 02_Task_Queue/Task_<NNN>_<slug>
 
    # Python option:
-   python .case/verifiers/verify.py 02_Task_Queue/Task_<NNN>_<slug>
+   python verifiers/verify.py 02_Task_Queue/Task_<NNN>_<slug>
    ```
 2. Inspect `output.md` against `recipe.md` DoD.
 3. Approve by transitioning state to `DONE` (and perform a git commit), or reject by transitioning back to `PENDING` with feedback in `feedback.md`.

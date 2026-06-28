@@ -23,7 +23,7 @@ set -eu
 
 # --- Configuration -----------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE:-$0}")" && pwd)"
-CASE_DIR="$SCRIPT_DIR"
+CASE_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Target: first argument, or current directory if omitted
 TARGET="${1:-.}"
@@ -44,7 +44,7 @@ if [ ! -d "$TARGET" ]; then
 fi
 
 if [ ! -d "$CASE_DIR" ]; then
-    echo "[ERROR] .case/ directory not found at: $CASE_DIR"
+    echo "[ERROR] C.A.S.E. root directory not found at: $CASE_DIR"
     exit 1
 fi
 
@@ -122,20 +122,20 @@ cat > "$TARGET/MAP.md" << MAP_EOF
 ## File Map
 
 ### 📜 Constitution (Read-Only)
-- \`00_Constitution/core.md\` — Mission, constraints, domain rules
-- \`00_Constitution/learnings.md\` — Trainable patterns & anti-patterns (auto-managed)
+- [00_Constitution/core.md](00_Constitution/core.md) — Mission, constraints, domain rules
+- [00_Constitution/learnings.md](00_Constitution/learnings.md) — Trainable patterns & anti-patterns (auto-managed)
 
 ### 🗺️ Roadmap (Read-Only for Executors)
-- \`01_Roadmap/roadmap.md\` — Phase breakdown & milestones
-- \`01_Roadmap/global_dod.md\` — Global Definition of Done
+- [01_Roadmap/roadmap.md](01_Roadmap/roadmap.md) — Phase breakdown & milestones
+- [01_Roadmap/global_dod.md](01_Roadmap/global_dod.md) — Global Definition of Done
 
 ### 📋 Task Queue (Agent Workspace)
-- \`02_Task_Queue/\` — Active task folders
+- [02_Task_Queue/](02_Task_Queue/) — Active task folders
   - Each task folder: \`Task_<NNN>_<slug>/\`
   - Contains: role.md, recipe.md, status.txt, inputs/, output.md, feedback.md, action_log.jsonl
 
 ### 📖 Documentation
-- \`CASE_framework_for_agents.md\` — Full agent protocol (if deployed)
+- [CASE_framework_for_agents.md](CASE_framework_for_agents.md) — Full agent protocol (if deployed)
 - \`docs/\` — Additional documentation
 
 ## Quick Reference
@@ -198,7 +198,7 @@ cat > "$TARGET/CASE.md" << 'CASE_EOF'
 ## For Humans
 To deploy the full agent protocol, run:
 ```bash
-sh .case/bootstrap.sh
+sh scripts/bootstrap.sh .
 ```
 Then instruct your AI agent: "This project uses C.A.S.E. framework. Read CASE.md."
 CASE_EOF

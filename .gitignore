@@ -4,9 +4,6 @@ external_references/
 # C.A.S.E. Framework — task queues are agent workspace
 02_Task_Queue/
 
-# C.A.S.E. Extension source (keep in repo for portability)
-# .case/  # Uncomment to ignore. Keep committed for team use.
-
 # Local Agent CLI run caches
 .pi/
 .antigravitycli/

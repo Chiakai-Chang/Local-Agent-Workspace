@@ -413,34 +413,41 @@ pause
 只需選擇以下三種方式之一，就能將本專案的 C.A.S.E 規範無縫植入目前的任何 AI 專案中：
 
 <details>
-<summary><b>📦 途徑 A：智慧安裝與自訂 Skill 整合（最推薦，支援全域/本機/更新）</b></summary>
+<summary><b>📦 途徑 A：一鍵聯網安裝與自訂 Skill 整合（最推薦，無需事先 Clone）</b></summary>
 
-C.A.S.E. 配備了互動式安裝與更新器。如果您已下載本專案，請直接在專案目錄下執行：
-```bash
-python .case/install.py
-```
-該安裝程式提供：
-1. **全域安裝 (Global Install)**：將 C.A.S.E. 註冊為全域 Skill (複製至 `~/.gemini/config/skills/`)，讓本機所有專案的 AI 代理自動載入該 Skill。
+C.A.S.E. 配備了智慧型聯網安裝器，您可以在您的任何 AI 專案目錄下，直接透過單行指令**下載並運行安裝**：
+
+* **💻 Linux / macOS (cURL + Python)**:
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/.case/install.py -o case_install.py && python case_install.py && rm case_install.py
+  ```
+* **💻 Windows (PowerShell + Python)**:
+  ```powershell
+  Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/.case/install.py" -OutFile "case_install.py"; python case_install.py; Remove-Item "case_install.py"
+  ```
+
+該互動式安裝程式將引導您執行：
+1. **全域安裝 (Global Install)**：將 C.A.S.E. 註冊為全域 Skill (下載至 `~/.gemini/config/skills/case-framework`)，讓本機所有專案的 AI 代理自動載入該 Skill。
 2. **本機自訂 Skill 安裝**：在指定專案中生成 `.agents/skills/case-framework/`。
 3. **專案初始化 (Scaffolding)**：快速生成 `00_Constitution/`、`01_Roadmap/`、`02_Task_Queue/`，以及 `MAP.md`、`CASE.md` 規則檔案。
-4. **自動更新 (Update)**：隨時重新執行，一鍵升級 C.A.S.E. 至最新版本且保留您自訂的憲法與 Roadmap 設定。
+4. **自動更新 (Update)**：隨時重新執行此單行指令，即可將本機或全域 C.A.S.E. 升級至最新版本，並完整保留您的自訂憲法與 Roadmap 設定。
 </details>
 
 <details>
-<summary><b>🐚 途徑 B：CLI 腳本初始化（單一專案快速部署）</b></summary>
+<summary><b>🐚 途徑 B：本地腳本初始化（已手動 Clone 或已下載 `.case/` 目錄）</b></summary>
 
-您也可以在專案目錄下直接執行單一腳本完成初始化：
+如果您已經手動 Clone 本專案，或下載了 `.case/` 目錄至您的目標專案中，可以在目標專案根目錄下直接執行本地腳本：
 * **💻 跨平台通用 (Python 3.x - 推薦)**:
   ```bash
-  python .case/bootstrap.py
+  python .case/bootstrap.py .
   ```
 * **💻 Windows (PowerShell)**:
   ```powershell
-  .\.case\bootstrap.ps1
+  .\.case\bootstrap.ps1 .
   ```
 * **💻 Linux / macOS (Bash)**:
   ```bash
-  sh .case/bootstrap.sh
+  sh .case/bootstrap.sh .
   ```
 </details>
 

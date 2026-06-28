@@ -207,13 +207,17 @@ $CaseTemplate = @"
 \`IN_PROGRESS\` → \`ESCALATED\` (on persistent failure)
 
 ## For Humans
-To deploy the full agent protocol, run:
+To redeploy or update the navigation indices, run:
 ```powershell
 .\scripts\bootstrap.ps1 .
 ```
-Or for POSIX:
-```bash
-sh scripts/bootstrap.sh .
+To verify a task folder's C.A.S.E. compliance:
+```powershell
+# Using Python:
+python .agents/skills/case-framework/verifiers/verify.py 02_Task_Queue/Task_<NNN>_<slug>
+
+# Using Node.js:
+node .agents/skills/case-framework/verifiers/verify.js 02_Task_Queue/Task_<NNN>_<slug>
 ```
 Then instruct your AI agent: "This project uses C.A.S.E. framework. Read CASE.md."
 "@
@@ -230,6 +234,8 @@ Write-Host ""
 Write-Host " Next steps:"
 Write-Host "  1. Edit 00_Constitution/core.md with your mission"
 Write-Host "  2. Edit 01_Roadmap/roadmap.md with your phases"
-Write-Host "  3. Instruct your AI agent:"
+Write-Host "  3. Run task validation checklist using:"
+Write-Host "     python .agents/skills/case-framework/verifiers/verify.py 02_Task_Queue/Task_<NNN>_<slug>"
+Write-Host "  4. Instruct your AI agent:"
 Write-Host "     `"This project uses C.A.S.E. framework. Read CASE.md.`""
 Write-Host "========================================================" -ForegroundColor Green

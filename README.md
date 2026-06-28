@@ -465,11 +465,11 @@ pause
 1. **一鍵下載 C.A.S.E. Agent 規則手冊 (CASE_framework_for_agents.md)**：
    * **💻 Linux / macOS (cURL)**:
      ```bash
-     curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md -o CASE_framework_for_agents.md
+     curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/references/for_agents.md -o CASE_framework_for_agents.md
      ```
    * **💻 Windows (PowerShell)**:
      ```powershell
-     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
+     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/references/for_agents.md" -OutFile "CASE_framework_for_agents.md"
      ```
 2. **給 AI Agent 貼上引導 Prompt**：
    > 「本專案採用 C.A.S.E. 框架，請閱讀並遵循專案中的 `CASE_framework_for_agents.md` 進行開發與任務管理。」

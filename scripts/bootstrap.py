@@ -192,9 +192,17 @@ def main():
 `IN_PROGRESS` → `ESCALATED` (on persistent failure)
 
 ## For Humans
-To deploy the full agent protocol, run:
+To redeploy or update the navigation indices, run:
 ```bash
-python .case/bootstrap.py
+python scripts/bootstrap.py .
+```
+To verify a task folder's C.A.S.E. compliance:
+```bash
+# Using Python:
+python .agents/skills/case-framework/verifiers/verify.py 02_Task_Queue/Task_<NNN>_<slug>
+
+# Using Node.js:
+node .agents/skills/case-framework/verifiers/verify.js 02_Task_Queue/Task_<NNN>_<slug>
 ```
 Then instruct your AI agent: "This project uses C.A.S.E. framework. Read CASE.md."
 """
@@ -207,7 +215,9 @@ Then instruct your AI agent: "This project uses C.A.S.E. framework. Read CASE.md
     print("\n Next steps:")
     print("  1. Edit 00_Constitution/core.md with your mission")
     print("  2. Edit 01_Roadmap/roadmap.md with your phases")
-    print("  3. Instruct your AI agent:")
+    print("  3. Run task validation checklist using:")
+    print("     python .agents/skills/case-framework/verifiers/verify.py 02_Task_Queue/Task_<NNN>_<slug>")
+    print("  4. Instruct your AI agent:")
     print('     "This project uses C.A.S.E. framework. Read CASE.md."')
     print("========================================================")
 

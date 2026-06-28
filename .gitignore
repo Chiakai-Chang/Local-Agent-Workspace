@@ -11,3 +11,7 @@ external_references/
 # Python bytecode & cache
 __pycache__/
 *.pyc
+
+# C.A.S.E. Framework — task queues are agent workspace
+02_Task_Queue/
+*.case/

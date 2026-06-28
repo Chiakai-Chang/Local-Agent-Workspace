@@ -16,6 +16,7 @@ import json
 def verify(task_dir: str) -> dict:
     errors = []
     warnings = []
+    status = 'PENDING'
 
     # 1. Check required files exist
     required_files = ['recipe.md', 'role.md', 'status.txt', 'output.md']

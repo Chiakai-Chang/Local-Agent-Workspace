@@ -33,8 +33,10 @@ def verify(task_dir: str) -> dict:
         if status not in valid_statuses:
             errors.append(f'Invalid status token: "{status}" (must be one of: {", ".join(valid_statuses)})')
 
-    # 3. Check action_log.jsonl exists and has valid JSON lines
+    # 3. Check action_log.jsonl (or fallback log.md) exists and has valid log entries
     log_path = os.path.join(task_dir, 'action_log.jsonl')
+    fallback_log_path = os.path.join(task_dir, 'log.md')
+    
     if os.path.isfile(log_path):
         with open(log_path, 'r', encoding='utf-8') as f:
             lines = [l.strip() for l in f.readlines() if l.strip()]
@@ -51,6 +53,13 @@ def verify(task_dir: str) -> dict:
             invalid_count = len(lines) - valid_lines
             if invalid_count > 0:
                 warnings.append(f"action_log.jsonl has {invalid_count} invalid JSON line(s)")
+    elif os.path.isfile(fallback_log_path):
+        with open(fallback_log_path, 'r', encoding='utf-8') as f:
+            content = f.read().strip()
+        if len(content) < 10:
+            warnings.append("log.md fallback exists but appears too short (< 10 chars)")
+    else:
+        warnings.append("Missing trace log: Neither action_log.jsonl nor log.md was found in task directory")
 
     # 4. Check output.md is non-empty
     output_path = os.path.join(task_dir, 'output.md')
@@ -91,6 +100,24 @@ def verify(task_dir: str) -> dict:
         return {"success": False, "errors": errors, "warnings": warnings}
 
     print("✅ VERIFICATION PASSED")
+    
+    # Run memory tiering automatically if status is DONE or REVIEW
+    if status in ['DONE', 'REVIEW']:
+        project_root = os.path.abspath(os.path.join(task_dir, '..', '..'))
+        # Search for path where 00_Constitution/learnings.md exists
+        # In case structure is flat or nested
+        if not os.path.isdir(os.path.join(project_root, '00_Constitution')):
+            # Fallback: check one level up
+            project_root = os.path.abspath(os.path.join(task_dir, '..'))
+        
+        if os.path.isdir(os.path.join(project_root, '00_Constitution')):
+            try:
+                sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+                from memory_tiering import manage_memory
+                manage_memory(project_root)
+            except Exception as ex:
+                warnings.append(f"Could not run memory tiering: {ex}")
+
     if warnings:
         print("\n⚠️  WARNINGS:")
         for w in warnings:

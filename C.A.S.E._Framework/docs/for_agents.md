@@ -388,6 +388,42 @@ When starting a new session or introducing a new agent to the workspace, paste t
 
 ---
 
+## 21. Cross-Platform & Cross-Shell Intelligent Adaptation Protocol (跨平台與跨 Shell 智慧適配協定)
+
+C.A.S.E. is a declarative protocol. The primary execution environment is the **AI Agent**, not any host-level shell command. To ensure flawless operation across Linux, macOS, and Windows, and under any shell environment (Bash, Zsh, CMD, PowerShell, Fish):
+
+### A. The Tool-First Rule (工具優先原則)
+- AI Agents MUST perform all file updates (like changing `status.txt`, writing `planning.md`, logging to `action_log.jsonl`) using **the Agent's native high-level file tools** (e.g., `write_to_file`, `replace_file_content`, `view_file` or equivalent MCP filesystem tools).
+- Do NOT invoke host shell commands (e.g., `echo "IN_PROGRESS" > status.txt` or `mkdir -p 02_Task_Queue/`) to perform file system mutations unless high-level API tools are completely unavailable.
+- *Why:* Native shell redirections are prone to formatting errors, such as Windows PowerShell writing UTF-16 LE with BOM by default, or trailing whitespace/carriage return (`\r\n`) pollution which breaks deterministic verifiers.
+
+### B. Standard Encoding and Terminations (標準化編碼與換行)
+- All state files (`status.txt`, `action_log.jsonl`, `planning.md`, `recipe.md`) MUST be written in **UTF-8 (without BOM)** encoding.
+- All line endings inside state files and logs MUST be **LF (`\n`)** only. Avoid CRLF (`\r\n`). Agent file APIs naturally normalize line endings, whereas OS shells do not.
+
+### C. OS and Shell Environment Querying (平台與 Shell 偵測)
+- Before executing any command-line task (such as running test suites or verification scripts), the Agent MUST query the current system details to adapt commands dynamically:
+  - Detect Operating System (Windows vs Unix/Linux/macOS).
+  - Detect Active Shell (PowerShell, Cmd, Bash, Zsh).
+- Command adaptation examples:
+  - **Node.js verifier**:
+    - *Windows (PowerShell/Cmd)*: `node .case/verifiers/verify.js <path>`
+    - *Unix/WSL/Git Bash*: `node .case/verifiers/verify.js <path>`
+  - **Python verifier**:
+    - *Windows (PowerShell/Cmd)*: `python .case/verifiers/verify.py <path>`
+    - *Unix/WSL/Git Bash*: `python3 .case/verifiers/verify.py <path>`
+  - **Test runner executions**:
+    - PowerShell handles paths and arguments differently than Bash. Standardize path formats using forward slashes (`/`) for cross-platform Node/Python/Ruby tools, as Windows file APIs natively support forward slashes.
+
+### D. Agnostic Script Execution (無障礙腳本啟動)
+- The C.A.S.E. harness provides three independent bootstrapping files:
+  - `bootstrap.py` (Python 3.x) — **Cross-platform, shell-agnostic (Recommended)**. Runs natively anywhere with `python bootstrap.py`.
+  - `bootstrap.ps1` (PowerShell) — Native Windows/PowerShell bootstrapper.
+  - `bootstrap.sh` (POSIX Shell) — Native macOS/Linux/WSL bootstrapper.
+- The verification scripts `verify.js` (Node) and `verify.py` (Python) read files using standard library APIs rather than shell integrations, ensuring 100% platform independence.
+
+---
+
 *This protocol is version-controlled. Changes require Layer 1 (human) approval and a new git commit.*
 
 🔗 See also: [for_humans.md](for_humans.md) | [glossary.md](glossary.md) | [Framework README](../README.md)

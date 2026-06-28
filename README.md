@@ -410,35 +410,66 @@ pause
 
 ### 🚀 3 分鐘快速上手（將 C.A.S.E 規範一鍵植入任何 AI 專案）
 
-只需簡單三步，就能將本專案的 C.A.S.E 規範無縫植入目前的任何 AI 專案中：
+只需選擇以下三種方式之一，就能將本專案的 C.A.S.E 規範無縫植入目前的任何 AI 專案中：
 
 <details>
-<summary><b>1️⃣ 第一步：一鍵下載 C.A.S.E. Agent 規則手冊 (CASE_framework_for_agents.md)</b></summary>
+<summary><b>📦 途徑 A：智慧安裝與自訂 Skill 整合（最推薦，支援全域/本機/更新）</b></summary>
 
-請在專案的根目錄下，開啟終端機並執行以下指令下載唯讀規則檔：
-* **💻 Linux / macOS / Git Bash (cURL)**:
+C.A.S.E. 配備了互動式安裝與更新器。如果您已下載本專案，請直接在專案目錄下執行：
+```bash
+python .case/install.py
+```
+該安裝程式提供：
+1. **全域安裝 (Global Install)**：將 C.A.S.E. 註冊為全域 Skill (複製至 `~/.gemini/config/skills/`)，讓本機所有專案的 AI 代理自動載入該 Skill。
+2. **本機自訂 Skill 安裝**：在指定專案中生成 `.agents/skills/case-framework/`。
+3. **專案初始化 (Scaffolding)**：快速生成 `00_Constitution/`、`01_Roadmap/`、`02_Task_Queue/`，以及 `MAP.md`、`CASE.md` 規則檔案。
+4. **自動更新 (Update)**：隨時重新執行，一鍵升級 C.A.S.E. 至最新版本且保留您自訂的憲法與 Roadmap 設定。
+</details>
+
+<details>
+<summary><b>🐚 途徑 B：CLI 腳本初始化（單一專案快速部署）</b></summary>
+
+您也可以在專案目錄下直接執行單一腳本完成初始化：
+* **💻 跨平台通用 (Python 3.x - 推薦)**:
   ```bash
-  curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md -o CASE_framework_for_agents.md
+  python .case/bootstrap.py
   ```
 * **💻 Windows (PowerShell)**:
   ```powershell
-  Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
+  .\.case\bootstrap.ps1
   ```
-> 💡 *說明：本指令僅會下載一個唯讀的 `.md` 規則文件，完全無任何代碼執行，絕無主機安全疑慮，亦不會覆蓋現有的任何開發檔案。*
+* **💻 Linux / macOS (Bash)**:
+  ```bash
+  sh .case/bootstrap.sh
+  ```
 </details>
 
 <details>
-<summary><b>2️⃣ 第二步：給 AI Agent 貼上引導 Prompt</b></summary>
+<summary><b>📝 途徑 C：純文字聲明式配置（零代碼執行，安全性最高）</b></summary>
 
-啟動 AI 輔助軟體（如 `Claude Code`、`Codex`、`Antigravity CLI`、`Pi`，或是 `Cursor` 等，若是 Cursor 則可使用 `@` 參照下載的檔案），貼上以下極簡引導 Prompt：
+本專案為純文字聲明式協定，無須在終端機執行任何外來腳本：
 
-> 「本專案採用 C.A.S.E. 框架，請閱讀並遵循專案中的 `CASE_framework_for_agents.md` 進行開發與任務管理。」
+1. **一鍵下載 C.A.S.E. Agent 規則手冊 (CASE_framework_for_agents.md)**：
+   * **💻 Linux / macOS (cURL)**:
+     ```bash
+     curl -fsSL https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md -o CASE_framework_for_agents.md
+     ```
+   * **💻 Windows (PowerShell)**:
+     ```powershell
+     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Chiakai-Chang/Local-Agent-Workspace/main/C.A.S.E._Framework/docs/for_agents.md" -OutFile "CASE_framework_for_agents.md"
+     ```
+2. **給 AI Agent 貼上引導 Prompt**：
+   > 「本專案採用 C.A.S.E. 框架，請閱讀並遵循專案中的 `CASE_framework_for_agents.md` 進行開發與任務管理。」
+3. **完成配置**：
+   AI 讀取後將自行建立物理目錄結構，後續即可遵循 C.A.S.E. 規則進行「認領任務 $\rightarrow$ 撰寫規劃 $\rightarrow$ 修改測試 $\rightarrow$ Git 版控 $\rightarrow$ 結案驗收」的純文本狀態機流轉。
 </details>
 
 <details>
-<summary><b>3️⃣ 第三步：檢閱並同意 AI 的自動配置</b></summary>
+<summary><b>🤖 途徑 D：匯入為 Agent 自訂 Skill（適用於本專案開發者）</b></summary>
 
-AI Agent 讀取 Prompt 後，將會依據手冊指南自動建立實體目錄（`00_Constitution/`、`01_Roadmap/`、`02_Task_Queue/`），並開始依循 C.A.S.E. 的規矩執行開發工作。
+如果您使用 `Antigravity CLI`、`Gemini CLI` 或支援自訂 Workspace Customizations 的 Agent，本專案已將 C.A.S.E. 「skills化」為 Workspace Skill。
+- 專案已配備位於 `.agents/skills/case-framework/` 的自訂技能。
+- 當您在對話中提及 `C.A.S.E.`, `bootstrap C.A.S.E.`, `file-as-state` 等關鍵字時，該 Skill 將自動加載，引導 AI Agent 嚴格執行 C.A.S.E. 規範與 Task 驗收工作。
 </details>
 
 ### 🤝 雲地協同實例：如何具體啟動、執行與交接？

@@ -5,6 +5,8 @@
 
 > 一個卷宗就是一個任務。一份指引就是一條法律。所有進度，肉眼可見。
 > 角色職責解耦分工——讓 Token 花在刀口上。
+>
+> 🗺️ **全域地圖 (Wiki Index)**: 本專案已維護全覽索引 **[MAP.md](file:///D:/Myproject/Local-Agent-Workspace/C.A.S.E._Framework/MAP.md)**。強烈建議人類與 AI 優先讀取地圖，進行 MECE 的按需子文件導航，以防止 Context Window 爆量。
 
 ---
 
@@ -113,7 +115,35 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
 
 ---
 
-### 💡 快速引入方式（純文字聲明式配置，零代碼依賴，相容性最高）
+### 💡 快速引入方式
+
+#### 📦 方法 A：一鍵安裝與自訂 Skill 整合（最推薦，適合本地/全域多專案）
+C.A.S.E. 配備了智慧型安裝與更新器。如果您已下載本專案的 `.case/` 目錄，請直接在終端機中運行：
+```bash
+python .case/install.py
+```
+該互動式安裝程式提供以下功能：
+1. **全域安裝 (Global Install)**：將 C.A.S.E. 註冊為您本機 Agent 的全域 Skill (搬移至 `~/.gemini/config/skills/`)，讓您任何資料夾的 AI Agent 均能自動遵循 C.A.S.E. 指令。
+2. **本機 Workspace Skill 安裝**：在指定目標專案中生成 `.agents/skills/case-framework/`。
+3. **專案初始化 (Scaffolding)**：快速在專案根目錄下建立 `00_Constitution/`、`01_Roadmap/`、`02_Task_Queue/`，並產生地圖與規則檔案（同下方的 `bootstrap.py`）。
+4. **自動更新 (Update)**：隨時重新執行，一鍵升級 C.A.S.E. 至最新版本且保留您自訂的憲法與 Roadmap 設定。
+
+#### 🐚 方法 B：CLI 腳本初始化（適合單一專案）
+您也可以在專案目錄下直接執行單一腳本完成初始化：
+* **💻 跨平台通用 (Python 3.x - 推薦)**:
+  ```bash
+  python .case/bootstrap.py
+  ```
+* **💻 Windows (PowerShell)**:
+  ```powershell
+  .\.case\bootstrap.ps1
+  ```
+* **💻 Linux / macOS (Bash)**:
+  ```bash
+  sh .case/bootstrap.sh
+  ```
+
+#### 📝 方法 C：純文字聲明式配置（相容性最高，零代碼執行）
 本專案為純文字聲明式協定，無須在終端機執行任何外來腳本：
 
 1. **一鍵下載 C.A.S.E. Agent 協定手冊 (CASE_framework_for_agents.md)**：
@@ -129,6 +159,11 @@ C.A.S.E. 將大任務拆解成多個獨立的「任務資料夾」，以實體�
    > 「本專案採用 C.A.S.E. 框架，請閱讀並遵循專案中的 `CASE_framework_for_agents.md` 進行開發與任務管理。」
 3. **完成配置**：
    AI 讀取後將自行建立物理目錄結構，後續即可遵循 C.A.S.E. 規則進行「認領任務 $\rightarrow$ 撰寫規劃 $\rightarrow$ 修改測試 $\rightarrow$ Git 版控 $\rightarrow$ 結案驗收」的純文本狀態機流轉。
+
+#### 🤖 方法 D：匯入為 Agent 自訂 Skill
+如果您使用 `Antigravity CLI`、`Gemini CLI` 或支援自訂 Workspace Customizations 的 Agent，本專案已將 C.A.S.E. 「skills 化」為 Workspace Skill。
+- 專案已配備位於 `.agents/skills/case-framework/` 的自訂技能。
+- 當您在對話中提及 `C.A.S.E.`, `bootstrap C.A.S.E.`, `file-as-state` 等關鍵字時，該 Skill 將自動加載，引導 AI Agent 嚴格執行 C.A.S.E. 規範與 Task 驗收工作。
 
 ---
 

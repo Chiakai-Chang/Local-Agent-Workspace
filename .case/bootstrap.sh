@@ -1,14 +1,19 @@
-#!/bin/sh
+#! /usr/bin/env bash
 # =============================================================================
-# C.A.S.E. Framework — Portable Bootstrap Script (POSIX Shell)
+# C.A.S.E. Framework — Portable Bootstrap Script
 # =============================================================================
-# Usage:  sh bootstrap.sh [target_project_root]
+# Usage:  bash bootstrap.sh [target_project_root]
 # Effect: Deploys the complete C.A.S.E. directory structure into the target
 #         project root. Safe to re-run (idempotent).
 #
-# This script requires ZERO external dependencies. It uses only POSIX
-# built-ins (mkdir, cp, cat, test, echo). It works on Linux, macOS, WSL,
-# Git Bash, and any POSIX-compatible environment.
+# This script uses only POSIX-compatible shell built-ins (mkdir, cp, cat,
+# test, echo, basename). It runs on Linux, macOS, WSL, Git Bash, and any
+# environment with a POSIX shell.
+#
+# Note: bash is used here because Pi Coding Agent defaults to it, but the
+# C.A.S.E. framework itself is shell-agnostic. The framework is a declarative
+# protocol — any agent (bash, PowerShell, Python, Node, etc.) can execute it
+# by reading the templates and following the instructions.
 #
 # Author: C.A.S.E. Framework
 # License: MIT

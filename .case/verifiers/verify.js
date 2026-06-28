@@ -13,6 +13,7 @@ const path = require('path');
 function verify(taskDir) {
   const errors = [];
   const warnings = [];
+  let status = 'PENDING';
 
   // 1. Check required files exist
   const requiredFiles = ['recipe.md', 'role.md', 'status.txt', 'output.md'];
@@ -26,15 +27,16 @@ function verify(taskDir) {
   // 2. Check status.txt has valid token
   const statusPath = path.join(taskDir, 'status.txt');
   if (fs.existsSync(statusPath)) {
-    const status = fs.readFileSync(statusPath, 'utf8').trim();
+    status = fs.readFileSync(statusPath, 'utf8').trim();
     const validStatuses = ['PENDING', 'IN_PROGRESS', 'REVIEW', 'DONE', 'ESCALATED'];
     if (!validStatuses.includes(status)) {
       errors.push(`Invalid status token: "${status}" (must be one of: ${validStatuses.join(', ')})`);
     }
   }
 
-  // 3. Check action_log.jsonl exists and has valid JSON lines
+  // 3. Check action_log.jsonl (or fallback log.md) exists and has valid log entries
   const logPath = path.join(taskDir, 'action_log.jsonl');
+  const fallbackLogPath = path.join(taskDir, 'log.md');
   if (fs.existsSync(logPath)) {
     const lines = fs.readFileSync(logPath, 'utf8').trim().split('\n').filter(l => l.trim());
     if (lines.length > 0) {
@@ -51,6 +53,13 @@ function verify(taskDir) {
         errors.push('action_log.jsonl has no valid JSON entries');
       }
     }
+  } else if (fs.existsSync(fallbackLogPath)) {
+    const content = fs.readFileSync(fallbackLogPath, 'utf8').trim();
+    if (content.length < 10) {
+      warnings.push('log.md fallback exists but appears too short (< 10 chars)');
+    }
+  } else {
+    warnings.push('Missing trace log: Neither action_log.jsonl nor log.md was found in task directory');
   }
 
   // 4. Check output.md is non-empty
@@ -75,13 +84,10 @@ function verify(taskDir) {
   }
 
   // 6. Check for ESCALATED status with feedback
-  if (fs.existsSync(statusPath)) {
-    const status = fs.readFileSync(statusPath, 'utf8').trim();
-    if (status === 'ESCALATED') {
-      const feedbackPath = path.join(taskDir, 'feedback.md');
-      if (!fs.existsSync(feedbackPath)) {
-        errors.push('ESCALATED status requires feedback.md with failure details');
-      }
+  if (status === 'ESCALATED') {
+    const feedbackPath = path.join(taskDir, 'feedback.md');
+    if (!fs.existsSync(feedbackPath)) {
+      errors.push('ESCALATED status requires feedback.md with failure details');
     }
   }
 
@@ -97,6 +103,31 @@ function verify(taskDir) {
   }
 
   console.log('✅ VERIFICATION PASSED');
+
+  // Run memory tiering automatically if status is DONE or REVIEW
+  if (['DONE', 'REVIEW'].includes(status)) {
+    const projectRoot = path.resolve(taskDir, '..', '..');
+    let targetRoot = projectRoot;
+    if (!fs.existsSync(path.join(projectRoot, '00_Constitution'))) {
+      targetRoot = path.resolve(taskDir, '..');
+    }
+    if (fs.existsSync(path.join(targetRoot, '00_Constitution'))) {
+      try {
+        const { execSync } = require('child_process');
+        const tieringScript = path.join(__dirname, 'memory_tiering.py');
+        if (fs.existsSync(tieringScript)) {
+          try {
+            execSync(`python "${tieringScript}" "${targetRoot}"`, { stdio: 'inherit' });
+          } catch (err) {
+            execSync(`python3 "${tieringScript}" "${targetRoot}"`, { stdio: 'inherit' });
+          }
+        }
+      } catch (ex) {
+        warnings.push(`Could not run memory tiering: ${ex.message}`);
+      }
+    }
+  }
+
   if (warnings.length > 0) {
     console.log('\n⚠️  WARNINGS:');
     warnings.forEach(w => console.log(`  • ${w}`));

@@ -129,7 +129,11 @@ Upon receiving a task (status = `PENDING`):
 1. **Set status** to `IN_PROGRESS` using `change_status`.
 2. **Load role**: Read `role.md` and apply as effective system persona.
 3. **Read recipe**: Parse all sections of `recipe.md`. If any required section is missing, call `escalate_issue("recipe.md missing required section: <section_name>")`.
-4. **Draft Micro-Plan**: Write a `planning.md` file within the task folder describing the specific steps, targeted files, and testing strategy. Double check constraints to ensure alignment.
+4. **Draft Micro-Plan & Self-Review**: Treat `role.md` and `recipe.md` (Objective, Input Sources, Output Specification, Local DoD, Constraints) as this task's own binding local constitution — as authoritative for this task as `00_Constitution/core.md` is for the whole project. Before touching any input or writing any code:
+   - Write `planning.md` with the specific steps, targeted files, and testing strategy.
+   - Add a `## Self-Review` section to the same file: does every DoD item have a concrete step addressing it? Does any planned step conflict with a stated Constraint? Is any part of the plan resting on an assumption `recipe.md`/`role.md` doesn't actually support?
+   - If the self-review surfaces a genuine gap or contradiction, treat it as "Contradictory instructions" or "Insufficient input" (see error-handling below) — escalate before executing, not after wasted work.
+   - Only proceed to Step 5 once the self-review passes.
 5. **Read inputs**: Process only files listed in `recipe.md > Input Sources`.
 6. **Execute Cautiously**: Make modifications step-by-step. Keep edits atomic. Run validation/testing checks frequently to confirm behavior.
 7. **AI Self-Review & Self-Healing (Max 3 attempts)**: Before presenting your work to the human, perform a thorough review of your modifications against `recipe.md` and run all verification checks. If any check fails, you MUST attempt to heal it locally in the background. This self-healing loop is capped at a **maximum of 3 consecutive attempts**. If checks still fail on the 3rd attempt, you MUST immediately cease work, change status to `ESCALATED`, document the details in `feedback.md` (or `output.md`), and halt to await human intervention.
@@ -364,6 +368,11 @@ active_pivot_point: |
   Name of the specific function, file, or test currently being worked on.
 pending_blockers: []
 ```
+
+## [R] Plan Self-Review (Before touching any input or code)
+- [R] Does every `recipe.md > Local DoD` item have a concrete step above that addresses it?
+- [R] Does any planned step conflict with a stated Constraint?
+- [R] Is any part of this plan resting on an assumption `recipe.md`/`role.md` doesn't actually support? If so, escalate now — do not proceed.
 
 ## [A] Planned Actions (BDD Flows / Spec-by-Example)
 - [A] Define acceptance criteria as Cucumber-like scenarios (Given-When-Then).

@@ -135,9 +135,9 @@ Upon receiving a task (status = `PENDING`):
 7. **AI Self-Review & Self-Healing (Max 3 attempts)**: Before presenting your work to the human, perform a thorough review of your modifications against `recipe.md` and run all verification checks. If any check fails, you MUST attempt to heal it locally in the background. This self-healing loop is capped at a **maximum of 3 consecutive attempts**. If checks still fail on the 3rd attempt, you MUST immediately cease work, change status to `ESCALATED`, document the details in `feedback.md` (or `output.md`), and halt to await human intervention.
 8. **Write output**: Use `write_artifact("output.md", <content>)`.
 9. **Submit**: Call `submit_for_review(<clean summary of what was produced>)` to set status to `REVIEW`.
-10. **Natural Language Gate & Automated Lifecycle**: Do NOT expect the human to manually edit `status.txt` or run git commands. Wait for natural language feedback in chat:
-    - If the human responds with approval (e.g., "Pass", "Looks good", "Approved", "OK"), the AI Agent MUST automatically change `status.txt` to `DONE`, run the hot memory migration protocol if necessary (see Section 13), and perform the git commit/push sequence.
-    - If the human requests modifications, the AI Agent MUST automatically record the feedback in `feedback.md`, transition `status.txt` back to `IN_PROGRESS` (or `PENDING`), and begin the next self-healing/development cycle.
+10. **Automated Lifecycle via Approval Routing**: Do NOT expect the human to manually edit `status.txt` or run git commands. Follow whichever approval path the deployment uses (Section 7 — human chat approval, or autonomous Checker approval):
+    - On APPROVE, the AI Agent MUST automatically perform the mandatory retrospective (Section 13a), change `status.txt` to `DONE`, run the hot memory migration protocol if necessary (see Section 13), and perform the git commit/push sequence.
+    - On REJECT, the AI Agent MUST automatically record the feedback in `feedback.md`, transition `status.txt` back to `IN_PROGRESS` (or `PENDING`), and begin the next self-healing/development cycle.
 
 **On error or uncertainty:**
 - Insufficient inputs where a prerequisite task can be defined → call `create_subtask(...)` first, then `escalate_issue(...)` (see Section 10a). Do NOT skip directly to `escalate_issue`.
@@ -153,16 +153,15 @@ Upon detecting status = `REVIEW` (or when a human reviews the output):
 
 1. **Read** `recipe.md > Local Definition of Done` — this is the authoritative checklist.
 2. **Read** `output.md` — evaluate against every DoD item.
-3. **Natural Language Gating & Action Routing**:
-   - Checkers and Humans communicate approval or rejection via natural language in the chat session. The AI Agent is responsible for translating these statements to state changes:
-   - **APPROVE** (Human responds with approval phrases like "pass", "looks good", "approved", "OK"):
-     - Checker/AI automatically transitions `status.txt` to `DONE`.
-     - Trigger the hot-memory migration protocol if `learnings.md` exceeds its limit (see Section 13).
-   - **REJECT** (Human requests changes or points out unmet DoD items):
-     - Checker/AI writes the specific feedback to `feedback.md`.
-     - Increment the external review retry counter (tracked in `action_log.jsonl`).
-     - If Review Retry Count < 3: Transition status to `PENDING` (or let Worker set to `IN_PROGRESS` to start fixing).
-     - If Review Retry Count >= 3: Transition status to `ESCALATED` to indicate a blocker requiring macro re-planning.
+3. **Approval Routing** (two valid paths — deployments choose based on their execution mode):
+   - **Path A — Human-in-the-Loop (default for supervised/interactive deployments)**: Checkers and Humans communicate approval or rejection via natural language in the chat session. The AI Agent translates these statements to state changes:
+     - **APPROVE** (Human responds with approval phrases like "pass", "looks good", "approved", "OK"): transitions `status.txt` to `DONE`.
+     - **REJECT** (Human requests changes or points out unmet DoD items): writes specific feedback to `feedback.md`, increments the retry counter.
+   - **Path B — Autonomous Checker Approval (for continuous/unattended execution)**: A Checker (same model in a fresh context, or a different model — cross-model strengthens honesty per Section 17 but is not required) evaluates `output.md` against every `recipe.md > Local Definition of Done` item directly, without waiting for human chat text:
+     - **APPROVE**: all DoD items satisfied (or unsatisfied items have a documented deviation reason in `output.md`/`retro.md` — DoD is a principle set at planning time, not a literal-match checklist) → transitions `status.txt` to `DONE`.
+     - **REJECT**: any DoD item genuinely unmet, or a substantive contradiction/risk found → writes feedback to `feedback.md`, increments retry counter.
+   - **Both paths**: on REJECT, if Review Retry Count < 3, transition to `PENDING`; if >= 3, transition to `ESCALATED` (Section 10). The `ESCALATED` human-intervention requirement is unchanged by either path — Path B never removes the human's role when a task is genuinely stuck, only when it is genuinely satisfied.
+   - On APPROVE (either path): perform the mandatory retrospective (Section 13a) before finalizing `DONE`, and trigger the hot-memory migration protocol if `learnings.md` exceeds its limit (see Section 13).
 
 ---
 
@@ -250,6 +249,24 @@ To prevent rule poisoning and context window bloat, learnings are tiered into tw
 
 ---
 
+## 13a. Mandatory Task Retrospective (Completes the SkillOpt Loop)
+
+Section 13 defines how `learnings.md` entries age out; this section defines how they get created in the first place.
+
+Immediately before a Checker transitions `status.txt` to `DONE` (either approval path in Section 7):
+
+1. Write `<task_dir>/retro.md` with four required subsections:
+   - **Gaps & Missteps**: anything overlooked or done sub-optimally this task.
+   - **Optimization Opportunities**: what would be done differently next time.
+   - **Lessons Learned**: what this task taught that's worth remembering.
+   - **Feedback to CASE**: any new requirement or gap discovered — if found, call `create_subtask(...)` to queue it (Section 10a), do not silently drop it.
+2. Distill the "Optimization Opportunities" and "Lessons Learned" subsections into 1–3 condensed lines, appended to `00_Constitution/learnings.md` (subject to the Section 13 hot-memory cap and migration protocol, unchanged).
+3. Update the task's row in `02_Task_Queue/README.md`'s status board.
+
+This step is mandatory under both Section 7 approval paths — it is not optional polish, and it is not skipped when using Path B (autonomous approval).
+
+---
+
 ## 14. Write Defense & Anti-Poisoning Enforcement
 
 If an executor agent attempts to modify any files in `00_Constitution/` or `01_Roadmap/` (other than sanctioned Checker writes):
@@ -281,6 +298,7 @@ When context window limits force a compaction or clear:
 To guarantee verification honesty:
 - **Separate Model Families**: Worker (executor) and Checker (verifier) roles SHOULD be operated by models from different families (e.g. Gemini for execution, Claude for checking) or independent context instances.
 - **Thread Freshness**: Checker reviews the file outcomes directly in a fresh context session, ensuring they are not biased by the Worker's conversational history.
+- **Default Path Clarity**: A fresh-context session with the *same* model family is an equally valid default — not a fallback or lesser option. Cross-model verification is a strengthening measure for deployments that have the resources for it, not a prerequisite for a Checker to be considered independent.
 
 ## 18. Sharded Knowledge Base Standard
 

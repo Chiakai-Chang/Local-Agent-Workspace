@@ -91,6 +91,32 @@ function verify(taskDir) {
     }
   }
 
+  // 7. Check planning.md exists with a Self-Review section (Section 6 step 4)
+  const planningPath = path.join(taskDir, 'planning.md');
+  if (!fs.existsSync(planningPath)) {
+    warnings.push('Missing planning.md — Section 6 step 4 requires a plan + Self-Review before execution begins');
+  } else {
+    const planning = fs.readFileSync(planningPath, 'utf8');
+    if (!planning.includes('## Self-Review') && !planning.includes('[R]')) {
+      warnings.push('planning.md missing a Self-Review section — the plan must be reviewed against recipe.md before execution (Section 6 step 4)');
+    }
+  }
+
+  // 8. Check retro.md exists with required sections when status is DONE (Section 13a)
+  if (status === 'DONE') {
+    const retroPath = path.join(taskDir, 'retro.md');
+    if (!fs.existsSync(retroPath)) {
+      errors.push('DONE status requires retro.md (Section 13a: mandatory retrospective before every DONE transition)');
+    } else {
+      const retro = fs.readFileSync(retroPath, 'utf8');
+      for (const section of ['Gaps & Missteps', 'Optimization Opportunities', 'Lessons Learned', 'Feedback to CASE']) {
+        if (!retro.includes(section)) {
+          warnings.push(`retro.md missing expected section: "${section}" (Section 13a requires all four)`);
+        }
+      }
+    }
+  }
+
   // Report
   if (errors.length > 0) {
     console.error('❌ VERIFICATION FAILED:');

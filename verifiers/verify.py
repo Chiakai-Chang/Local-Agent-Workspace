@@ -12,6 +12,12 @@ import sys
 import os
 import json
 
+# Windows consoles often default to a legacy codepage (e.g. cp950) that
+# can't encode the emoji used below, crashing the PASS path itself.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8")
+
 
 def verify(task_dir: str) -> dict:
     errors = []
@@ -88,6 +94,28 @@ def verify(task_dir: str) -> dict:
             feedback_path = os.path.join(task_dir, 'feedback.md')
             if not os.path.isfile(feedback_path):
                 errors.append("ESCALATED status requires feedback.md with failure details")
+
+    # 7. Check planning.md exists with a Self-Review section (Section 6 step 4)
+    planning_path = os.path.join(task_dir, 'planning.md')
+    if not os.path.isfile(planning_path):
+        warnings.append("Missing planning.md — Section 6 step 4 requires a plan + Self-Review before execution begins")
+    else:
+        with open(planning_path, 'r', encoding='utf-8') as f:
+            planning = f.read()
+        if '## Self-Review' not in planning and '[R]' not in planning:
+            warnings.append('planning.md missing a Self-Review section — the plan must be reviewed against recipe.md before execution (Section 6 step 4)')
+
+    # 8. Check retro.md exists with required sections when status is DONE (Section 13a)
+    if status == 'DONE':
+        retro_path = os.path.join(task_dir, 'retro.md')
+        if not os.path.isfile(retro_path):
+            errors.append("DONE status requires retro.md (Section 13a: mandatory retrospective before every DONE transition)")
+        else:
+            with open(retro_path, 'r', encoding='utf-8') as f:
+                retro = f.read()
+            for section in ['Gaps & Missteps', 'Optimization Opportunities', 'Lessons Learned', 'Feedback to CASE']:
+                if section not in retro:
+                    warnings.append(f'retro.md missing expected section: "{section}" (Section 13a requires all four)')
 
     # Report
     if errors:

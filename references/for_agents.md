@@ -449,6 +449,11 @@ C.A.S.E. is a declarative protocol. The primary execution environment is the **A
   - `bootstrap.sh` (POSIX Shell) — Native macOS/Linux/WSL bootstrapper.
 - The verification scripts `verify.js` (Node) and `verify.py` (Python) (located under `verifiers/` or `.agents/skills/case-framework/verifiers/`) read files using standard library APIs rather than shell integrations, ensuring 100% platform independence.
 
+### E. Verifier Flags (驗證器旗標)
+- `--strict` — treat warnings as failures. By default ten of the fifteen checks are warnings, so a task with no `action_log.jsonl`, no `## Local Definition of Done`, no `planning.md` and a one-character `output.md` exits 0. That is the "format passes, function missing" outcome this protocol exists to prevent. The default is left permissive so queues written before a given rule keep their exit codes; a Checker that means to enforce the whole protocol passes `--strict`.
+- `--queue <02_Task_Queue>` — verify the queue rather than one task: **at most one task may be `IN_PROGRESS`**, and a `DONE` task with unfinished lower-numbered tasks before it is reported (a warning by default, a failure under `--strict`, because independent tasks legitimately finish out of order). No per-task check can see a second task running beside it.
+- `--tier-memory` — **behaviour change.** Memory tiering no longer runs as a side effect of verification. It previously ran on every `DONE`/`REVIEW` verification, so a command named `verify` modified `00_Constitution/learnings.md` unasked and was not idempotent. Checkers that want tiering must now ask for it.
+
 ---
 
 *This protocol is version-controlled. Changes require Layer 1 (human) approval and a new git commit.*

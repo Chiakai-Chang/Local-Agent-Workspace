@@ -3,14 +3,40 @@
 C.A.S.E. Framework — Task Verifier (Python)
 
 Validates a task's completeness before submission.
-Usage: python verify.py <task_folder_path>
+
+Usage:
+    python verify.py <task_folder_path> [--strict] [--tier-memory]
+    python verify.py --queue <02_Task_Queue_path> [--strict]
 
 Exit codes: 0 = PASS, 1 = FAIL (with reason printed to stderr)
+
+  --strict        Treat warnings as errors. Ten of this verifier's fifteen
+                  checks were warnings, so a task with no audit trail, no local
+                  Definition of Done, no plan and a one-character output.md
+                  printed "VERIFICATION PASSED". That is the "format passes,
+                  function missing" shape the protocol's own convergence gate
+                  warns against. The default stays permissive so existing task
+                  queues keep their exit codes; callers that want the whole
+                  protocol enforced ask for it.
+
+  --tier-memory   Run memory tiering after a successful verification. This used
+                  to happen automatically whenever status was DONE or REVIEW,
+                  which meant a command named `verify` rewrote
+                  00_Constitution/learnings.md as a side effect, and running it
+                  twice did not mean the same thing as running it once.
+
+  --queue         Check the invariants that span the whole queue rather than one
+                  task package: at most one task IN_PROGRESS, and tasks finished
+                  in order. "One task at a time" is the promise the framework is
+                  built on and nothing verified it, because verify only ever saw
+                  a single task directory.
 """
 
+import argparse
 import sys
 import os
 import json
+import re
 
 # Windows consoles often default to a legacy codepage (e.g. cp950) that
 # can't encode the emoji used below, crashing the PASS path itself.
@@ -19,7 +45,95 @@ for _stream in (sys.stdout, sys.stderr):
         _stream.reconfigure(encoding="utf-8")
 
 
-def verify(task_dir: str) -> dict:
+VALID_STATUSES = ['PENDING', 'IN_PROGRESS', 'REVIEW', 'DONE', 'ESCALATED']
+TASK_DIR_RE = re.compile(r'^Task_(\d+)_')
+
+
+def _report(errors, warnings, ok_message):
+    """Print the outcome and return the result dict.
+
+    Shared by verify() and verify_queue() so the two cannot drift into printing
+    different things for the same condition.
+    """
+    if errors:
+        print("❌ VERIFICATION FAILED:", file=sys.stderr)
+        for e in errors:
+            print(f"  • {e}", file=sys.stderr)
+        if warnings:
+            print("\n⚠️  WARNINGS:", file=sys.stderr)
+            for w in warnings:
+                print(f"  • {w}", file=sys.stderr)
+        return {"success": False, "errors": errors, "warnings": warnings}
+
+    print(ok_message)
+    if warnings:
+        print("\n⚠️  WARNINGS:")
+        for w in warnings:
+            print(f"  • {w}")
+    return {"success": True, "errors": [], "warnings": warnings}
+
+
+def verify_queue(queue_dir: str, strict: bool = False) -> dict:
+    """Check the invariants that only exist across the whole queue.
+
+    A task package can be perfect on its own while the queue around it is not
+    being worked one task at a time — which is the entire point of the queue.
+    Directories that are not task packages (an `_archive/`, notes, anything not
+    matching `Task_<NNN>_<slug>`) are skipped rather than reported: the queue
+    folder is allowed to hold other things.
+    """
+    errors = []
+    warnings = []
+    tasks = []
+
+    if not os.path.isdir(queue_dir):
+        return _report([f"Queue directory not found: {queue_dir}"], [], "")
+
+    for name in sorted(os.listdir(queue_dir)):
+        path = os.path.join(queue_dir, name)
+        m = TASK_DIR_RE.match(name)
+        if not os.path.isdir(path) or not m:
+            continue
+        status_path = os.path.join(path, 'status.txt')
+        if not os.path.isfile(status_path):
+            errors.append(f"{name}: missing status.txt — the queue cannot be read without it")
+            continue
+        with open(status_path, 'r', encoding='utf-8') as f:
+            status = f.read().strip()
+        if status not in VALID_STATUSES:
+            errors.append(
+                f'{name}: invalid status token "{status}" '
+                f'(must be one of: {", ".join(VALID_STATUSES)})')
+            continue
+        tasks.append((int(m.group(1)), name, status))
+
+    active = [n for _i, n, s in tasks if s == 'IN_PROGRESS']
+    if len(active) > 1:
+        errors.append(
+            "More than one task is IN_PROGRESS (%s) — the queue is worked one "
+            "task at a time" % ", ".join(active))
+
+    # Finishing out of order is legitimate when tasks are genuinely independent,
+    # so it is a warning by default and an error for callers who want the queue
+    # order to mean something.
+    for index, name, status in tasks:
+        if status != 'DONE':
+            continue
+        earlier = [n for i, n, s in tasks if i < index and s != 'DONE']
+        if earlier:
+            warnings.append(
+                "%s is DONE out of order — still open before it: %s"
+                % (name, ", ".join(earlier)))
+
+    if strict and warnings:
+        errors.extend(warnings)
+        warnings = []
+
+    return _report(errors, warnings,
+                   f"✅ QUEUE VERIFICATION PASSED ({len(tasks)} task(s))")
+
+
+def verify(task_dir: str, strict: bool = False, tier_memory: bool = False) -> dict:
     errors = []
     warnings = []
     status = 'PENDING'
@@ -36,9 +150,8 @@ def verify(task_dir: str) -> dict:
     if os.path.isfile(status_path):
         with open(status_path, 'r', encoding='utf-8') as f:
             status = f.read().strip()
-        valid_statuses = ['PENDING', 'IN_PROGRESS', 'REVIEW', 'DONE', 'ESCALATED']
-        if status not in valid_statuses:
-            errors.append(f'Invalid status token: "{status}" (must be one of: {", ".join(valid_statuses)})')
+        if status not in VALID_STATUSES:
+            errors.append(f'Invalid status token: "{status}" (must be one of: {", ".join(VALID_STATUSES)})')
 
     # 3. Check action_log.jsonl (or fallback log.md) exists and has valid log entries
     log_path = os.path.join(task_dir, 'action_log.jsonl')
@@ -117,52 +230,66 @@ def verify(task_dir: str) -> dict:
                 if section not in retro:
                     warnings.append(f'retro.md missing expected section: "{section}" (Section 13a requires all four)')
 
-    # Report
-    if errors:
-        print("❌ VERIFICATION FAILED:", file=sys.stderr)
-        for e in errors:
-            print(f"  • {e}", file=sys.stderr)
-        if warnings:
-            print("\n⚠️  WARNINGS:", file=sys.stderr)
-            for w in warnings:
-                print(f"  • {w}", file=sys.stderr)
-        return {"success": False, "errors": errors, "warnings": warnings}
+    # Under --strict every check counts. The split between "error" and "warning"
+    # was never about severity — a missing audit trail is not a lesser problem
+    # than a missing file — it was about not breaking task queues that predate
+    # each new rule.
+    if strict and warnings:
+        errors.extend(warnings)
+        warnings = []
 
-    print("✅ VERIFICATION PASSED")
-    
-    # Run memory tiering automatically if status is DONE or REVIEW
-    if status in ['DONE', 'REVIEW']:
+    result = _report(errors, warnings, "✅ VERIFICATION PASSED")
+    if not result["success"]:
+        return result
+
+    # Only when asked. This used to run on every DONE or REVIEW verification,
+    # so `verify` rewrote 00_Constitution/learnings.md without being asked to
+    # and could not be run twice for the same answer.
+    if tier_memory and status in ['DONE', 'REVIEW']:
         project_root = os.path.abspath(os.path.join(task_dir, '..', '..'))
-        # Search for path where 00_Constitution/learnings.md exists
-        # In case structure is flat or nested
+        # The structure may be flat or nested; look one level up as a fallback.
         if not os.path.isdir(os.path.join(project_root, '00_Constitution')):
-            # Fallback: check one level up
             project_root = os.path.abspath(os.path.join(task_dir, '..'))
-        
+
         if os.path.isdir(os.path.join(project_root, '00_Constitution')):
             try:
                 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
                 from memory_tiering import manage_memory
                 manage_memory(project_root)
             except Exception as ex:
-                warnings.append(f"Could not run memory tiering: {ex}")
+                print(f"  • Could not run memory tiering: {ex}")
+                result["warnings"].append(f"Could not run memory tiering: {ex}")
 
-    if warnings:
-        print("\n⚠️  WARNINGS:")
-        for w in warnings:
-            print(f"  • {w}")
-    return {"success": True, "errors": [], "warnings": warnings}
+    return result
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(
+        prog="verify.py",
+        description="C.A.S.E. task and queue verifier.")
+    ap.add_argument("path", nargs="?",
+                    help="a task folder, or the queue folder when --queue is given")
+    ap.add_argument("--queue", action="store_true",
+                    help="check queue-wide invariants instead of one task package")
+    ap.add_argument("--strict", action="store_true",
+                    help="treat warnings as errors")
+    ap.add_argument("--tier-memory", action="store_true", dest="tier_memory",
+                    help="run memory tiering after a successful task verification")
+    args = ap.parse_args(argv)
+
+    if not args.path:
+        ap.print_usage(sys.stderr)
+        return 1
+    if not os.path.isdir(args.path):
+        print(f"Error: Directory not found: {args.path}", file=sys.stderr)
+        return 1
+
+    if args.queue:
+        result = verify_queue(args.path, strict=args.strict)
+    else:
+        result = verify(args.path, strict=args.strict, tier_memory=args.tier_memory)
+    return 0 if result['success'] else 1
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("Usage: python verify.py <task_folder_path>")
-        sys.exit(1)
-
-    task_dir = sys.argv[1]
-    if not os.path.isdir(task_dir):
-        print(f"Error: Directory not found: {task_dir}", file=sys.stderr)
-        sys.exit(1)
-
-    result = verify(task_dir)
-    sys.exit(0 if result['success'] else 1)
+    sys.exit(main())

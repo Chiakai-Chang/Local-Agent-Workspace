@@ -1,18 +1,128 @@
 /**
  * C.A.S.E. Framework — Task Verifier (Node.js)
- * 
+ *
  * Validates a task's completeness before submission.
- * Run: node verify.js <task_folder_path>
- * 
+ *
+ * Run:
+ *   node verify.js <task_folder_path> [--strict] [--tier-memory]
+ *   node verify.js --queue <02_Task_Queue_path> [--strict]
+ *
  * Exit codes: 0 = PASS, 1 = FAIL (with reason printed to stderr)
+ *
+ *   --strict        Treat warnings as errors. Ten of the fifteen checks were
+ *                   warnings, so a task with no audit trail, no local
+ *                   Definition of Done, no plan and a one-character output.md
+ *                   printed "VERIFICATION PASSED" — the "format passes,
+ *                   function missing" shape the protocol's own convergence gate
+ *                   warns against. The default stays permissive so existing
+ *                   queues keep their exit codes.
+ *   --tier-memory   Run memory tiering after a successful task verification. It
+ *                   used to run automatically on DONE or REVIEW, so a command
+ *                   named `verify` rewrote 00_Constitution/learnings.md as a
+ *                   side effect and could not be run twice for one answer.
+ *   --queue         Check invariants that span the queue: at most one task
+ *                   IN_PROGRESS, and tasks finished in order. "One task at a
+ *                   time" is what the queue is for, and nothing checked it.
+ *
+ * Kept in step with verifiers/verify.py on purpose: a verifier that lags the
+ * protocol lets every new mandatory step go silently unchecked.
  */
 
 const fs = require('fs');
 const path = require('path');
 
-function verify(taskDir) {
+const VALID_STATUSES = ['PENDING', 'IN_PROGRESS', 'REVIEW', 'DONE', 'ESCALATED'];
+const TASK_DIR_RE = /^Task_(\d+)_/;
+
+/**
+ * Print the outcome and return the result object.
+ *
+ * Shared by verify() and verifyQueue() so the two cannot drift into printing
+ * different things for the same condition.
+ */
+function report(errors, warnings, okMessage) {
+  if (errors.length > 0) {
+    console.error('❌ VERIFICATION FAILED:');
+    errors.forEach(e => console.error(`  • ${e}`));
+    if (warnings.length > 0) {
+      console.error('\n⚠️  WARNINGS:');
+      warnings.forEach(w => console.error(`  • ${w}`));
+    }
+    return { success: false, errors, warnings };
+  }
+  console.log(okMessage);
+  if (warnings.length > 0) {
+    console.log('\n⚠️  WARNINGS:');
+    warnings.forEach(w => console.log(`  • ${w}`));
+  }
+  return { success: true, errors: [], warnings };
+}
+
+/**
+ * Check what only exists across the whole queue.
+ *
+ * A task package can be perfect on its own while the queue around it is not
+ * being worked one task at a time. Directories that are not task packages are
+ * skipped rather than reported — the queue folder may hold other things.
+ */
+function verifyQueue(queueDir, options = {}) {
+  const strict = !!options.strict;
   const errors = [];
-  const warnings = [];
+  let warnings = [];
+  const tasks = [];
+
+  if (!fs.existsSync(queueDir) || !fs.statSync(queueDir).isDirectory()) {
+    return report([`Queue directory not found: ${queueDir}`], [], '');
+  }
+
+  for (const name of fs.readdirSync(queueDir).sort()) {
+    const full = path.join(queueDir, name);
+    const m = TASK_DIR_RE.exec(name);
+    if (!m || !fs.statSync(full).isDirectory()) continue;
+    const statusPath = path.join(full, 'status.txt');
+    if (!fs.existsSync(statusPath)) {
+      errors.push(`${name}: missing status.txt — the queue cannot be read without it`);
+      continue;
+    }
+    const status = fs.readFileSync(statusPath, 'utf8').trim();
+    if (!VALID_STATUSES.includes(status)) {
+      errors.push(`${name}: invalid status token "${status}" `
+        + `(must be one of: ${VALID_STATUSES.join(', ')})`);
+      continue;
+    }
+    tasks.push({ index: parseInt(m[1], 10), name, status });
+  }
+
+  const active = tasks.filter(t => t.status === 'IN_PROGRESS').map(t => t.name);
+  if (active.length > 1) {
+    errors.push(`More than one task is IN_PROGRESS (${active.join(', ')}) `
+      + '— the queue is worked one task at a time');
+  }
+
+  // Finishing out of order is legitimate when tasks are genuinely independent,
+  // so it warns by default and fails for callers who want the order to mean
+  // something.
+  for (const t of tasks) {
+    if (t.status !== 'DONE') continue;
+    const earlier = tasks.filter(o => o.index < t.index && o.status !== 'DONE').map(o => o.name);
+    if (earlier.length > 0) {
+      warnings.push(`${t.name} is DONE out of order — still open before it: ${earlier.join(', ')}`);
+    }
+  }
+
+  if (strict && warnings.length > 0) {
+    errors.push(...warnings);
+    warnings = [];
+  }
+
+  return report(errors, warnings, `✅ QUEUE VERIFICATION PASSED (${tasks.length} task(s))`);
+}
+
+function verify(taskDir, options = {}) {
+  const strict = !!options.strict;
+  const tierMemory = !!options.tierMemory;
+  const errors = [];
+  let warnings = [];
   let status = 'PENDING';
 
   // 1. Check required files exist
@@ -28,9 +138,8 @@ function verify(taskDir) {
   const statusPath = path.join(taskDir, 'status.txt');
   if (fs.existsSync(statusPath)) {
     status = fs.readFileSync(statusPath, 'utf8').trim();
-    const validStatuses = ['PENDING', 'IN_PROGRESS', 'REVIEW', 'DONE', 'ESCALATED'];
-    if (!validStatuses.includes(status)) {
-      errors.push(`Invalid status token: "${status}" (must be one of: ${validStatuses.join(', ')})`);
+    if (!VALID_STATUSES.includes(status)) {
+      errors.push(`Invalid status token: "${status}" (must be one of: ${VALID_STATUSES.join(', ')})`);
     }
   }
 
@@ -117,21 +226,21 @@ function verify(taskDir) {
     }
   }
 
-  // Report
-  if (errors.length > 0) {
-    console.error('❌ VERIFICATION FAILED:');
-    errors.forEach(e => console.error(`  • ${e}`));
-    if (warnings.length > 0) {
-      console.error('\n⚠️  WARNINGS:');
-      warnings.forEach(w => console.error(`  • ${w}`));
-    }
-    return { success: false, errors, warnings };
+  // Under --strict every check counts. The split between "error" and "warning"
+  // was never about severity — a missing audit trail is not a lesser problem
+  // than a missing file — it was about not breaking queues that predate each
+  // new rule.
+  if (strict && warnings.length > 0) {
+    errors.push(...warnings);
+    warnings = [];
   }
 
-  console.log('✅ VERIFICATION PASSED');
+  const result = report(errors, warnings, '✅ VERIFICATION PASSED');
+  if (!result.success) return result;
 
-  // Run memory tiering automatically if status is DONE or REVIEW
-  if (['DONE', 'REVIEW'].includes(status)) {
+  // Only when asked. This used to run on every DONE or REVIEW verification, so
+  // `verify` rewrote 00_Constitution/learnings.md without being asked to.
+  if (tierMemory && ['DONE', 'REVIEW'].includes(status)) {
     const projectRoot = path.resolve(taskDir, '..', '..');
     let targetRoot = projectRoot;
     if (!fs.existsSync(path.join(projectRoot, '00_Constitution'))) {
@@ -149,32 +258,37 @@ function verify(taskDir) {
           }
         }
       } catch (ex) {
-        warnings.push(`Could not run memory tiering: ${ex.message}`);
+        console.log(`  • Could not run memory tiering: ${ex.message}`);
+        result.warnings.push(`Could not run memory tiering: ${ex.message}`);
       }
     }
   }
 
-  if (warnings.length > 0) {
-    console.log('\n⚠️  WARNINGS:');
-    warnings.forEach(w => console.log(`  • ${w}`));
-  }
-  return { success: true, errors: [], warnings };
+  return result;
 }
 
 // CLI entry point
 if (require.main === module) {
-  const taskDir = process.argv[2];
-  if (!taskDir) {
-    console.error('Usage: node verify.js <task_folder_path>');
+  const argv = process.argv.slice(2);
+  const strict = argv.includes('--strict');
+  const tierMemory = argv.includes('--tier-memory');
+  const queueMode = argv.includes('--queue');
+  const target = argv.find(a => !a.startsWith('--'));
+
+  if (!target) {
+    console.error('Usage: node verify.js <task_folder_path> [--strict] [--tier-memory]');
+    console.error('       node verify.js --queue <02_Task_Queue_path> [--strict]');
     process.exit(1);
   }
-  const resolved = path.resolve(taskDir);
+  const resolved = path.resolve(target);
   if (!fs.existsSync(resolved)) {
     console.error(`Error: Directory not found: ${resolved}`);
     process.exit(1);
   }
-  const result = verify(resolved);
+  const result = queueMode
+    ? verifyQueue(resolved, { strict })
+    : verify(resolved, { strict, tierMemory });
   process.exit(result.success ? 0 : 1);
 }
 
-module.exports = { verify };
+module.exports = { verify, verifyQueue };

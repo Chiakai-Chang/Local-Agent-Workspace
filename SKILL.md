@@ -94,6 +94,27 @@ If acting as a **Checker**:
 2. Inspect `output.md` against `recipe.md` DoD.
 3. Approve by transitioning state to `DONE` (and perform a git commit), or reject by transitioning back to `PENDING` with feedback in `feedback.md`.
 
+#### Verifier flags
+
+| Flag | Effect |
+|------|--------|
+| `--strict` | Treat warnings as failures. Ten of the fifteen checks are warnings by default, so a task with no `action_log.jsonl`, no `## Local Definition of Done`, no `planning.md` and a one-character `output.md` still exits 0. Use `--strict` when the whole protocol is meant to be enforced; the default stays permissive so task queues written before a given rule keep their exit codes. |
+| `--queue <02_Task_Queue>` | Check the invariants that span the queue instead of one task package: **at most one task `IN_PROGRESS`**, and tasks finished in order. Working one task at a time is what the queue is for, and no per-task check can see a second task running beside it. |
+| `--tier-memory` | Run memory tiering after a successful task verification. **This no longer happens automatically.** It used to run on every `DONE`/`REVIEW` verification, which meant a command named `verify` rewrote `00_Constitution/learnings.md` as a side effect, and running it twice did not mean the same thing as running it once. |
+
+```bash
+# One task, fully enforced
+python verifiers/verify.py 02_Task_Queue/Task_007_Thing --strict
+
+# The queue as a whole
+python verifiers/verify.py --queue 02_Task_Queue --strict
+
+# Tiering, when you actually want it to write
+python verifiers/verify.py 02_Task_Queue/Task_007_Thing --tier-memory
+```
+
+Both verifiers are covered by `tests/test_verify.py` (`python -m unittest discover -s tests`, no dependencies), including a parity check that runs the Python and Node implementations over the same fixtures and fails if they ever disagree about pass/fail. A verifier that lags the protocol lets every newly mandated step go silently unchecked, and there are two of them.
+
 ---
 
 ## 🌐 4. Cross-Platform & Cross-Shell Intelligent Adaptation Rules

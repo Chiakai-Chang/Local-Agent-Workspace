@@ -14,6 +14,24 @@ import os
 import sys
 import shutil
 
+# Windows consoles often default to a legacy codepage (e.g. cp950 on zh-TW,
+# cp1252 on western installs) that cannot encode the check marks and arrows
+# printed below. Without this, `python scripts/bootstrap.py .` dies with
+# UnicodeEncodeError partway through — measured 2026-08-06 on a zh-TW Windows
+# machine, where it created 00_Constitution/ and then crashed, leaving no
+# 01_Roadmap/ and no 02_Task_Queue/. A half-deployed scaffold is worse than a
+# refusal, because the next command finds some of what it expects.
+#
+# verifiers/verify.py already carried this fix. It was never copied here, and
+# bootstrap is the first script a new user runs.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
+
+
 def main():
     # Target directory defaults to current directory
     target_dir = sys.argv[1] if len(sys.argv) > 1 else "."

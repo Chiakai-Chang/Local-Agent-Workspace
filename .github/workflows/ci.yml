@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The Pi adapter's tests drive the bridge modules directly, which needs
+      # node >= 22 for native TypeScript type stripping. Pinned rather than
+      # inherited from the runner image: `skipUnless` does not fail, it
+      # disappears, and a green run with several hundred fewer tests looks
+      # identical to a green run.
+      - name: Install Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      # Both commands are the ones actually run locally. `-t .` was in the first
+      # draft and raises ImportError here: `tests/` has no __init__.py and
+      # `adapters-pi` is not a legal package name, so neither is importable as a
+      # top-level. A CI line nobody has executed is a guess.
+      #
+      # The two steps are disjoint: `discover -s tests` does not recurse into
+      # adapters-pi without an __init__.py, which is why the adapter needs its
+      # own step rather than being picked up for free.
+      # The protocol itself: verifiers, templates, bootstrap. No node needed.
+      - name: Protocol tests
+        run: |
+          python -m unittest discover -s tests
+
+      # The Pi adapter, which lives here so C.A.S.E. can be adopted by a harness
+      # without that harness owning the protocol. Kept in its own step so a
+      # failure says which half broke.
+      - name: Pi adapter tests
+        run: |
+          python -m unittest discover -s tests/adapters-pi
+
+      - name: Check the verifier still refuses
+        run: |
+          python verifiers/verify.py --help > /dev/null

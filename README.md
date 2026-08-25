@@ -395,6 +395,10 @@ pause
 
 ## 🔵 軌道二：通用協作框架與任務規範導入 (C.A.S.E. Framework)
 
+> Adapter 實驗整理出的通用失敗模式與驗證教訓，見 [`references/lessons-from-adapter-experiments.md`](references/lessons-from-adapter-experiments.md)。這份文件是參考資料，不把 Pi、Windows 或特定模型行為升格成 C.A.S.E. 核心保證。
+
+> 本框架的跨宿主支援與自主效果是設計目標，不能只由規則文字、安裝成功或單元測試推出；請以各 adapter 的 live evidence 及其負結果紀錄為準。
+
 軌道二專注於 AI Agent 的紀律管束與非同步任務流轉。本框架設計為**領域無關 (Domain-Agnostic)**，除了支援**程式開發**外，亦能無縫應用於**網路情資巡邏（如賭博網站蒐報）、簡報大綱與投影片製作、學術論文編修、複雜劇情解讀、以及數據報表分析**等各種複雜任務。
 
 此處設計可完美兼容以下多種部署拓撲，支援彈性配比（全本地 Full-Local、全雲端 Full-Cloud、或雲地混合 Hybrid）：
